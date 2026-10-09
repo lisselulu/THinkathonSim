@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Run Evidence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE8DC; --panel:#F7F3EB; --panel2:#FCFAF4; --ink:#3B423E;
+    --rust:#A8624C; --muted:#868C86; --muted2:#585E59; --line:#D6D0C2;
+    --good:#7FA476; --mid:#C9A45E; --bad:#AE6450;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.5}
+  header{background:var(--ink);color:var(--panel);padding:18px 24px 16px}
+  header .eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#9BA29B}
+  header h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:clamp(28px,4vw,40px);margin:4px 0 6px;line-height:1.05}
+  header .meta{font-family:"Space Mono",monospace;font-size:11.5px;color:#C9CEC6;display:flex;gap:6px 18px;flex-wrap:wrap}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 24px 60px;display:flex;flex-direction:column;gap:18px}
+  section{background:var(--panel);border:2px solid var(--ink);padding:14px 16px}
+  h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:24px;margin:0 0 2px}
+  .lede{color:var(--muted2);font-size:12.5px;margin:0 0 12px;max-width:70ch}
+  .banner{border:2px solid var(--bad);background:#F3E0DA;padding:10px 14px;font-size:13px}
+  .banner.ok{border-color:var(--good);background:#E8F0E2}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .tile{border:2px solid var(--ink);background:var(--panel2);padding:9px 11px}
+  .tile .v{font-family:"Space Mono",monospace;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+  .tile .k{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+  .tw{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:560px}
+  th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--ink);padding:4px 10px 5px 0;white-space:nowrap}
+  td{border-bottom:1px solid var(--line);padding:6px 10px 6px 0;vertical-align:top;font-variant-numeric:tabular-nums}
+  td.n{font-family:"Space Mono",monospace;white-space:nowrap}
+  .spark{display:block;width:120px;height:26px}
+  .pill{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--ink);background:var(--panel2);margin:0 4px 3px 0}
+  .voice{border-left:3px solid var(--line);padding:4px 0 4px 10px;margin:0 0 9px}
+  .voice .who{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .voice.firm{border-left-color:var(--mid)} .voice.government{border-left-color:var(--rust)} .voice.departure{border-left-color:var(--bad)}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+  .progress{font-family:"Space Mono",monospace;font-size:12px;max-height:340px;overflow:auto;background:var(--panel2);border:1px solid var(--line);padding:8px 10px}
+  .progress div{padding:2px 0;border-bottom:1px dashed var(--line)}
+  .muted{color:var(--muted)} .small{font-size:12px}
+  details summary{cursor:pointer;font-weight:700}
+  a{color:var(--rust)}
+  header .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px 24px;flex-wrap:wrap}
+  header .back{color:#DDBE7E;text-decoration:none}
+  header .back:hover{text-decoration:underline}
+  .downloads{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .downloads[hidden]{display:none}
+  .dl{font:700 12.5px Archivo,sans-serif;color:var(--ink);background:var(--panel);border:2px solid var(--panel);padding:7px 12px;
+    text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .dl:hover{background:#fff;border-color:#fff}
+  .dl.ghost{background:transparent;color:var(--panel);border-color:#6B726D}
+  .dl.ghost:hover{border-color:var(--panel);background:transparent}
+  .dl:focus-visible{outline:3px solid #DDBE7E;outline-offset:2px}
+  .dlnote{flex-basis:100%;font-size:11px;color:#9BA29B;max-width:52ch;line-height:1.4}
+
+  /* Saved as PDF: the report on white, no buttons, sections kept whole. */
+  @media print{
+    @page{margin:14mm}
+    body{background:#fff;font-size:11.5px}
+    header{background:#fff;color:var(--ink);border-bottom:2px solid var(--ink);padding:0 0 10px}
+    header .meta{color:var(--muted2)} header .meta a{color:var(--muted2)!important}
+    .downloads,header .back{display:none!important}
+    .wrap{max-width:none;padding:12px 0 0}
+    section,.tile,.voice,tr{break-inside:avoid}
+    .progress{max-height:none;overflow:visible}
+    .tw{overflow:visible} table{min-width:0}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div>
+      <div class="eyebrow"><a class="back" href="/reports">← All reports</a> · Meridian · agent run · evidence, not a verdict</div>
+      <h1 id="title">Loading the run…</h1>
+    </div>
+    <div class="downloads" id="downloads" hidden>
+      <button type="button" class="dl" id="dlPdf">Download report (PDF)</button>
+      <a class="dl ghost" id="dlReport" download>Report data (.json)</a>
+      <a class="dl ghost" id="dlRecord" download>Full record (.json)</a>
+      <div class="dlnote">For the PDF, choose "Save as PDF" in the print dialog. The full record adds the settings, trace and every model decision, for replay.</div>
+    </div>
+  </div>
+  <div class="meta" id="meta"></div>
+</header>
+<div class="wrap" id="wrap"></div>
+
+<script>
+(function(){
+'use strict';
+var id = decodeURIComponent(location.pathname.split('/').pop());
+var wrap = document.getElementById('wrap');
+var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+var fmt = function(v, d){ return v == null ? '–' : (typeof v === 'number' ? v.toLocaleString(undefined, { maximumFractionDigits: d == null ? 1 : d }) : esc(v)); };
+var pct = function(v){ return v == null ? '–' : Math.round(v * 100) + '%'; };
+
+function spark(values, lo, hi){
+  var vs = values.filter(function(v){ return typeof v === 'number'; });
+  if (vs.length < 2) return '';
+  lo = lo == null ? Math.min.apply(null, vs) : lo; hi = hi == null ? Math.max.apply(null, vs) : hi;
+  if (hi - lo < 1e-9) hi = lo + 1;
+  var W = 120, H = 26;
+  var pts = vs.map(function(v, i){ return (2 + i / (vs.length - 1) * (W - 4)).toFixed(1) + ',' + (H - 3 - (v - lo) / (hi - lo) * (H - 6)).toFixed(1); });
+  var last = pts[pts.length - 1].split(',');
+  return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><polyline points="' + pts.join(' ') +
+    '" fill="none" stroke="#3B423E" stroke-width="1.6"/><circle cx="' + last[0] + '" cy="' + last[1] + '" r="2.4" fill="#A8624C"/></svg>';
+}
+
+function live(run){
+  document.getElementById('title').textContent = run.team + ' · ' + (run.status === 'queued' ? 'waiting for the model server' : 'running');
+  document.getElementById('meta').innerHTML = '<span>year ' + (run.year || 2050) + '</span><span>' + esc(run.status) + '</span>';
+  wrap.innerHTML = '<section><h2>Arriving round by round</h2><p class="lede">The society is deciding. Each line is a round: what the country looked like, and what people did about it.</p>' +
+    '<div class="progress" id="prog"></div></section>';
+  var prog = document.getElementById('prog');
+  var line = function(e){
+    var t = '';
+    if (e.type === 'start') t = 'started · ' + e.population + ' personas · ' + e.firms + ' firms · model ' + (e.model || 'none');
+    else if (e.type === 'substep') t = '  ' + e.year + ' sub-step ' + (e.substep + 1) + ': ' + (e.actions || []).map(function(a){ return a.kind + ' ' + a.share + '%'; }).join(', ');
+    else if (e.type === 'round') t = e.year + '  trust ' + fmt(e.polls && e.polls.trust) + '  employment ' + pct(e.indicators.employment_rate) +
+      '  buys ' + fmt(e.indicators.effective_ubi_index) + '  worst service ' + fmt(e.worst_essential) + '  agents ' + pct(e.agent_share) +
+      (e.events && e.events.length ? '  [' + e.events.join(', ') + ']' : '');
+    else if (e.type === 'error') t = 'ERROR: ' + e.text;
+    else if (e.type === 'notice') t = e.text;
+    else if (e.type === 'end') { setTimeout(load, 600); t = 'finished (' + e.status + ')'; }
+    else return;
+    var d = document.createElement('div'); d.textContent = t; prog.appendChild(d); prog.scrollTop = prog.scrollHeight;
+  };
+  var es = new EventSource('/api/runs/' + encodeURIComponent(id) + '/stream');
+  es.onmessage = function(m){ try { line(JSON.parse(m.data)); } catch (e) {} };
+  es.onerror = function(){ es.close(); setTimeout(load, 3000); };
+}
+
+function render(run){
+  var ev = run.evidence, p = ev.provenance, h = ev.headline;
+  document.getElementById('title').textContent = p.team + ', ' + h.years;
+  document.title = 'Meridian evidence · ' + p.team + ' · ' + id;
+  var base = '/api/runs/' + encodeURIComponent(id) + '/download/';
+  document.getElementById('dlReport').href = base + 'report';
+  document.getElementById('dlRecord').href = base + 'record';
+  document.getElementById('dlPdf').onclick = function(){ window.print(); };
+  document.getElementById('downloads').hidden = false;
+  /* Opened from Reports with ?print=1: go straight to Save as PDF. */
+  if (/[?&]print=1/.test(location.search)) setTimeout(function(){ window.print(); }, 700);
+  document.getElementById('meta').innerHTML = ['seed ' + p.seed, p.rounds + ' rounds', p.substeps + ' sub-step(s)', 'model ' + (p.model || 'none'),
+    '<a href="/api/runs/' + encodeURIComponent(id) + '" style="color:#DDBE7E">evidence JSON</a>'].map(function(x){ return '<span>' + x + '</span>'; }).join('');
+  var out = [];
+
+  out.push(p.degraded
+    ? '<div class="banner"><b>Degraded run.</b> ' + esc(p.degraded_reason) + '. The physics ran; the society did not decide for itself. Treat it as a trial, not evidence.</div>'
+    : '<div class="banner ok"><b>' + p.decided_by_agents_pct.overall + '% of decisions were made by agents</b> (citizens ' + p.decided_by_agents_pct.citizens +
+      '%, firms ' + p.decided_by_agents_pct.firms + '%). Model ' + esc(p.model) + ', calibration ' +
+      (p.calibration && p.calibration.passed ? 'passed' : '<b>not passed</b>') + (p.uncalibrated_override ? ' (organiser override recorded)' : '') + '.</div>');
+
+  /* How time was cut. */
+  if (p.time && p.time.tick_months === 1) {
+    out.push('<div class="small muted" style="margin-top:-8px">Ran by the month for ' + p.time.years + ' years (' + p.time.ticks + ' ticks). ' +
+      'The country moved every month; the government decided every ' + esc(p.time.government_decides_every) + ', residents every ' +
+      esc(p.time.residents_decide_every) + ', firms every ' + esc(p.time.firms_decide_every) + '. The tables below read the country once a year.' +
+      (p.time.paced_ms_per_tick ? ' Paced live at ' + Math.round(p.time.paced_ms_per_tick * 12 / 60000) + ' minutes a year' +
+        (p.time.clock_behind_s ? ', and finished ' + p.time.clock_behind_s + 's behind the clock because the model could not keep up' : '') + '.' : '') + '</div>');
+  }
+
+  /* How the run was kept, and what refusing to fall back cost it. */
+  var w = p.waits, sto = p.storage;
+  if (w || sto) {
+    out.push('<div class="small muted" style="margin-top:-8px">' +
+      (w && w.never_falls_back ? 'No decision was replaced by a rule. ' + (w.replies_asked_again ? w.replies_asked_again + ' unusable replies were asked for again' : 'Every reply was usable first time') +
+        (w.waited_s ? ', costing ' + w.waited_s + 's of waiting' : '') + (w.outages ? '; the model server dropped ' + w.outages + ' time' + (w.outages === 1 ? '' : 's') : '') +
+        (w.paused_s ? '; paused for ' + w.paused_s + 's' : '') + '. ' : '') +
+      (sto ? 'Kept: ' + esc(sto.kept) + '. ' + (sto.replayable ? 'This run can be replayed exactly.' : 'This run cannot be replayed exactly, because most residents\' transcripts were not kept.') : '') +
+      '</div>');
+  }
+
+  var t = ev.trajectory, first = t[0], last = t[t.length - 1];
+  out.push('<section><h2>The country</h2><p class="lede">Where it started and where it ended. Nothing here is combined into a score; the argument is yours.</p><div class="tiles">' +
+    [['population', fmt(first.population, 0) + ' → ' + fmt(last.population, 0)],
+     ['employment', pct(first.employment_rate) + ' → ' + pct(last.employment_rate)],
+     ['what the payment buys', fmt(first.effective_payment_index, 0) + ' → ' + fmt(last.effective_payment_index, 0)],
+     ['weakest service, lowest', fmt(h.worst_essential_lowest, 0)],
+     ['reserves S$bn', fmt(first.reserves_bn, 0) + ' → ' + fmt(last.reserves_bn, 0)],
+     ['reported trust', fmt(h.trust_last, 0) + ' / 100'],
+     ['left the country', fmt(h.left_the_country, 0)],
+     ['organisations formed', fmt(h.organisations, 0)]].map(function(x){ return '<div class="tile"><div class="v">' + x[1] + '</div><div class="k">' + x[0] + '</div></div>'; }).join('') +
+    '</div></section>');
+
+  var cols = [['population','population',0],['employment_rate','employment',2],['effective_payment_index','buys',0],['consumption_index','spending',0],
+    ['worst_essential','weakest service',0],['legitimacy','legitimacy',0],['cohesion','cohesion',0],['civic_unrest','unrest',0],
+    ['reserves_bn','reserves bn',0],['gini','gini',2],['energy_tightness','grid tightness',2]];
+  out.push('<section><h2>Round by round</h2><div class="tw"><table><thead><tr><th>measure</th><th>trend</th>' +
+    t.map(function(r){ return '<th>' + r.year + '</th>'; }).join('') + '</tr></thead><tbody>' +
+    cols.map(function(c){ return '<tr><td>' + c[1] + '</td><td>' + spark(t.map(function(r){ return r[c[0]]; })) + '</td>' +
+      t.map(function(r){ return '<td class="n">' + fmt(r[c[0]], c[2]) + '</td>'; }).join('') + '</tr>'; }).join('') +
+    '</tbody></table></div></section>');
+
+  out.push('<section><h2>Industries against their fixed missions</h2><p class="lede">Every team\'s industries are judged on the same scorecard, so they can be compared across teams. Performance is 0–100 against that mission.</p>' +
+    '<div class="tw"><table><thead><tr><th>industry</th><th>judged first on</th><th>trend</th><th>start</th><th>end</th><th>lowest</th><th>margin</th><th>automation</th></tr></thead><tbody>' +
+    ev.industries.map(function(i){
+      var top = i.kpi_weights ? Object.keys(i.kpi_weights).sort(function(a, b){ return i.kpi_weights[b] - i.kpi_weights[a]; })[0] : '';
+      return '<tr><td>' + esc(i.name) + '</td><td>' + esc(top) + '</td><td>' + spark(i.kpi_performance, 0, 100) + '</td><td class="n">' + i.start.kpi_performance +
+        '</td><td class="n">' + i.end.kpi_performance + '</td><td class="n">' + i.lowest + '</td><td class="n">' + fmt(i.end.margin, 2) + '</td><td class="n">' + pct(i.end.automation) + '</td></tr>';
+    }).join('') + '</tbody></table></div></section>');
+
+  var sr = ev.society.rounds;
+  out.push(amendments(ev.government));
+  out.push(distribution(ev.society));
+  out.push(institutions(ev.society));
+  out.push(panel(ev.society));
+  out.push(behaviours(ev.society));
+
+  out.push('<section><h2>What people reported and did</h2><p class="lede">Polled from the agents themselves. Actions are shares of adults.' +
+    (ev.society.actions && ev.society.actions.mode === 'open' ? ' Every action was interpreted, so nothing people did was ignored.' : ' "Tried" lists what people attempted that the fixed pattern list could not read.') + '</p>' +
+    '<div class="tw"><table><thead><tr><th>year</th><th>trust</th><th>belonging</th><th>spending</th><th>willing to work</th><th>what people did</th><th>left</th><th>organisations</th></tr></thead><tbody>' +
+    sr.map(function(r){
+      return '<tr><td class="n">' + (r.month ? MON[r.month - 1] + ' ' : '') + r.year + '</td><td class="n">' + fmt(r.trust, 0) + '</td><td class="n">' + fmt(r.belonging, 0) + '</td><td class="n">' + pct(r.spending_share) +
+        '</td><td class="n">' + fmt(r.willingness_to_work, 2) + '</td><td>' + (r.actions || []).slice(0, 5).map(function(a){ return '<span class="pill">' + esc(a.kind.replace('_', ' ')) + ' ' + a.share + '%</span>'; }).join('') +
+        (r.unrouted_count ? '<details class="small"><summary>' + r.unrouted_count + ' things tried</summary>' + (r.things_people_tried_that_the_world_cannot_do_yet || []).slice(0, 8).map(function(u){ return '<div>' + esc(u.text) + '</div>'; }).join('') + '</details>' : '') +
+        '</td><td class="n">' + fmt(r.left_the_country, 0) + '</td><td class="n">' + r.organisations + '</td></tr>';
+    }).join('') + '</tbody></table></div>' +
+    (ev.society.organisations.length ? '<h2 style="margin-top:14px;font-size:20px">Organisations</h2><div class="tw"><table><thead><tr><th>name</th><th>kind</th><th>founded</th><th>members</th><th>represents</th></tr></thead><tbody>' +
+      ev.society.organisations.map(function(o){ return '<tr><td>' + esc(o.name) + '</td><td>' + esc(o.kind) + '</td><td class="n">' + o.founded + '</td><td class="n">' + o.members + '</td><td class="n">' + fmt(o.represents, 0) + '</td></tr>'; }).join('') +
+      '</tbody></table></div>' : '') + '</section>');
+
+  var g = ev.government;
+  out.push('<div class="cols"><section><h2>Government</h2><p class="lede">What the constitution compiled into, what the governing agent changed, and what never reached the world.</p>' +
+    '<div class="small"><b>In force (' + g.enacted.length + ')</b></div>' +
+    (g.enacted.length ? g.enacted.map(function(x){ return '<div class="small">· ' + esc(describePolicy(x)) + ' <span class="muted">(' + esc(x.origin || '') + ')</span></div>'; }).join('') : '<div class="muted small">none</div>') +
+    (g.rejected.length ? '<div class="small" style="margin-top:8px"><b>Rejected (' + g.rejected.length + ')</b></div>' + g.rejected.map(function(r){ return '<div class="small">· ' + esc(JSON.stringify(r.policy)) + ' — ' + esc(r.reason) + '</div>'; }).join('') : '') +
+    (g.untranslatable.length ? '<div class="small" style="margin-top:8px"><b>Could not be expressed as policy (' + g.untranslatable.length + ')</b></div>' + g.untranslatable.map(function(u){ return '<div class="small">· ' + esc(u.commitment) + ' — ' + esc(u.why) + '</div>'; }).join('') : '') +
+    (g.history.length > 1 ? '<div class="small" style="margin-top:8px"><b>Changes</b></div>' + g.history.slice(1).map(function(x){ return '<div class="small">· ' + x.year + ': ' + esc(x.change) + (x.reasoning ? ' — ' + esc(x.reasoning) : '') + '</div>'; }).join('') : '') +
+    '</section>' +
+    '<section><h2>What happened to them</h2>' + (ev.events.length ? ev.events.map(function(e){
+      return '<div class="voice"><div class="who">' + e.year + ' · ' + esc(e.label) + ' · severity ' + e.severity + ' · ' + esc(e.source) + '</div>' + esc(e.perceived) + '</div>'; }).join('') : '<div class="muted small">No events.</div>') +
+    '</section></div>');
+
+  out.push(governing(g));
+
+  out.push('<section><h2>Voices</h2><p class="lede">The most widely heard things people, firms and the government said.</p><div class="cols">' +
+    [ev.government.announcements.map(function(a){ return { kind: 'government', author: 'Government of Meridian', role: 'public statement', year: a.year, text: a.text }; }), ev.voices]
+      .reduce(function(a, b){ return a.concat(b); }, []).slice(0, 30).map(function(v){
+        return '<div class="voice ' + esc(v.kind) + '"><div class="who">' + esc(v.author) + ' · ' + esc(v.role) + ' · ' + v.year + '</div>' + esc(v.text) + '</div>'; }).join('') +
+    '</div></section>');
+
+  var rb = ev.rubric;
+  out.push('<div class="cols"><section><h2>The team\'s case</h2><p class="lede">' + esc(rb ? rb.note : 'No rubric was written.') + '</p>' +
+    (rb ? rb.angles.map(function(a){ return '<div class="small">' + esc(a.replace(/_/g, ' ')) + ': <b>' + (rb.weights[a] == null ? 'not weighted' : rb.weights[a]) + '</b></div>'; }).join('') +
+      (rb.case ? '<p style="margin-top:10px;white-space:pre-wrap">' + esc(rb.case) + '</p>' : '<p class="muted small">No written case.</p>') : '') +
+    '</section><section><h2>Reference</h2><p class="lede">' + esc(ev.reference.note) + '</p><div class="small">Legacy score: <b>' + ev.reference.legacy_score.total + '</b> · gates breached: ' +
+    ev.reference.legacy_score.gates_failed.length + '</div><div class="small" style="margin-top:10px"><b>Approximations in this run</b></div>' +
+    ev.approximations.map(function(a){ return '<div class="small">· ' + esc(a) + '</div>'; }).join('') +
+    (ev.population_sources ? '<div class="small" style="margin-top:10px"><b>Where the residents come from</b></div>' +
+      '<div class="small">' + esc(ev.population_sources.note) + '</div>' +
+      ev.population_sources.tables.map(function(t){ return '<div class="small">· <a href="' + esc(t.url) + '" target="_blank" rel="noopener">' + esc(t.id) + '</a> ' +
+        esc(t.title) + ' (' + esc(t.agency) + ', ' + esc(t.period) + '): ' + esc(t.used_for) + '</div>'; }).join('') +
+      '<div class="small">Modelled, not measured: ' + esc(ev.population_sources.modelled.join('; ')) + '.</div>' : '') +
+    '</section></div>');
+
+  wrap.innerHTML = out.join('');
+}
+
+/* Who set the levers each year, why, and whether they kept their word. */
+function governing(g){
+  var KIND = { rules: 'the team\'s rules', llm: 'one model decision-maker, reading the team\'s briefing', none: 'nobody: the saved levers held every year', custom: 'a custom cabinet' };
+  var rounds = g.rounds || [], a = g.audit;
+  var html = '<div class="cols"><section><h2>Who governed</h2><p class="lede">Governed by ' + esc(KIND[g.kind] || g.kind || 'nobody') + '.' +
+    (g.ungoverned_rounds && g.ungoverned_rounds.length ? ' Nobody governed in ' + g.ungoverned_rounds.join(', ') + ': the levers held.' : '') + '</p>' +
+    (g.declared && g.declared.unusable && g.declared.unusable.length ? '<div class="banner">Rules that could not run: ' + g.declared.unusable.map(function(u){ return 'rule ' + u.rule + ' (' + esc(u.problems.join('; ')) + ')'; }).join(' · ') + '</div>' : '') +
+    (rounds.length ? rounds.map(function(r){
+      return '<div class="voice' + (r.fallback ? ' departure' : ' government') + '"><div class="who">' + r.year + (r.fallback ? ' · nobody governed' : '') +
+        ((r.fired || []).length ? ' · fired ' + esc(r.fired.join(', ')) : '') + ((r.cites || []).length ? ' · cites ' + esc(r.cites.join(', ')) : '') + '</div>' +
+        esc(r.rationale || '') +
+        ((r.changed || []).length ? '<div class="small" style="margin-top:4px">' + r.changed.map(esc).join(' · ') + '</div>' : '<div class="small muted" style="margin-top:4px">no lever changed</div>') + '</div>';
+    }).join('') : '<div class="muted small">No government rounds were recorded.</div>') +
+    '</section><section><h2>Did it keep its word?</h2>';
+  if (!a) return html + '<div class="muted small">No constitution was sent with this run, so there was nothing to audit.</div></section></div>';
+  var cr = a.checkable_rules;
+  html += '<p class="lede">A deterministic audit of what the government did against what the constitution says. It is evidence, not a verdict.</p><div class="tiles">' +
+    '<div class="tile"><div class="k">checkable rules held</div><div class="v">' + (cr.checked ? cr.held + ' / ' + cr.checked : '–') + '</div></div>' +
+    '<div class="tile"><div class="k">constitutional drift</div><div class="v">' + fmt(a.constitutional_drift, 2) + '</div></div></div>' +
+    (cr.results.length ? '<div class="small" style="margin-top:8px"><b>Rules</b></div>' + cr.results.map(function(r){
+      return '<div class="small">' + (r.malformed ? '? ' : r.held ? '✓ ' : '✗ ') + esc(r.commitment || r.id) +
+        (r.breached_rounds.length ? ' <span class="muted">— broken in round ' + r.breached_rounds.join(', ') + '</span>' : '') +
+        (r.malformed ? ' <span class="muted">— could never be checked</span>' : '') + '</div>'; }).join('') : '<div class="muted small">The constitution has no checkable rules.</div>') +
+    '<div class="small" style="margin-top:8px">Big departures nobody explained: ' + (a.unminuted_rounds.length ? 'rounds ' + a.unminuted_rounds.join(', ') : 'none') + '</div>' +
+    '<div class="small">Clauses never cited: ' + (a.clauses_never_cited.length ? esc(a.clauses_never_cited.join(', ')) : 'none') + '</div>' +
+    '<div class="small">Rounds nobody governed: ' + (a.rounds_nobody_governed.length ? a.rounds_nobody_governed.join(', ') : 'none') + '</div>';
+  return html + '</section></div>';
+}
+
+/* AMENDMENTS: what the team changed while the run was going. */
+function amendments(g){
+  var list = (g && g.amendments) || [];
+  if (!list.length) return '';
+  return '<section><h2>Changed while it was running</h2><p class="lede">The team paused, changed its settings, and carried on from the same month. ' +
+    'Everything before each date was governed under the earlier settings; a recovery is read from what happened after.</p>' +
+    list.map(function(a){
+      return '<div class="voice government"><div class="who">' + (a.month ? MON[a.month - 1] + ' ' : '') + a.year +
+        (a.version != null ? ' · saved version ' + a.version : '') + '</div>' +
+        'Changed: ' + esc(a.changed.join(', ') || 'nothing that took effect') + '.' +
+        (a.levers && a.levers.length ? '<div class="small" style="margin-top:4px">' + a.levers.map(esc).join(' · ') + '</div>' : '') +
+        (a.note ? '<div class="small muted">' + esc(a.note) + '</div>' : '') + '</div>';
+    }).join('') + '</section>';
+}
+
+/* DISTRIBUTION: the team's own ways of sharing out, and who they reached. */
+function distribution(soc){
+  var d = soc.distribution;
+  if (!d || !d.schemes.length) return '';
+  var rows = d.by_decision;
+  var last = rows[rows.length - 1] || { schemes: [] };
+  return '<section><h2>How this country shares out</h2><p class="lede">Beyond the payment everyone gets, this team pays people for what they do. ' +
+    esc(d.note) + '</p>' +
+    '<div class="tw"><table><thead><tr><th>scheme</th><th>earned by</th><th>worth</th><th>paid from</th><th>taking part</th><th>spread</th><th>cost, $bn a year</th><th>who</th></tr></thead><tbody>' +
+    d.schemes.map(function(s){
+      var series = rows.map(function(r){ return (r.schemes.find(function(x){ return x.id === s.id; }) || {}).taking_part_pct || 0; });
+      var now = last.schemes.find(function(x){ return x.id === s.id; }) || {};
+      var what = [];
+      if (s.earns.time) what.push(s.earns.sectors === 'all' ? 'time given to any industry' : 'time given to ' + s.earns.sectors.map(function(k){ return k.replace(/_/g, ' '); }).join(', '));
+      if (s.earns.ties) what.push('bringing people together');
+      if (s.earns.organising) what.push('organising');
+      return '<tr><td><b>' + esc(s.name) + '</b></td><td class="small">' + esc(what.join('; ')) + '</td>' +
+        '<td class="n">$' + fmt(s.credits_per_hour * s.sgd_per_credit, 1) + '/h, to $' + fmt(s.cap_credits_month * s.sgd_per_credit, 0) + '/mo</td>' +
+        '<td>' + (s.funding === 'budget' ? 'new money' : 'the payment\'s pot') + '</td>' +
+        '<td class="n">' + fmt(now.taking_part_pct || 0, 1) + '%</td><td>' + spark(series, 0, Math.max(1, Math.max.apply(null, series.concat([1])))) + '</td>' +
+        '<td class="n">' + fmt(now.paid_bn_year || 0, 2) + '</td>' +
+        '<td class="small">' + ((now.who || []).map(function(w){ return esc(w.status) + ' ' + w.pct + '%'; }).join(', ') || '–') + '</td></tr>';
+    }).join('') + '</tbody></table></div></section>';
+}
+
+/* THE PANEL: the same people, followed for the whole run, in their own words. */
+function panel(soc){
+  var pn = soc.panel;
+  if (!pn || !pn.members.length) return '';
+  return '<section><h2>The people we followed</h2><p class="lede">' + pn.members.length + ' residents followed for the whole run, each standing for thousands of others. ' +
+    'Their reasoning is kept in full; everyone else contributes numbers. Open one to read their years.</p>' +
+    pn.members.map(function(m){
+      var last = m.years[m.years.length - 1] || {};
+      return '<details class="voice" style="border-left-color:var(--ink)"><summary><b>' + esc(m.name) + '</b>, ' + m.age + ' · ' +
+        esc(m.status === 'employed' && m.sector ? m.sector.replace(/_/g, ' ') : m.status) + ' · ' + esc(String(m.region).replace(/_/g, ' ')) +
+        ' <span class="muted small">stands for ' + fmt(m.stands_for, 0) + ' people' + (last.trust != null ? ' · trust ' + last.trust + '/10 at the end' : '') + '</span></summary>' +
+        m.years.map(function(y){
+          return '<div class="small" style="margin:6px 0 0 4px"><b>' + y.year + '</b> ' + esc(y.thinking || '') +
+            (y.did && y.did.length ? '<div class="muted">did: ' + y.did.map(function(a){ return esc(a.do + (a.target ? ' (' + a.target + ')' : '')); }).join('; ') + '</div>' : '') +
+            (y.post ? '<div class="muted">posted: "' + esc(y.post) + '"</div>' : '') +
+            (y.migrate && y.migrate !== 'stay' ? '<div class="muted">about leaving: ' + esc(y.migrate) + '</div>' : '') + '</div>';
+        }).join('') + '</details>';
+    }).join('') + '</section>';
+}
+
+/* INSTITUTIONS: behaviours this team made part of the country before the
+   run started, and what became of them. */
+function institutions(soc){
+  var list = soc.institutions || [];
+  if (!list.length) return '';
+  return '<section><h2>What this team institutionalised</h2>' +
+    '<p class="lede">Behaviours the society invented in an earlier run, which the team then funded, licensed, subsidised or endorsed. Everyone in the country was told these exist, so they change what people decide as well as what the arithmetic produces.</p>' +
+    '<div class="tw"><table><thead><tr><th>institution</th><th>industry</th><th>what the team did</th><th>cost</th><th>the behaviour it came from</th></tr></thead><tbody>' +
+    list.map(function(x){
+      var sp = x.spread_of_its_behaviour;
+      return '<tr><td><b>' + esc(x.name) + '</b>' + (x.mandate ? '<div class="small muted">' + esc(x.mandate) + '</div>' : '') + '</td>' +
+        '<td>' + esc(x.sector.replace(/_/g, ' ')) + '</td><td>' + esc(x.adopted_as) + '</td>' +
+        '<td class="n">' + (x.budget_bn ? '$' + x.budget_bn + 'bn/yr' : '–') + '</td>' +
+        '<td>' + (x.behaviour ? esc(x.behaviour) + (sp && sp.length ? ' ' + spark(sp.map(function(p){ return p.share; }), 0, Math.max(1, Math.max.apply(null, sp.map(function(p){ return p.share; })))) +
+          ' <span class="muted small">' + (sp[sp.length - 1].share) + '% by ' + sp[sp.length - 1].year + '</span>' : '') : '<span class="muted">written by hand</span>') + '</td></tr>';
+    }).join('') + '</tbody></table></div></section>';
+}
+
+/* BEHAVIOURS: the list worth reading first. Every behaviour the society
+   produced, novel ones on top, with when it began and how it spread. */
+var ADOPT_WORDS = { fund: 'fund it', formalise: 'licence and tax it', ease: 'make it easier to do', endorse: 'endorse it' };
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var CHANNEL_WORDS = {
+  time_to_sector: 'gave time to', informal_production: 'worked off the books in', labour_withheld: 'withheld their labour',
+  labour_supply: 'changed how much they work', spending: 'changed their spending', demand_shift: 'moved custom in',
+  harm: 'damaged', unrest: 'disrupted', legitimacy: 'moved trust in government', cohesion: 'moved ties between people',
+  organise: 'organised', found_business: 'started businesses in'
+};
+function sectorName(k){ return k ? k.replace(/_/g, ' ') : ''; }
+function didWhat(chs){
+  return chs.map(function(c){ var p = c.split(':'); return (CHANNEL_WORDS[p[0]] || p[0]) + (p[1] ? ' ' + sectorName(p[1]) : ''); }).join(', ');
+}
+function behaviours(soc){
+  var bs = soc.behaviours, act = soc.actions || {};
+  if (!bs) return '<section><h2>Behaviours</h2><p class="lede">This run used the fixed pattern list, so behaviours were not interpreted one by one. Runs with a model interpret every action.</p></section>';
+  var novel = bs.filter(function(b){ return b.novel; });
+  var st = act.interpreter || {};
+  var years = []; bs.forEach(function(b){ b.by_year.forEach(function(y){ if (years.indexOf(y.year) < 0) years.push(y.year); }); }); years.sort();
+  function row(b){
+    var d = b.institution_draft || {};
+    var vals = years.map(function(y){ var f = b.by_year.find(function(x){ return x.year === y; }); return f ? f.share : 0; });
+    return '<tr><td><b>' + esc(b.label) + '</b>' + (b.novel ? ' <span class="pill" style="border-color:var(--rust);color:var(--rust)">novel</span>' : '') +
+      (b.lasting ? ' <span class="pill">lasting</span>' : '') +
+      '<div class="small muted">' + b.examples.slice(0, 2).map(function(x){ return '"' + esc(x) + '"'; }).join(' · ') + '</div></td>' +
+      '<td class="n">' + b.first_year + '</td><td>' + spark(vals, 0, Math.max(1, Math.max.apply(null, vals))) + '</td>' +
+      '<td class="n">' + b.peak_share + '%</td>' +
+      '<td class="small">' + b.who.map(function(w){ return esc(w.status) + ' ' + w.pct + '%'; }).join(', ') + '</td>' +
+      '<td class="small">' + esc(didWhat(b.what_it_did)) + '</td>' +
+      '<td class="small muted">' + (d.adoption ? esc(ADOPT_WORDS[d.adoption]) + (d.budget_bn ? ', about $' + d.budget_bn + 'bn a year' : '') : '') + '</td></tr>';
+  }
+  var head = '<thead><tr><th>behaviour</th><th>first</th><th>spread</th><th>peak</th><th>who</th><th>what it did</th><th>to institutionalise</th></tr></thead>';
+  return '<section><h2>Behaviours</h2><p class="lede">Everything people chose to do, in their own words, interpreted into what it did. ' +
+    '<b>' + novel.length + '</b> of ' + bs.length + ' behaviours were novel: nothing in the simulation was written to expect them. ' +
+    'Spread is the share of adults doing it each year. The last column is what adopting it on Setup would mean.</p>' +
+    (novel.length ? '<h3 class="small" style="margin:10px 0 4px">Novel</h3><div class="tw"><table>' + head + '<tbody>' + novel.map(row).join('') + '</tbody></table></div>' : '') +
+    '<h3 class="small" style="margin:12px 0 4px">Anticipated</h3><div class="tw"><table>' + head + '<tbody>' +
+      bs.filter(function(b){ return !b.novel; }).map(row).join('') + '</tbody></table></div>' +
+    '<details class="small" style="margin-top:10px"><summary>How actions were interpreted</summary>' +
+      '<p>' + (st.model || 0) + ' newly interpreted by the model in ' + (st.calls || 0) + ' calls, ' + (st.cached || 0) + ' reused from earlier runs, ' +
+      (st.override || 0) + ' set by an organiser, ' + (st.registry || 0) + ' from the fixed pattern list because the model gave nothing usable.</p>' +
+      Object.keys(act.interpretations || {}).slice(0, 80).map(function(k){
+        var it = act.interpretations[k];
+        return '<div>' + esc(k) + ' <span class="muted">→ ' + esc(it.label) + ': ' + esc(it.effects.map(function(e){ return e.channel + (e.sector ? ' ' + sectorName(e.sector) : '') + ' ' + e.amount; }).join(', ') || 'no effect') +
+          ' (' + it.hours_per_week + 'h/wk, ' + esc(it.source) + ')</span></div>';
+      }).join('') + '</details></section>';
+}
+
+function describePolicy(x){
+  if (x.type === 'tax') return (x.name ? x.name + ': ' : '') + Math.round(x.rate * 100) + '% tax on ' + x.base.replace('_', ' ');
+  if (x.type === 'transfer') return (x.name ? x.name + ': ' : '') + 'S$' + x.sgd_month + '/month to ' + x.to.replace('_', ' ');
+  if (x.type === 'regulate') return x.what.replace('_', ' ') + ' ' + (x.sector ? 'in ' + x.sector.replace('_', ' ') + ' ' : '') + 'at ' + x.limit;
+  if (x.type === 'provide') return 'S$' + x.budget_bn + 'bn a year into ' + x.sector.replace('_', ' ');
+  if (x.type === 'institution') return x.name + ' (' + x.sector.replace('_', ' ') + ', S$' + x.budget_bn + 'bn): ' + (x.mandate || '');
+  if (x.type === 'announce') return 'says: "' + x.text + '"';
+  return JSON.stringify(x);
+}
+
+async function load(){
+  var r = await fetch('/api/runs/' + encodeURIComponent(id), { cache: 'no-store' });
+  if (!r.ok) { document.getElementById('title').textContent = 'No such run'; return; }
+  var run = await r.json();
+  if (run.evidence) return render(run);
+  if (run.status === 'failed') {
+    document.getElementById('title').textContent = run.team + ' · the run failed';
+    wrap.innerHTML = '<div class="banner">' + esc(run.error) + '</div>';
+    return;
+  }
+  live(run);
+}
+load();
+})();
+</script>
+</body>
+</html>

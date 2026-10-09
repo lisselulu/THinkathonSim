@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/app.css">
+<style>
+  :root{ --k-citizen:#5D6B7D; --k-firm:#B08A3E; --k-government:#A8624C; --k-departure:#A8523E; --k-quiet:#9AA09A }
+  body{overflow:hidden}
+  .stage{height:calc(100vh - 56px);display:grid;grid-template-columns:minmax(0,1fr) 360px}
+  @media(max-width:980px){.stage{grid-template-columns:1fr;height:auto}body{overflow:auto}.main{overflow:visible}.side{max-height:none}}
+  .main{overflow-y:auto;background:var(--bg)}
+
+  /* ---- the bar above the stream ---- */
+  .bar{position:sticky;top:0;z-index:5;background:rgba(239,234,224,.96);backdrop-filter:blur(4px);border-bottom:1px solid var(--line2);
+    padding:14px 22px 10px}
+  .bar .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+  .bar h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:30px;margin:0;line-height:1}
+  .bar .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .bar .row.top{justify-content:space-between;gap:10px 16px}
+  .bar select{width:auto;padding:6px 8px;font-size:12.5px}
+  .bar .note{font-size:12px;color:var(--muted2);line-height:1.45}
+  .bar .note b{color:var(--ink)}
+  .timeline{display:flex;align-items:center;gap:10px}
+  .step{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line2);background:var(--panel2);color:var(--ink);cursor:pointer;font-size:11px;flex:0 0 auto}
+  .step:hover:not(:disabled){border-color:var(--ink)}
+  .step:disabled{opacity:.4;cursor:default}
+  .ticks{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;overflow-x:auto}
+  .ticks.long{gap:2px}
+  .ticks.long .tick span{display:none}
+  .ticks .tick.yr i{height:11px;margin-top:-5px}
+  .tick{font:inherit;border:0;background:transparent;cursor:pointer;padding:4px 0 2px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted)}
+  .tick i{display:block;height:6px;width:100%;border-radius:3px;background:var(--line)}
+  .tick span{font-family:"Space Mono",monospace;font-size:11px}
+  .tick.has i{background:var(--line2)}
+  .tick.on i{background:var(--rust)} .tick.on span{color:var(--ink);font-weight:700}
+  .tick.missing{opacity:.35;cursor:default}
+  @media(max-width:640px){.tick span{font-size:9px}}
+  .seg button .n{font-family:"Space Mono",monospace;font-size:11px;opacity:.7;margin-left:5px}
+  .bar .row.filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:2px}
+  .bar .row.filters .seg{flex:0 0 auto}
+
+  /* ---- the stream ---- */
+  .stream{max-width:760px;margin:0 auto;padding:16px 22px 80px;display:flex;flex-direction:column;gap:10px}
+  .post{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;background:var(--panel);border:1px solid var(--line2);
+    border-left:4px solid var(--k,var(--k-quiet));border-radius:6px;padding:12px 14px}
+  .post.citizen{--k:var(--k-citizen)} .post.firm{--k:var(--k-firm)} .post.government{--k:var(--k-government)} .post.departure{--k:var(--k-departure)}
+  .post.t-good{--k:var(--good)} .post.t-mid{--k:var(--mid)} .post.t-bad{--k:var(--bad)} .post.t-quiet{--k:var(--k-quiet)}
+  .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#FDFBF7;background:var(--k,var(--k-quiet))}
+  .ph{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
+  .ph b{font-size:14px}
+  .ph .role{font-size:12px;color:var(--muted)}
+  .ph .pill{margin-left:auto}
+  .pt{margin:5px 0 0;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+  .pm{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .pm .chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted2)}
+  .pm .num{font-family:"Space Mono",monospace;font-size:11px}
+  .quiet{border:1.5px dashed var(--line2);border-radius:6px;padding:16px;color:var(--muted2);font-size:13.5px;background:var(--panel2)}
+  .quiet b{color:var(--ink)}
+  .more{align-self:center}
+
+  /* ---- the side panel ---- */
+  .side{background:var(--panel);border-left:1px solid var(--line2);overflow-y:auto;max-height:calc(100vh - 56px)}
+  .side section{padding:16px 18px;border-bottom:1px solid var(--line)}
+  .side h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:30px;margin:0;line-height:1}
+  .side h3{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+  .yearhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .figs{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:14px}
+  .fig .v{font-family:"Space Mono",monospace;font-size:19px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+  .fig .k{font-size:11.5px;color:var(--muted2);margin-top:2px}
+  .acts{display:flex;flex-wrap:wrap;gap:6px}
+  .trend{display:grid;grid-template-columns:1fr 70px 34px;gap:6px 8px;align-items:center;font-size:12.5px}
+  .trend .b{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
+  .trend .b i{display:block;height:100%;background:var(--map-ink)}
+  .trend .q{font-family:"Space Mono",monospace;font-size:11.5px;text-align:right}
+  .ev{border-left:3px solid var(--bad);padding:2px 0 2px 10px;margin-bottom:10px;font-size:12.5px}
+  .ev b{display:block}
+  .lg{display:grid;grid-template-columns:12px 1fr;gap:6px 9px;align-items:center;font-size:12.5px}
+  .lg i{width:12px;height:12px;border-radius:3px}
+</style>
+</head>
+<body>
+<header id="nav"></header>
+
+<div class="stage">
+  <main class="main" id="main">
+    <div class="bar"><div class="inner" id="bar"></div></div>
+    <div class="stream" id="stream" aria-live="polite"></div>
+  </main>
+  <aside class="side" id="side" aria-label="This year"></aside>
+</div>
+
+<script src="/js/meridian.js"></script>
+<script src="/app/common.js"></script>
+<script>
+(function(){
+'use strict';
+var M = window.Meridian, E = M.E, Store = M.Store, esc = M.esc, n0 = M.n0;
+
+var KINDS = [['all', 'Everyone'], ['citizen', 'Residents'], ['firm', 'Firms'], ['government', 'Government'], ['departure', 'Leaving']];
+var KIND_LABEL = { citizen: 'Resident', firm: 'Firm', government: 'Government', departure: 'Leaving' };
+var PAGE = 60;
+
+var S = {
+  source: M.lsGet('feedSource', 'run'),   // run | trial
+  runs: [], runId: M.lsGet('feedRun', null),
+  view: null, legacy: false, legacyVoices: [],   // agent run: rounds of views
+  trial: null, trialKey: null, trialErr: null,
+  year: null, filter: 'all', shown: PAGE
+};
+
+/* ---------------------------------------------------------------------
+   THE YEARS
+   Both sources become twelve years, each with posts and a summary.
+   --------------------------------------------------------------------- */
+var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function years() {
+  var out = [];
+  /* UNDER TICKS people post on the months they decide, so those months are
+     the entries: a quarter's worth of talk each, with a mark at each year. */
+  if (S.source === 'run' && S.view && S.view.some(function (v) { return v.month; })) {
+    var seenYear = {};
+    S.view.forEach(function (v) {
+      if (!v.month || !(v.people || (v.posts && v.posts.length))) return;
+      var first = !seenYear[v.year]; seenYear[v.year] = true;
+      out.push({ key: v.round, year: v.year, month: v.month, round: v.round, yr: first,
+                 label: MONTHS[v.month - 1] + ' ' + v.year, posts: v.posts || [], view: v, trial: null });
+    });
+    return out;
+  }
+  var n = Math.max(12, S.view ? S.view.length : 0, S.trial && S.trial.rounds ? Object.keys(S.trial.rounds).length + 1 : 0);
+  for (var i = 0; i < n; i++) out.push({ key: 2050 + i * 2, year: 2050 + i * 2, label: String(2050 + i * 2), round: i + 1, posts: null, view: null, trial: null });
+  if (S.source === 'run' && S.view) {
+    S.view.forEach(function (v) {
+      var y = out[v.round - 1]; if (!y) return;
+      y.view = v; y.posts = v.posts || (S.legacy ? [] : null);
+    });
+    if (S.legacy) S.legacyVoices.forEach(function (p) { var y = out[(p.year - 2050) / 2]; if (y) (y.posts = y.posts || []).push(p); });
+  }
+  if (S.source === 'trial' && S.trial) {
+    Object.keys(S.trial.rounds || {}).forEach(function (r) {
+      var f = S.trial.rounds[r], y = out[Number(r) - 1];
+      if (y && f) { y.trial = f; y.posts = f.posts || []; }
+    });
+  }
+  return out;
+}
+function available(ys) { return ys.filter(function (y) { return y.posts && (y.month || y.round > 1); }); }
+
+/* ---------------------------------------------------------------------
+   LOADING
+   --------------------------------------------------------------------- */
+function mine() { return S.runs.filter(function (r) { return Store.team && M.slug(r.team) === M.slug(Store.team); }); }
+
+function refreshRuns() {
+  return fetch('/api/runs', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+    S.runs = j.runs || [];
+    var m = mine();
+    if (!m.some(function (r) { return r.id === S.runId; })) S.runId = m.length ? m[0].id : null;
+  }).catch(function () { S.runs = []; });
+}
+
+var timer = null;
+function loadRun() {
+  clearTimeout(timer);
+  if (!S.runId) { S.view = null; paint(); return; }
+  fetch('/api/runs/' + encodeURIComponent(S.runId) + '/view', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      S.view = j ? j.rounds : null;
+      /* Runs recorded before posts were kept per year: fall back to the
+         most-heard voices from the evidence, and say so. */
+      var hasPosts = S.view && S.view.some(function (v) { return v.posts; });
+      var run = S.runs.find(function (x) { return x.id === S.runId; });
+      var live = run && (run.status === 'running' || run.status === 'queued');
+      if (S.view && !hasPosts && !live) {
+        return fetch('/api/runs/' + encodeURIComponent(S.runId), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (full) {
+          S.legacy = !!(full.evidence && full.evidence.voices);
+          S.legacyVoices = S.legacy ? full.evidence.voices.concat((full.evidence.government.announcements || []).map(function (a) {
+            return { kind: 'government', author: 'Government of Meridian', role: 'public statement', year: a.year, text: a.text };
+          })) : [];
+          return live;
+        });
+      }
+      S.legacy = false;
+      return live;
+    })
+    .then(function (live) {
+      settleYear(); paint();
+      if (live) timer = setTimeout(function () { refreshRuns().then(loadRun); }, 3500);
+    });
+}
+
+function loadTrial() {
+  var sys = Store.saved;
+  if (!sys || !sys.levers) { S.trial = null; paint(); return; }
+  var shock = M.lsGet('simShock', { event: '', round: 6 });
+  var shocks = {}; if (shock.event) shocks[shock.round] = [shock.event];
+  var levers = M.clone(sys.levers); delete levers.policies;
+  var key = JSON.stringify([levers, shocks]);
+  if (key === S.trialKey && S.trial) { settleYear(); paint(); return; }
+  S.trialKey = key; S.trial = null; S.trialErr = null; paint();
+  fetch('/api/feed?all=1&scenario=baseline_2050', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ levers: levers, shocks: shocks, all: true }) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (key !== S.trialKey) return;
+      if (j.error) { S.trialErr = j.error; S.trial = null; } else S.trial = j;
+      S.trial && (S.trial.shock = shock.event ? shock : null);
+      settleYear(); paint();
+    })
+    .catch(function (e) { S.trialErr = String(e && e.message || e); paint(); });
+}
+
+function load() {
+  if (S.source === 'trial') loadTrial();
+  else refreshRuns().then(loadRun);
+}
+
+/* Keep the chosen year if it has posts; otherwise the latest that does. */
+function settleYear() {
+  var av = available(years());
+  if (!av.length) { S.year = null; return; }
+  if (S.year == null || !av.some(function (y) { return y.key === S.year; })) S.year = av[av.length - 1].key;
+}
+
+/* ---------------------------------------------------------------------
+   PAINTING
+   --------------------------------------------------------------------- */
+function paint() { paintBar(); paintStream(); paintSide(); }
+
+function paintBar() {
+  var el = document.getElementById('bar');
+  var ys = years(), cur = ys.find(function (y) { return y.key === S.year; });
+  var m = mine(), run = S.runs.find(function (r) { return r.id === S.runId; });
+  var note;
+  if (!Store.team) note = '<a href="/setup">Choose your team on Setup</a> to see your society.';
+  else if (S.source === 'run') {
+    note = !m.length ? 'No agent run yet. <a href="/sim">Start one on the Simulation page</a>; posts appear here year by year as people write them.'
+      : run && (run.status === 'running' || run.status === 'queued') ? '<b>Live.</b> Each resident and firm writes their own post as they decide; new years appear as the run reaches them.'
+      : S.legacy ? 'This run was recorded before every post was kept, so only its <b>most-heard</b> posts are shown.'
+      : 'Written by the agents themselves, as they decided what to do that year.';
+  } else {
+    note = 'A preview from your <b>saved</b> settings (version ' + (Store.saved.version || 0) + '). These posts are <b>written from templates</b> by the arithmetic, not by people; agent runs are where people write their own.' +
+      (S.trial && S.trial.shock ? ' Stress test from the Simulation page: <b>' + esc((E.SHOCKS[S.trial.shock.event] || {}).label || S.trial.shock.event) + '</b> in ' + (2048 + S.trial.shock.round * 2) + '.' : '');
+  }
+  var counts = {};
+  if (cur && cur.posts && S.source === 'run') cur.posts.forEach(function (p) { counts[p.kind] = (counts[p.kind] || 0) + 1; });
+  var total = cur && cur.posts ? cur.posts.length : 0;
+  var av = available(ys), idx = av.findIndex(function (y) { return y.key === S.year; });
+
+  el.innerHTML =
+    '<div class="row top"><h1>What people are saying</h1><div class="row">' +
+      '<div class="seg" role="group" aria-label="Which feed">' +
+        '<button data-src="run" aria-pressed="' + (S.source === 'run') + '">Agent run</button>' +
+        '<button data-src="trial" aria-pressed="' + (S.source === 'trial') + '">Trial</button></div>' +
+      (S.source === 'run' && m.length ? '<select id="runPick" aria-label="Which run">' + m.map(function (r) {
+        return '<option value="' + esc(r.id) + '"' + (r.id === S.runId ? ' selected' : '') + '>' +
+          new Date(r.created).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · ' + esc(r.status) + '</option>';
+      }).join('') + '</select>' : '') +
+    '</div></div>' +
+    '<div class="note">' + note + '</div>' +
+    '<div class="timeline">' +
+      '<button class="step" id="prev" aria-label="Previous year"' + (idx > 0 ? '' : ' disabled') + '>◀</button>' +
+      '<div class="ticks' + (ys.length > 20 ? ' long' : '') + '">' + ys.map(function (y) {
+        var has = y.posts && (y.month || y.round > 1);
+        return '<button class="tick' + (has ? ' has' : ' missing') + (y.key === S.year ? ' on' : '') + (y.yr ? ' yr' : '') + '" data-year="' + y.key + '"' +
+          (has ? '' : ' disabled') + ' title="' + y.label + '" aria-label="' + y.label + '"><i></i><span>' + y.year + '</span></button>';
+      }).join('') + '</div>' +
+      '<button class="step" id="next" aria-label="Next year"' + (idx >= 0 && idx < av.length - 1 ? '' : ' disabled') + '>▶</button>' +
+    '</div>' +
+    (S.source === 'run' && total ? '<div class="row filters"><div class="seg" role="group" aria-label="Who is speaking">' + KINDS.filter(function (k) { return k[0] === 'all' || counts[k[0]] || S.filter === k[0]; }).map(function (k) {
+      var n = k[0] === 'all' ? total : (counts[k[0]] || 0);
+      return '<button data-filter="' + k[0] + '" aria-pressed="' + (S.filter === k[0]) + '"' + (n || k[0] === 'all' ? '' : ' disabled') + '>' + k[1] + '<span class="n">' + n + '</span></button>';
+    }).join('') + '</div></div>' : '');
+
+  el.querySelectorAll('[data-src]').forEach(function (b) {
+    b.onclick = function () { if (S.source === b.dataset.src) return; S.source = b.dataset.src; M.lsSet('feedSource', S.source); S.year = null; S.filter = 'all'; S.shown = PAGE; paint(); load(); };
+  });
+  el.querySelectorAll('[data-year]').forEach(function (b) { b.onclick = function () { goYear(+b.dataset.year); }; });
+  el.querySelectorAll('[data-filter]').forEach(function (b) { b.onclick = function () { S.filter = b.dataset.filter; S.shown = PAGE; paint(); }; });
+  var pick = document.getElementById('runPick');
+  if (pick) pick.onchange = function () { S.runId = pick.value; M.lsSet('feedRun', S.runId); S.view = null; S.year = null; paint(); loadRun(); };
+  var prev = document.getElementById('prev'), next = document.getElementById('next');
+  prev.onclick = function () { if (idx > 0) goYear(av[idx - 1].key); };
+  next.onclick = function () { if (idx < av.length - 1) goYear(av[idx + 1].key); };
+}
+
+function goYear(y) { S.year = y; S.shown = PAGE; paint(); document.getElementById('main').scrollTop = 0; }
+
+function initials(name) {
+  var w = String(name || '?').replace(/^(Mdm|Mr|Mrs|Ms|Dr|Sister)\s+/i, '').split(/\s+/).filter(Boolean);
+  return ((w[0] || '?')[0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase();
+}
+
+function paintStream() {
+  var el = document.getElementById('stream');
+  var cur = years().find(function (y) { return y.key === S.year; });
+  if (S.source === 'trial' && !S.trial) {
+    el.innerHTML = '<div class="quiet">' + (S.trialErr ? 'The preview could not be built: ' + esc(S.trialErr) : 'Writing the preview…') + '</div>';
+    return;
+  }
+  if (S.source === 'run' && S.runId && !S.view) { el.innerHTML = '<div class="quiet">Loading the run…</div>'; return; }
+  if (!cur || !cur.posts) {
+    el.innerHTML = '<div class="quiet">' + (S.source === 'run' && S.runId
+      ? 'Nobody has posted yet. Posts begin in <b>2052</b>, after people have lived through the first year.'
+      : S.source === 'run' ? 'Nothing to show yet.' : 'Nothing to show.') + '</div>';
+    return;
+  }
+  var posts = cur.posts;
+  if (S.source === 'run') {
+    if (S.filter !== 'all') posts = posts.filter(function (p) { return p.kind === S.filter; });
+    /* Residents and firms measure reach differently (people who know them,
+       share of an industry), so they are ranked separately and woven
+       together: government first, then residents, with a firm after every
+       four residents and anyone leaving after every six. */
+    var byReach = function (k) { return posts.filter(function (p) { return p.kind === k; }).sort(function (a, b) { return (b.reach || 0) - (a.reach || 0); }); };
+    var gov = byReach('government'), res = byReach('citizen'), firms = byReach('firm'), gone = byReach('departure');
+    var woven = gov.slice(), i = 0;
+    while (res.length || firms.length || gone.length) {
+      if (res.length) woven.push(res.shift());
+      i++;
+      if ((i % 4 === 0 || !res.length) && firms.length) woven.push(firms.shift());
+      if ((i % 6 === 0 || !res.length) && gone.length) woven.push(gone.shift());
+    }
+    posts = woven;
+  }
+  if (!posts.length) { el.innerHTML = '<div class="quiet">Nobody in this group posted in ' + (cur.label || S.year) + '.</div>'; return; }
+  var html = posts.slice(0, S.shown).map(S.source === 'run' ? runPost : trialPost).join('');
+  if (posts.length > S.shown) html += '<button class="btn more" id="more">Show ' + Math.min(PAGE, posts.length - S.shown) + ' more of ' + (posts.length - S.shown) + '</button>';
+  el.innerHTML = html;
+  var more = document.getElementById('more');
+  if (more) more.onclick = function () { S.shown += PAGE; paintStream(); };
+}
+
+function runPost(p) {
+  var kind = p.kind || 'citizen';
+  var meta = [];
+  if (p.org) meta.push('<span class="chip">' + esc(p.org) + '</span>');
+  (p.actions || []).slice(0, 3).forEach(function (a) { meta.push('<span class="chip">' + esc(String(a).replace(/_/g, ' ')) + '</span>'); });
+  if (kind === 'citizen' && p.reach) meta.push('<span>heard by <span class="num">' + p.reach + '</span> people they know</span>');
+  if (kind === 'firm' && p.reach) meta.push('<span><span class="num">' + p.reach + '%</span> of its industry</span>');
+  if (kind === 'departure') meta.push('<span>left Meridian this year</span>');
+  return '<article class="post ' + kind + '"><div class="av" aria-hidden="true">' + (kind === 'government' ? '⌂' : esc(initials(p.author))) + '</div><div>' +
+    '<div class="ph"><b>' + esc(p.author) + '</b><span class="role">' + esc(p.role || '') + '</span><span class="pill">' + (KIND_LABEL[kind] || kind) + '</span></div>' +
+    '<p class="pt">' + esc(p.text) + '</p>' +
+    (meta.length ? '<div class="pm">' + meta.join('') + '</div>' : '') + '</div></article>';
+}
+
+function trialPost(p) {
+  var meta = [];
+  if (p.prosocial_kind) meta.push('<span class="chip">' + (p.prosocial_kind === 'deficit' ? 'covering for a gap' : 'time to spare') + '</span>');
+  else if (p.note) meta.push('<span class="chip">' + esc(p.note) + '</span>');
+  if (p.weight) meta.push('<span>speaks for <span class="num">' + Math.round(p.weight * 100) + '%</span> of residents</span>');
+  if (p.departed) meta.push('<span>' + Math.round(p.departed) + '% of them have already left</span>');
+  return '<article class="post t-' + esc(p.tone || 'quiet') + '"><div class="av" aria-hidden="true">' + esc(initials(p.name)) + '</div><div>' +
+    '<div class="ph"><b>' + esc(p.name) + '</b><span class="role">' + esc(p.role || '') + '</span><span class="pill">' + esc(p.label || '') + '</span></div>' +
+    '<p class="pt">' + esc(p.text) + '</p>' +
+    (meta.length ? '<div class="pm">' + meta.join('') + '</div>' : '') + '</div></article>';
+}
+
+function fig(v, k) { return '<div class="fig"><div class="v">' + v + '</div><div class="k">' + k + '</div></div>'; }
+
+function paintSide() {
+  var side = document.getElementById('side');
+  var cur = years().find(function (y) { return y.key === S.year; });
+  if (!cur || !cur.posts) {
+    side.innerHTML = '<section><h2>' + ((cur && cur.label) || '–') + '</h2><p class="hint">A summary of the year appears here once there are posts.</p></section>' + legend();
+    return;
+  }
+  var html = '<section><div class="yearhead"><h2>' + cur.label + '</h2><span class="pill">' + (S.source === 'run' ? 'agent run' : 'trial') + (cur.month ? ' · month ' + (cur.round - 1) : ' · round ' + cur.round) + '</span></div>';
+  if (S.source === 'run' && cur.view) {
+    var soc = cur.view.society || {};
+    var byKind = {}; cur.posts.forEach(function (p) { byKind[p.kind] = (byKind[p.kind] || 0) + 1; });
+    html += '<div class="figs">' +
+      fig(soc.trust == null ? '–' : soc.trust, 'trust in government, reported') +
+      fig(soc.belonging == null ? '–' : soc.belonging, 'sense of belonging') +
+      fig(n0(byKind.citizen || 0), 'residents posted') +
+      fig(n0(soc.departed || 0), 'people left the country') +
+    '</div></section>';
+    if ((soc.actions || []).length) {
+      html += '<section><h3>What people did</h3><div class="acts">' + soc.actions.filter(function (a) { return a.kind !== 'unrouted'; }).slice(0, 8).map(function (a) {
+        return '<span class="pill">' + esc(a.kind.replace(/_/g, ' ')) + ' ' + a.share + '%</span>'; }).join('') + '</div>' +
+        '<p class="hint" style="margin:8px 0 0">' + (soc.organisations || 0) + ' organisations</p></section>';
+    }
+    if ((cur.view.events || []).length) {
+      html += '<section><h3>What happened</h3>' + cur.view.events.map(function (e) {
+        return '<div class="ev"><b>' + esc(e.label) + (e.severity ? ' · severity ' + e.severity : '') + '</b>' + esc(e.perceived || '') + '</div>'; }).join('') + '</section>';
+    }
+    var g = cur.view.government;
+    if (g && g.rationale) html += '<section><h3>Government this year</h3><p class="hint" style="margin:0;color:var(--ink)">' + esc(g.rationale) + '</p></section>';
+  } else if (cur.view) {
+    html += '</section>';
+  } else if (cur.trial) {
+    var mood = cur.trial.mood || {};
+    html += '<div class="figs">' +
+      fig(mood.unrest == null ? '–' : mood.unrest, 'unrest') +
+      fig((mood.flourishing || 0) + '%', 'flourishing') +
+      fig((mood.coping || 0) + '%', 'covering for gaps') +
+      fig((mood.furious || 0) + '%', 'furious') +
+    '</div></section>';
+    if ((cur.trial.trending || []).length) {
+      html += '<section><h3>What the country is doing</h3><div class="trend">' + cur.trial.trending.map(function (t) {
+        return '<span>' + esc(t.label) + '</span><span class="b"><i style="width:' + t.share + '%"></i></span><span class="q">' + t.share + '%</span>';
+      }).join('') + '</div></section>';
+    }
+  } else html += '</section>';
+  side.innerHTML = html + legend();
+}
+
+function legend() {
+  if (S.source === 'run') {
+    return '<section><h3>Reading the feed</h3><div class="lg">' +
+      '<i style="background:var(--k-citizen)"></i><span>Residents, most widely heard first</span>' +
+      '<i style="background:var(--k-firm)"></i><span>Firms</span>' +
+      '<i style="background:var(--k-government)"></i><span>Government statements</span>' +
+      '<i style="background:var(--k-departure)"></i><span>People leaving the country</span></div>' +
+      '<p class="hint" style="margin:10px 0 0">Each post comes from the same model call as that person\'s decision. Posts that only quote figures, repeat someone else or say nothing are not published.</p></section>';
+  }
+  return '<section><h3>Reading the preview</h3><div class="lg">' +
+    '<i style="background:var(--good)"></i><span>Doing well, with time to spare</span>' +
+    '<i style="background:var(--mid)"></i><span>Coping, or covering for a gap</span>' +
+    '<i style="background:var(--bad)"></i><span>Angry, organising or leaving</span>' +
+    '<i style="background:var(--k-quiet)"></i><span>Getting on with it</span></div>' +
+    '<p class="hint" style="margin:10px 0 0">Each post stands for a group of residents. The same act can mean opposite things: neighbours running errands because a service closed are covering for a gap; the same neighbours with a free Thursday have time to spare.</p></section>';
+}
+
+Store.init().then(function () { M.nav('feed'); paint(); load(); });
+Store.on(function () { if (S.source === 'trial') loadTrial(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,911 @@
+<title>Meridian Policy Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Instrument+Serif&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE8DC; --panel:#F7F3EB; --panel2:#FCFAF4; --ink:#3B423E;
+    --rust:#A8624C; --muted:#868C86; --muted2:#585E59; --line:#D6D0C2;
+    --good:#7FA476; --mid:#C9A45E; --bad:#AE6450;
+    --ubi:#A8624C; --infra:#7FA3AC; --resv:#88A87E;
+    --shadow:6px 6px 0 rgba(22,21,15,0.12);
+  }
+  *{box-sizing:border-box}
+  :where(button,[href],input,textarea):focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+  h1,h2,h3,.card .cf,.callout .t{text-wrap:balance}
+  .mono,.n,.cv,.scoreval,.allocnum,.sq,table.sg th.rn{font-variant-numeric:tabular-nums}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px}
+  h1,h2,h3{margin:0;font-weight:400}
+  .serif{font-family:"Instrument Serif",Georgia,serif}
+  .mono{font-family:"Space Mono",ui-monospace,monospace}
+  .lbl{font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---- header ---- */
+  header{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:20px;
+    padding:0 26px;min-height:78px;background:var(--ink);color:var(--panel);flex-wrap:wrap}
+  header .title{font-family:"Instrument Serif",Georgia,serif;font-size:31px;line-height:1}
+  header .sub{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:#9BA29B;margin-top:3px}
+  .presets{display:flex;gap:7px;flex-wrap:wrap}
+  .presets button{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:8px 11px;cursor:pointer;border:2px solid #4A4636;background:transparent;color:#9BA29B;
+    font-family:inherit}
+  .presets button:hover{border-color:var(--panel);color:var(--panel)}
+  .presets button.on{background:var(--panel);color:var(--ink);border-color:var(--panel)}
+  .scorebox{margin-left:auto;display:flex;align-items:center;gap:16px}
+  .scoreval{font-family:"Space Mono",monospace;font-size:38px;font-weight:700;line-height:1}
+  .gatechips{display:flex;gap:5px;flex-wrap:wrap;max-width:330px}
+  .gatechip{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:4px 7px;background:#A85B49;color:#FAF6EE;border:1px solid #C4796A}
+  .gateok{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7FA476}
+
+  /* ---- layout ---- */
+  .wrap{display:grid;grid-template-columns:352px minmax(0,1fr);gap:20px;padding:20px 26px 60px}
+  @media(max-width:1180px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:3px solid var(--ink);box-shadow:var(--shadow);padding:16px 17px}
+  .panel + .panel{margin-top:18px}
+  .panel h3{font-size:12px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;
+    padding-bottom:9px;margin-bottom:13px;border-bottom:2px solid var(--ink)}
+
+  /* ---- controls ---- */
+  .row{margin-bottom:13px}
+  .rowhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px}
+  .rowhead .n{font-family:"Space Mono",monospace;font-size:13px;font-weight:700}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;
+    background:var(--line);border:2px solid var(--ink);outline:none;margin:0;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:19px;
+    background:var(--panel2);border:2px solid var(--ink);cursor:pointer;margin-top:-1px}
+  input[type=range]::-moz-range-thumb{width:15px;height:19px;background:var(--panel2);
+    border:2px solid var(--ink);border-radius:0;cursor:pointer}
+  input[type=range]:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+  .seg{display:flex;gap:5px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:44px;font-family:inherit;font-size:11px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;padding:8px 6px;cursor:pointer;
+    border:2px solid var(--ink);background:var(--panel2);color:var(--muted)}
+  .seg button.on{background:var(--ink);color:var(--panel)}
+
+  /* allocation mixing desk */
+  .alloc{display:flex;gap:12px;align-items:flex-end;height:132px;margin-bottom:6px}
+  .alloccol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+  .allocbar{position:relative;flex:1;width:100%;background:var(--line);border:2px solid var(--ink);
+    cursor:ns-resize;overflow:hidden}
+  .allocfill{position:absolute;left:0;right:0;bottom:0}
+  .allocnum{font-family:"Space Mono",monospace;font-size:13px;font-weight:700}
+
+  /* sectors */
+  .secgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px}
+  @media(max-width:520px){.secgrid{grid-template-columns:1fr}}
+
+  /* ---- charts ---- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:18px}
+  .card{background:var(--panel);border:3px solid var(--ink);box-shadow:var(--shadow);padding:14px 15px 11px}
+  .card .ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:2px}
+  .card .cv{font-family:"Space Mono",monospace;font-size:25px;font-weight:700;line-height:1.15}
+  .card .cd{font-size:11px;font-weight:700;letter-spacing:.03em}
+  .card svg{display:block;width:100%;height:auto;margin:6px 0 4px}
+  .card .cf{font-size:11px;color:var(--muted2);line-height:1.45;min-height:2.9em}
+
+  .callout{background:var(--ink);color:var(--panel);border:3px solid var(--ink);
+    box-shadow:var(--shadow);padding:15px 18px;margin-bottom:18px}
+  .callout .k{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+    color:#C9A45E;margin-bottom:6px}
+  .callout .t{font-family:"Instrument Serif",Georgia,serif;font-size:22px;line-height:1.3}
+  .callout .t em{font-style:normal;color:#E3A88F}
+
+  /* round inspector */
+  .scrub{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .pips{display:flex;gap:4px;flex:1;min-width:200px}
+  .pip{flex:1;height:26px;border:2px solid var(--ink);background:var(--panel2);cursor:pointer;
+    font-family:"Space Mono",monospace;font-size:10px;font-weight:700;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;padding:0}
+  .pip.on{background:var(--ink);color:var(--panel)}
+  .btn.play{font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.07em;
+    text-transform:uppercase;padding:8px 13px;cursor:pointer;border:2px solid var(--ink);
+    background:var(--rust);color:#FAF6EE;flex:0 0 auto}
+  .btn.play:hover{background:var(--ink)}
+  .speed{font-family:inherit;font-size:11px;font-weight:700;padding:7px 6px;
+    border:2px solid var(--ink);background:var(--panel2);color:var(--ink);flex:0 0 auto}
+  .clock{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto;min-width:96px}
+  .clock .yr{font-size:24px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .clock .lbl{font-size:10px;margin-top:2px}
+  .pip.past{background:var(--line)}
+  .secrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:8px}
+  .sectile{border:2px solid var(--ink);background:var(--panel2);padding:8px 9px}
+  .sectile .sn{font-size:11px;font-weight:800;letter-spacing:.04em;line-height:1.25;
+    display:flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border:2px solid var(--ink);flex:0 0 auto}
+  .sectile .sq{font-family:"Space Mono",monospace;font-size:19px;font-weight:700;margin-top:3px}
+  .sectile .sm{font-size:10px;color:var(--muted2);letter-spacing:.02em;margin-top:1px}
+
+  /* shock grid */
+  .shockgrid{overflow-x:auto}
+  table.sg{border-collapse:collapse;font-size:11px;width:100%;min-width:520px}
+  table.sg th{font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    padding:3px 4px;text-align:left;font-size:10px}
+  table.sg th.rn{text-align:center;font-family:"Space Mono",monospace;font-size:11px}
+  table.sg td{padding:2px}
+  .scell{width:100%;height:22px;border:2px solid var(--line);background:var(--panel2);cursor:pointer;
+    padding:0;display:block}
+  .scell.on{background:var(--rust);border-color:var(--ink)}
+  .scell:hover{border-color:var(--ink)}
+
+  /* ---- city view ---- */
+  .cityfit{position:relative;width:100%;overflow:hidden;border:2px solid var(--ink);
+    background:linear-gradient(170deg,#E7E1D2 0%,#EFEADD 55%,#E4DED0 100%);margin-bottom:12px}
+  .cityfit .city-scene{transform-origin:0 0}
+  .city-group{position:absolute;left:0;top:0;width:0;height:0;cursor:pointer}
+  .city-puff{position:absolute;width:34px;height:34px;border-radius:50%;background:#EDE3D0;
+    pointer-events:none;animation:puff 4.2s linear infinite;opacity:0}
+  @keyframes puff{0%{transform:translateY(0) scale(.6);opacity:.5}
+                  100%{transform:translateY(-72px) scale(1.6);opacity:0}}
+  .city-label{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:center;
+    gap:8px;padding:4px 11px;border-radius:999px;background:var(--panel);border:2px solid transparent;
+    box-shadow:0 2px 8px rgba(59,66,62,.10);cursor:pointer;font-family:inherit;white-space:nowrap}
+  .city-label.on{border-color:var(--ink);background:var(--panel2)}
+  .city-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .city-name{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--ink)}
+  .city-q{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .city-plaza{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;
+    align-items:center;gap:1px;padding:8px 16px;background:var(--panel);border:2px solid var(--ink);
+    box-shadow:4px 4px 0 rgba(22,21,15,.14);z-index:55;white-space:nowrap}
+  .city-plaza-v{font-family:"Space Mono",monospace;font-size:21px;font-weight:700;
+    font-variant-numeric:tabular-nums}
+  .city-plaza-u{font-size:11px;font-weight:700;color:var(--muted2);margin-left:2px}
+  .citylegend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .citylegend .li{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+    letter-spacing:.04em;color:var(--muted2)}
+  .selcard{border:3px solid var(--ink);background:var(--panel2);padding:12px 14px;margin-bottom:12px;
+    display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+  .selcard .sh{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted)}
+  .selcard .st{font-family:"Instrument Serif",Georgia,serif;font-size:24px;line-height:1.1}
+  .selstat{min-width:86px}
+  .selstat .k{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .selstat .v{font-family:"Space Mono",monospace;font-size:17px;font-weight:700;
+    font-variant-numeric:tabular-nums}
+  .selclose{margin-left:auto;font-family:inherit;font-size:16px;font-weight:800;line-height:1;
+    border:2px solid var(--ink);background:var(--panel);cursor:pointer;padding:4px 9px;color:var(--ink)}
+
+  .vitals{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+  .vital{border:2px solid var(--ink);background:var(--panel2);padding:8px 9px}
+  .vital .vv{font-family:"Space Mono",monospace;font-size:17px;font-weight:700;
+    font-variant-numeric:tabular-nums;line-height:1.1}
+  .vital .vk{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--muted);margin-top:3px}
+  .feedgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.feedgrid{grid-template-columns:1fr}}
+  ul.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  ul.feed li{font-size:12px;line-height:1.45;padding-left:15px;position:relative;color:var(--ink)}
+  ul.feed li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;
+    background:var(--rust)}
+  ul.feed li.shock::before{background:var(--bad)}
+  .hh{display:flex;flex-direction:column;gap:7px}
+  .hhrow{display:flex;align-items:center;gap:9px;font-size:12px}
+  .hhrow .nm{font-weight:700;min-width:118px}
+  .hhrow .ag{color:var(--muted2);font-size:11px;min-width:30px}
+  .hhbar{flex:1;height:9px;background:var(--line);border:1px solid var(--ink);position:relative}
+  .hhbar i{position:absolute;left:0;top:0;bottom:0;display:block}
+  .hhrow .wb{font-family:"Space Mono",monospace;font-weight:700;font-size:12px;min-width:24px;
+    text-align:right;font-variant-numeric:tabular-nums}
+
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .btn{font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:9px 13px;cursor:pointer;border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+  .btn:hover{background:var(--ink);color:var(--panel)}
+  .btn.pri{background:var(--rust);border-color:var(--rust);color:#FAF6EE}
+  .btn.pri:hover{background:var(--ink);border-color:var(--ink)}
+  textarea{width:100%;height:150px;font-family:"Space Mono",monospace;font-size:10px;
+    border:2px solid var(--ink);background:var(--panel2);color:var(--ink);padding:8px;resize:vertical}
+  .hint{font-size:11px;color:var(--muted2);line-height:1.5;margin-top:8px}
+</style>
+
+<header>
+  <div>
+    <div class="title">Meridian policy lab</div>
+    <div class="sub">layer 1 engine · live 12-round projection</div>
+  </div>
+  <div class="presets" id="presets"></div>
+  <div class="scorebox">
+    <div style="text-align:right">
+      <div class="lbl" style="color:#9BA29B">societal resilience index</div>
+      <div class="gatechips" id="gates"></div>
+    </div>
+    <div class="scoreval" id="score">–</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ================= LEFT: LEVERS ================= -->
+  <div>
+    <div class="panel">
+      <h3>Fiscal allocation</h3>
+      <div class="alloc" id="alloc"></div>
+      <div class="hint">Cash and services compete for the same pot. Drag a column;
+        the other two rebalance.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Policy levers</h3>
+      <div id="policy"></div>
+      <div class="row">
+        <div class="lbl" style="margin-bottom:5px">UBI design</div>
+        <div class="seg" id="ubidesign"></div>
+      </div>
+      <div class="row">
+        <div class="lbl" style="margin-bottom:5px">Working week</div>
+        <div class="seg" id="week"></div>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <div class="lbl" style="margin-bottom:5px">Care job guarantee</div>
+        <div class="seg" id="guarantee"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>AI adoption target · per sector</h3>
+      <div class="secgrid" id="autotargets"></div>
+      <div class="hint">Automate past 80% and the door closes behind you:
+        re-employing humans there costs rounds of retraining.</div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: PROJECTION ================= -->
+  <div>
+    <div class="callout" id="callout"></div>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="panel" style="margin-top:18px">
+      <h3>The city</h3>
+      <div class="scrub">
+        <button class="btn play" id="btnPlay">▶ Play</button>
+        <select id="playSpeed" class="speed" aria-label="seconds per round">
+          <option value="2200">slow</option>
+          <option value="1200" selected>normal</option>
+          <option value="600">fast</option>
+        </select>
+        <div class="pips" id="pips"></div>
+        <div class="clock"><span class="yr mono" id="yearlbl">2050</span>
+          <span class="lbl" id="roundlbl">round 1 of 12</span></div>
+      </div>
+      <div class="citylegend">
+        <span class="li"><span class="dot" style="background:var(--good)"></span>healthy 65+</span>
+        <span class="li"><span class="dot" style="background:var(--mid)"></span>strained 40-64</span>
+        <span class="li"><span class="dot" style="background:var(--bad)"></span>failing below 40</span>
+        <span class="li" style="color:var(--muted)">height carries capacity &middot; click a building</span>
+      </div>
+      <div class="cityfit" id="cityfit"><div id="city"></div></div>
+      <div id="selcard"></div>
+      <div class="secrow" id="secrow"></div>
+      <div class="hint" id="roundnote"></div>
+      <div class="lbl" style="margin:16px 0 7px">Meanwhile, with nobody doing anything</div>
+      <div class="vitals" id="vitals"></div>
+      <div class="feedgrid">
+        <div>
+          <div class="lbl" style="margin:14px 0 7px">Round bulletin</div>
+          <ul class="feed" id="news"></ul>
+        </div>
+        <div>
+          <div class="lbl" style="margin:14px 0 7px">Households</div>
+          <div class="hh" id="households"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Shock schedule</h3>
+      <div class="shockgrid"><table class="sg" id="shocktable"></table></div>
+      <div class="hint">Click a cell to land a shock in that round. Endogenous shocks —
+        unrest, fiscal crisis, service cascade — fire on their own when your own state
+        triggers them, and are not shown here.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Export</h3>
+      <div class="btnrow">
+        <button class="btn pri" id="btnCopy">Copy world-states.json</button>
+        <button class="btn" id="btnExport">Download file</button>
+        <button class="btn" id="btnToggleJson">Show JSON</button>
+      </div>
+      <div class="hint">Writes all twelve rounds in the published schema, so the
+        world-state monitor can render an engine-generated run instead of the
+        hand-authored demo states.</div>
+      <div id="jsonwrap" hidden style="margin-top:10px"><textarea id="jsonout" readonly spellcheck="false"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<script>/*<!--INJECT:ENGINE-->*/</script>
+<script>/*<!--INJECT:CITY-->*/</script>
+<script id="baseline-json" type="application/json">/*<!--INJECT:BASELINE-->*/</script>
+<script>
+(function(){
+'use strict';
+var E = window.MeridianEngine;
+var BASE = JSON.parse(document.getElementById('baseline-json').textContent);
+
+/* ------------------------------------------------------------------ */
+var PRESETS = {
+  baseline:  {label:'Baseline'},
+  boom:      {label:'The boom'},
+  resilient: {label:'Resilient'},
+  doom:      {label:'Doom loop'}
+};
+/*<!--INJECT:PRESETS-->*/
+
+var levers = JSON.parse(JSON.stringify(PRESET_LEVERS.baseline));
+var shockSched = {};
+var activePreset = 'baseline';
+var inspectRound = 12;
+var inspectT = 0;            // 0..1 through the round: the years BETWEEN checkpoints
+var selectedSector = null;
+
+/* The engine settles the world every two years. The world does not wait
+   for it, so what we show is the path between two checkpoints rather than
+   the checkpoints alone. This is what makes the society look alive when
+   nobody is touching anything: people are still being born, still dying,
+   still turning 65, and the numbers move because of it. */
+function curState(){
+  if (inspectT > 0 && inspectRound < traj.length) {
+    return E.interpolate(traj[inspectRound-1], traj[inspectRound], inspectT);
+  }
+  return traj[inspectRound-1];
+}
+var traj = [], sc = null;
+
+var BAND = function(q){ return q>=65 ? 'good' : (q>=40 ? 'mid' : 'bad'); };
+var CSSVAR = function(n){ return getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim(); };
+var money = function(v){ return '$' + Math.round(v).toLocaleString('en-SG'); };
+var pct = function(v){ return Math.round(v*100) + '%'; };
+
+/* ================= CHART ================= */
+function lineChart(series, opts){
+  opts = opts || {};
+  var W = 300, H = 104, PL = 4, PR = 4, PT = 8, PB = 14;
+  var all = [];
+  series.forEach(function(s){ all = all.concat(s.data); });
+  var lo = opts.min != null ? opts.min : Math.min.apply(null, all);
+  var hi = opts.max != null ? opts.max : Math.max.apply(null, all);
+  if (hi - lo < 1e-6){ hi = lo + 1; }
+  var pad = (hi - lo) * 0.14; lo -= pad; hi += pad;
+  if (opts.min != null) lo = opts.min;
+  var n = series[0].data.length;
+  var X = function(i){ return PL + i/(n-1) * (W-PL-PR); };
+  var Y = function(v){ return PT + (1 - (v-lo)/(hi-lo)) * (H-PT-PB); };
+
+  var svg = '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+(opts.aria||'')+'">';
+  // baseline reference at round-1 value
+  if (opts.ref != null && opts.ref >= lo && opts.ref <= hi){
+    svg += '<line x1="'+PL+'" y1="'+Y(opts.ref).toFixed(1)+'" x2="'+(W-PR)+'" y2="'+Y(opts.ref).toFixed(1)+
+           '" stroke="#D6CBB0" stroke-width="1.5" stroke-dasharray="4 4"/>';
+  }
+  series.forEach(function(s){
+    var pts = s.data.map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(' ');
+    svg += '<polyline points="'+pts+'" fill="none" stroke="'+s.color+'" stroke-width="'+(s.ghost?2:3.4)+
+           '" stroke-linejoin="round" stroke-linecap="round"'+(s.ghost?' stroke-dasharray="3 3" opacity="0.75"':'')+'/>';
+  });
+  // peak marker on the primary series
+  var main = series[series.length-1];
+  if (opts.markPeak){
+    var pi = main.data.indexOf(Math.max.apply(null, main.data));
+    if (pi > 0 && pi < n-1){
+      svg += '<line x1="'+X(pi).toFixed(1)+'" y1="'+PT+'" x2="'+X(pi).toFixed(1)+'" y2="'+(H-PB)+
+             '" stroke="'+CSSVAR('mid')+'" stroke-width="1.5" stroke-dasharray="2 3"/>';
+      svg += '<circle cx="'+X(pi).toFixed(1)+'" cy="'+Y(main.data[pi]).toFixed(1)+'" r="4" fill="'+
+             CSSVAR('mid')+'" stroke="'+CSSVAR('ink')+'" stroke-width="1.6"/>';
+    }
+  }
+  svg += '<circle cx="'+X(n-1).toFixed(1)+'" cy="'+Y(main.data[n-1]).toFixed(1)+'" r="4.6" fill="'+
+         main.color+'" stroke="'+CSSVAR('ink')+'" stroke-width="1.8"/>';
+  // round axis ticks
+  svg += '<text x="'+PL+'" y="'+(H-3)+'" font-size="9" fill="#9A9587" font-family="Space Mono, monospace">r1</text>';
+  svg += '<text x="'+(W-PR)+'" y="'+(H-3)+'" font-size="9" fill="#9A9587" text-anchor="end" font-family="Space Mono, monospace">r12</text>';
+  svg += '</svg>';
+  return svg;
+}
+
+/* ================= CARDS ================= */
+function cardDefs(){
+  var eff = traj.map(function(s){ return s.indicators.effective_ubi_index; });
+  var real = traj.map(function(s){ return s.indicators.real_ubi_index; });
+  var cons = traj.map(function(s){ return s.indicators.consumption_index; });
+  var emp = traj.map(function(s){ return s.indicators.employment_rate*100; });
+  var worst = traj.map(function(s){ return Math.min.apply(null, E.ESSENTIAL.map(function(k){ return s.sectors[k].quality; })); });
+  var resv = traj.map(function(s){ return s.fiscal.reserves_bn; });
+  var coh = traj.map(function(s){ return s.indicators.cohesion; });
+  var leg = traj.map(function(s){ return s.indicators.legitimacy; });
+  var gdp = traj.map(function(s){ return s.fiscal.gdp_bn; });
+  var last = function(a){ return a[a.length-1]; };
+  var peakAt = function(a){ return a.indexOf(Math.max.apply(null,a)) + 1; };
+  var delta = function(a){ var d = last(a)-a[0]; return (d>=0?'+':'') + Math.round(d); };
+  var ink = CSSVAR('ink'), rust = CSSVAR('rust');
+
+  return [
+    { key:'ubi', label:'UBI purchasing power', value:Math.round(last(eff)),
+      delta:delta(eff)+' vs round 1', col: last(eff)>=100?'good':(last(eff)>=70?'mid':'bad'),
+      svg: lineChart([
+        {data:real, color:'#C4A98C', ghost:true},
+        {data:eff,  color:rust}
+      ], {ref:100, markPeak:true, aria:'UBI purchasing power over twelve rounds'}),
+      foot:'Solid: what the UBI actually buys, after inflation and after the state of the services it must buy around. Dashed: inflation-adjusted cash alone. Peaks round ' + peakAt(eff) + '.' },
+
+    { key:'cons', label:'Consumption index', value:Math.round(last(cons)),
+      delta:delta(cons)+' vs round 1', col: last(cons)>=95?'good':(last(cons)>=75?'mid':'bad'),
+      svg: lineChart([{data:cons, color:'#7FA3AC'}], {ref:100, markPeak:true, aria:'Consumption index'}),
+      foot:'The loop-closing variable. Household spending becomes next round’s demand, which becomes the profit you tax to fund the UBI.' },
+
+    { key:'emp', label:'Employment rate', value:Math.round(last(emp))+'%',
+      delta:delta(emp)+' pts', col: last(emp)>=45?'good':(last(emp)>=25?'mid':'bad'),
+      svg: lineChart([{data:emp, color:'#8A8FA8'}], {min:0, aria:'Employment rate'}),
+      foot:'Share of working-age people in paid work. Every point lost is a wage bill removed from household income.' },
+
+    { key:'worst', label:'Worst essential service', value:Math.round(last(worst)),
+      delta:delta(worst)+' pts', col: BAND(last(worst)),
+      svg: lineChart([{data:worst, color:CSSVAR(BAND(last(worst)))}],
+        {min:0, max:100, ref:40, aria:'Worst essential service quality'}),
+      foot:'Scored on your worst sector, never the average. The dashed line at 40 is the fail gate: two consecutive rounds below it caps your total.' },
+
+    { key:'resv', label:'Sovereign reserves', value:'$'+Math.round(last(resv))+'bn',
+      delta:delta(resv)+'bn', col: last(resv)>=60?'good':(last(resv)>=0?'mid':'bad'),
+      svg: lineChart([{data:resv, color:CSSVAR('resv')}], {ref:0, aria:'Sovereign reserves'}),
+      foot:'The buffer that lets you survive a shock you were not told about. Below zero at any point is an insolvency gate.' },
+
+    { key:'coh', label:'Cohesion & legitimacy', value:Math.round(last(coh)),
+      delta:'legitimacy '+Math.round(last(leg)), col: last(coh)>=55?'good':(last(coh)>=35?'mid':'bad'),
+      svg: lineChart([
+        {data:leg, color:'#B0A48C', ghost:true},
+        {data:coh, color:'#8C7BA0'}
+      ], {min:0, max:100, ref:35, aria:'Cohesion and legitimacy'}),
+      foot:'Solid: cohesion, which triggers civil unrest below 35. Dashed: legitimacy, which forces a lever reset below 25.' },
+
+    { key:'gdp', label:'GDP', value:'$'+Math.round(last(gdp))+'bn',
+      delta:delta(gdp)+'bn', col: last(gdp)>=760?'good':(last(gdp)>=650?'mid':'bad'),
+      svg: lineChart([{data:gdp, color:'#9A9075'}], {markPeak:true, aria:'GDP'}),
+      foot:'Output actually sold, not output the machines could have made. Capacity you cannot sell into is not GDP.' }
+  ];
+}
+
+function renderCards(){
+  var html = cardDefs().map(function(c){
+    return '<div class="card">' +
+      '<div class="ch"><span class="lbl">'+c.label+'</span>' +
+      '<span class="cd" style="color:var(--'+c.col+')">'+c.delta+'</span></div>' +
+      '<div class="cv">'+c.value+'</div>' + c.svg +
+      '<div class="cf">'+c.foot+'</div></div>';
+  }).join('');
+  document.getElementById('cards').innerHTML = html;
+}
+
+/* ================= CALLOUT — the teaching moment ================= */
+function renderCallout(){
+  var eff = traj.map(function(s){ return s.indicators.effective_ubi_index; });
+  var peak = Math.max.apply(null, eff), pi = eff.indexOf(peak), fin = eff[eff.length-1];
+  var worst = traj.map(function(s){ return Math.min.apply(null, E.ESSENTIAL.map(function(k){ return s.sectors[k].quality; })); });
+  var k, t;
+
+  if (sc.gates_failed.length){
+    k = 'Hard gate breached';
+    t = 'Your total is capped regardless of the UBI. ' +
+        sc.gates_failed.map(function(g){
+          return g === 'insolvency' ? 'Reserves went negative.' :
+                 g === 'legitimacy_collapse' ? 'Legitimacy collapsed by round 12.' :
+                 '<em>' + (E.SECTORS[g.replace('service_critical_','')]||{name:g}).name +
+                 '</em> sat below quality 40 for two consecutive rounds.';
+        }).join(' ');
+  } else if (pi > 0 && pi < 11 && fin < peak * 0.88){
+    k = 'You are over the cliff';
+    t = 'Purchasing power peaks at <em>round ' + (pi+1) + '</em> and is <em>' +
+        Math.round((1 - fin/peak)*100) + '% lower</em> by round 12. ' +
+        'Automation removed the wages, the transfer replaced them for a while, and then the ' +
+        'demand that funded the transfer went with them.';
+  } else if (Math.min.apply(null,worst) < 45){
+    k = 'Services are the binding constraint';
+    t = 'Your worst essential service reaches <em>' + Math.min.apply(null,worst) +
+        '</em>. Cash is worth only what it can buy — every dollar of UBI is discounted ' +
+        'by the state of the services a household has to buy around.';
+  } else if (fin >= peak * 0.95 && fin >= 100){
+    k = 'Holding';
+    t = 'Purchasing power is <em>sustained</em> rather than spiked: round 12 sits within ' +
+        '5% of your peak, and no essential service fell below 45. This is what the index rewards.';
+  } else {
+    k = 'Running';
+    t = 'Round 12 purchasing power at <em>' + fin + '</em>, worst essential service at <em>' +
+        Math.min.apply(null,worst) + '</em>. Move a lever and watch all twelve rounds redraw.';
+  }
+  document.getElementById('callout').innerHTML = '<div class="k">'+k+'</div><div class="t">'+t+'</div>';
+}
+
+/* ================= ROUND INSPECTOR ================= */
+function fitCity(){
+  var host = document.getElementById('cityfit');
+  var k = Math.min(1, host.clientWidth / MeridianCity.SCENE_W);
+  host.style.height = (MeridianCity.SCENE_H * k) + 'px';
+  var scene = host.querySelector('.city-scene');
+  if (scene) scene.style.transform = 'scale(' + k + ')';
+}
+
+function renderSel(){
+  var host = document.getElementById('selcard');
+  if (!selectedSector){ host.innerHTML = ''; return; }
+  var s = curState(), x = s.sectors[selectedSector];
+  var b = MeridianCity.bandOf(x.quality);
+  var css = b === 'healthy' ? 'good' : (b === 'strained' ? 'mid' : 'bad');
+  var stat = function(k,v){ return '<div class="selstat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; };
+  host.innerHTML = '<div class="selcard">' +
+    '<div style="min-width:190px"><div class="sh">sector &middot; round '+s.meta.round+'</div>' +
+    '<div class="st">'+MeridianCity.META[selectedSector].name+'</div>' +
+    '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--'+css+')">'+b+'</div></div>' +
+    stat('quality', x.quality) +
+    stat('automation', Math.round(x.automation*100)+'%') +
+    stat('capacity', Math.round(x.capacity*100)+'%') +
+    stat('headcount', Math.round(x.headcount/1000)+'k') +
+    stat('margin', (x.margin>0?'+':'')+Math.round(x.margin*100)+'%') +
+    '<button class="selclose" id="selclose" aria-label="Close">\u00d7</button></div>';
+  document.getElementById('selclose').onclick = function(){ selectedSector = null; renderSel(); renderCity(); };
+}
+
+function renderCity(){
+  MeridianCity.render(curState(), document.getElementById('city'), {
+    selected: selectedSector,
+    onSelect: function(k){
+      selectedSector = (selectedSector === k) ? null : k;
+      renderSel(); renderCity();
+    }
+  });
+  fitCity();
+}
+
+/* PLAYBACK.
+   Twelve rounds is twenty-four years, and clicking through them one at a
+   time hides the thing you most want to see: the shape. Played back, the
+   city recolours, the households age, the bulletin arrives round by round
+   and a boom visibly turns into something else. */
+var playTimer = null;
+
+function playing(){ return playTimer !== null; }
+
+function stopPlay(){
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  var b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+function startPlay(){
+  stopPlay();
+  var perRound = +(document.getElementById('playSpeed') || {}).value || 1200;
+  // Starting from the end means replaying the whole run, not sitting still.
+  if (inspectRound >= 12 && inspectT === 0) { inspectRound = 1; inspectT = 0; }
+  renderRound();
+  var b = document.getElementById('btnPlay');
+  if (b) b.textContent = '❚❚ Pause';
+
+  /* Advance in tenths of a round rather than whole rounds, so the years
+     between checkpoints are shown too. The society is doing something in
+     2057 even though the engine only settles 2056 and 2058. */
+  var STEPS = 10, frame = perRound / STEPS;
+  playTimer = setInterval(function(){
+    inspectT += 1 / STEPS;
+    if (inspectT >= 1 - 1e-9) {
+      inspectT = 0;
+      if (inspectRound >= 12) { stopPlay(); renderRound(); return; }
+      inspectRound++;
+    }
+    renderRound();
+  }, frame);
+}
+
+function renderRound(){
+  var s = curState();
+  document.getElementById('pips').innerHTML = traj.map(function(t,i){
+    var cls = (i+1===inspectRound) ? ' on' : (i+1 < inspectRound ? ' past' : '');
+    return '<button class="pip'+cls+'" data-r="'+(i+1)+'">'+(i+1)+'</button>';
+  }).join('');
+  var exact = s.meta.year_exact != null ? s.meta.year_exact : s.meta.year;
+  document.getElementById('yearlbl').textContent = Math.floor(exact);
+  var rl = document.getElementById('roundlbl');
+  // Mid-round, show the running year — including 2051.0, which is a whole
+  // number and would otherwise fall back to the range and look like a jump.
+  if (rl) rl.textContent = 'round ' + s.meta.round + ' of 12 · ' +
+    (inspectT > 0 ? exact.toFixed(1) : s.meta.year + '–' + (s.meta.year + 2));
+  renderCity(); renderSel();
+  document.getElementById('secrow').innerHTML = E.ORDER.map(function(k){
+    var x = s.sectors[k], b = BAND(x.quality);
+    return '<div class="sectile" data-sec="'+k+'" style="cursor:pointer"><div class="sn"><span class="dot" style="background:var(--'+b+')"></span>'+
+      E.SECTORS[k].name+'</div><div class="sq" style="color:var(--'+b+')">'+x.quality+'</div>'+
+      '<div class="sm">auto '+pct(x.automation)+' · cap '+Math.round(x.capacity*100)+'% · '+
+      Math.round(x.headcount/1000)+'k jobs</div></div>';
+  }).join('');
+  /* The population line is not a line. It is people arriving and leaving,
+     and a society that only ever shows the line teaches the wrong thing. */
+  var vEl = document.getElementById('vitals');
+  if (vEl) {
+    if (inspectRound < traj.length) {
+      var v = E.vitals(traj[inspectRound-1], traj[inspectRound]);
+      var n0 = function(x){ return Math.round(x).toLocaleString('en-SG'); };
+      vEl.innerHTML = [
+        ['births a year', n0(v.births_per_year), 'good'],
+        ['deaths a year', n0(v.deaths_per_year), 'bad'],
+        ['turned 65', n0(v.turned_65), 'mid'],
+        ['left school', n0(v.left_school), 'mid'],
+        [v.jobs_lost ? 'jobs lost' : 'jobs created',
+         n0(v.jobs_lost || v.jobs_created), v.jobs_lost ? 'bad' : 'good'],
+        ['net population', (v.net_population>0?'+':'') + n0(v.net_population),
+         v.net_population>=0 ? 'good' : 'bad']
+      ].map(function(r){
+        return '<div class="vital"><div class="vv" style="color:var(--'+r[2]+')">'+r[1]+'</div>'+
+               '<div class="vk">'+r[0]+'</div></div>';
+      }).join('');
+    } else {
+      vEl.innerHTML = '<div class="empty">2074 — the run ends here.</div>';
+    }
+  }
+
+  document.getElementById('news').innerHTML = (s.news||[]).map(function(t){
+    var isShock = /declared\. Emergency/.test(t);
+    return '<li'+(isShock?' class="shock"':'')+'>'+t+'</li>';
+  }).join('') || '<li>Round 1 baseline. No prior round to compare.</li>';
+
+  document.getElementById('households').innerHTML = (s.personas||[]).map(function(p){
+    var w = p.wellbeing;
+    var col = w>=65 ? 'good' : (w>=40 ? 'mid' : 'bad');
+    return '<div class="hhrow"><span class="nm">'+p.name+'</span>'+
+      '<span class="ag">'+p.age+'</span>'+
+      '<span class="hhbar"><i style="width:'+w+'%;background:var(--'+col+')"></i></span>'+
+      '<span class="wb" style="color:var(--'+col+')">'+w+'</span></div>';
+  }).join('');
+
+  var sh = (s.shocks||[]).map(function(x){ return (E.SHOCKS[x]||{}).label || x; });
+  document.getElementById('roundnote').innerHTML =
+    'UBI ' + money(s.indicators.ubi_monthly_sgd) + '/mo mean · purchasing power ' +
+    s.indicators.real_ubi_index + ' · after service access ' + s.indicators.effective_ubi_index +
+    ' · employment ' + Math.round(s.indicators.employment_rate*100) + '% · reserves $' +
+    Math.round(s.fiscal.reserves_bn) + 'bn' +
+    (sh.length ? ' · <strong style="color:var(--bad)">' + sh.join(', ') + '</strong>' : '');
+}
+
+/* ================= LEVER UI ================= */
+function slider(label, value, min, max, step, fmt, onInput){
+  var row = document.createElement('div'); row.className = 'row';
+  row.innerHTML = '<div class="rowhead"><span class="lbl"></span><span class="n"></span></div>';
+  row.querySelector('.lbl').textContent = label;
+  var num = row.querySelector('.n'); num.textContent = fmt(value);
+  var inp = document.createElement('input');
+  inp.type='range'; inp.min=min; inp.max=max; inp.step=step; inp.value=value;
+  inp.setAttribute('aria-label', label);
+  inp.addEventListener('input', function(){
+    var v = parseFloat(inp.value); num.textContent = fmt(v); onInput(v); recompute();
+  });
+  row.appendChild(inp); row._input = inp; row._num = num; row._fmt = fmt;
+  return row;
+}
+
+var policyRows = [];
+function buildPolicy(){
+  var host = document.getElementById('policy'); host.innerHTML=''; policyRows=[];
+  var defs = [
+    ['corporate tax rate', 'corporate_tax_rate', 0, 0.45, 0.01, pct],
+    ['compute levy',       'compute_levy',       0, 0.30, 0.01, pct],
+    ['reskilling spend',   'reskilling_spend_pct',0,0.30, 0.01, pct],
+    ['public ownership',   'public_ownership_pct',0,0.50, 0.01, pct]
+  ];
+  defs.forEach(function(d){
+    var r = slider(d[0], levers[d[1]], d[2], d[3], d[4], d[5], function(v){ levers[d[1]] = v; });
+    r._key = d[1]; host.appendChild(r); policyRows.push(r);
+  });
+}
+
+var autoRows = [];
+function buildAuto(){
+  var host = document.getElementById('autotargets'); host.innerHTML=''; autoRows=[];
+  E.ORDER.forEach(function(k){
+    var r = slider(E.SECTORS[k].name, levers.automation_target[k], 0, 1, 0.01, pct,
+      function(v){ levers.automation_target[k] = v; });
+    r._key = k; host.appendChild(r); autoRows.push(r);
+  });
+}
+
+var allocKeys = ['ubi','infrastructure','reserves'];
+function buildAlloc(){
+  var host = document.getElementById('alloc'); host.innerHTML='';
+  allocKeys.forEach(function(k){
+    var col = document.createElement('div'); col.className='alloccol';
+    col.innerHTML = '<div class="allocnum"></div><div class="allocbar"><div class="allocfill"></div></div>'+
+                    '<div class="lbl" style="font-size:10px">'+(k==='infrastructure'?'infra':k)+'</div>';
+    var bar = col.querySelector('.allocbar');
+    var drag = function(ev){
+      var r = bar.getBoundingClientRect();
+      var t = 1 - (ev.clientY - r.top)/r.height;
+      setAlloc(k, Math.max(0, Math.min(1, t)));
+    };
+    bar.addEventListener('pointerdown', function(ev){
+      ev.preventDefault(); bar.setPointerCapture(ev.pointerId); drag(ev);
+      var mv = function(e){ drag(e); };
+      var up = function(){ bar.removeEventListener('pointermove',mv); bar.removeEventListener('pointerup',up); };
+      bar.addEventListener('pointermove',mv); bar.addEventListener('pointerup',up);
+    });
+    host.appendChild(col);
+  });
+}
+function setAlloc(key, v){
+  v = Math.round(v*100)/100;
+  var others = allocKeys.filter(function(o){ return o!==key; });
+  var sum = others.reduce(function(a,o){ return a + levers.allocation[o]; }, 0);
+  levers.allocation[key] = v;
+  var rest = 1 - v;
+  if (sum <= 0.0001){ others.forEach(function(o){ levers.allocation[o] = rest/2; }); }
+  else { others.forEach(function(o){ levers.allocation[o] = Math.round(levers.allocation[o]/sum*rest*100)/100; }); }
+  paintAlloc(); recompute();
+}
+function paintAlloc(){
+  var cols = document.querySelectorAll('#alloc .alloccol');
+  allocKeys.forEach(function(k,i){
+    var v = levers.allocation[k];
+    cols[i].querySelector('.allocnum').textContent = Math.round(v*100)+'%';
+    var f = cols[i].querySelector('.allocfill');
+    f.style.height = (v*100)+'%';
+    f.style.background = k==='ubi'?'var(--ubi)':(k==='infrastructure'?'var(--infra)':'var(--resv)');
+  });
+}
+
+function buildSegs(){
+  var mk = function(host, opts, get, set){
+    host.innerHTML = opts.map(function(o){
+      return '<button data-v="'+o.v+'"'+(get()===o.v?' class="on"':'')+'>'+o.l+'</button>';
+    }).join('');
+    host.onclick = function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      var v = b.dataset.v;
+      set(v === 'true' ? true : (v === 'false' ? false : (isNaN(+v) ? v : +v)));
+      mk(host, opts, get, set); recompute();
+    };
+  };
+  mk(document.getElementById('ubidesign'),
+     [{v:'flat',l:'flat'},{v:'means_tested',l:'means-tested'},{v:'age_weighted',l:'age-weighted'}],
+     function(){ return levers.ubi_design; }, function(v){ levers.ubi_design = v; });
+  mk(document.getElementById('week'),
+     [{v:3,l:'3 day'},{v:4,l:'4 day'},{v:5,l:'5 day'}],
+     function(){ return levers.working_week_days; }, function(v){ levers.working_week_days = v; });
+  mk(document.getElementById('guarantee'),
+     [{v:'false',l:'off'},{v:'true',l:'on'}],
+     function(){ return levers.care_job_guarantee; }, function(v){ levers.care_job_guarantee = v; });
+}
+
+function syncControls(){
+  policyRows.forEach(function(r){
+    r._input.value = levers[r._key]; r._num.textContent = r._fmt(levers[r._key]);
+  });
+  autoRows.forEach(function(r){
+    r._input.value = levers.automation_target[r._key];
+    r._num.textContent = r._fmt(levers.automation_target[r._key]);
+  });
+  paintAlloc(); buildSegs();
+}
+
+/* ================= SHOCK GRID ================= */
+var DRAWABLE = ['pandemic','food_import_disruption','energy_price_spike','chip_export_controls','cyber_attack'];
+function buildShocks(){
+  var t = document.getElementById('shocktable');
+  var head = '<tr><th></th>';
+  for (var r=2; r<=12; r++) head += '<th class="rn">'+r+'</th>';
+  head += '</tr>';
+  var rows = DRAWABLE.map(function(sk){
+    var tr = '<tr><th>'+E.SHOCKS[sk].label+'</th>';
+    for (var r=2; r<=12; r++){
+      var on = (shockSched[r]||[]).indexOf(sk) >= 0;
+      tr += '<td><button class="scell'+(on?' on':'')+'" data-s="'+sk+'" data-r="'+r+
+            '" aria-label="'+E.SHOCKS[sk].label+' at round '+r+'"></button></td>';
+    }
+    return tr + '</tr>';
+  }).join('');
+  t.innerHTML = head + rows;
+  t.onclick = function(e){
+    var b = e.target.closest('.scell'); if(!b) return;
+    var r = +b.dataset.r, s = b.dataset.s;
+    shockSched[r] = shockSched[r] || [];
+    var i = shockSched[r].indexOf(s);
+    if (i>=0) shockSched[r].splice(i,1); else shockSched[r].push(s);
+    b.classList.toggle('on');
+    recompute();
+  };
+}
+
+/* ================= PRESETS ================= */
+function buildPresets(){
+  document.getElementById('presets').innerHTML = Object.keys(PRESETS).map(function(k){
+    return '<button data-k="'+k+'"'+(k===activePreset?' class="on"':'')+'>'+PRESETS[k].label+'</button>';
+  }).join('');
+  document.getElementById('presets').onclick = function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    activePreset = b.dataset.k;
+    levers = JSON.parse(JSON.stringify(PRESET_LEVERS[activePreset]));
+    buildPresets(); syncControls(); recompute();
+  };
+}
+
+/* ================= EXPORT ================= */
+function exportJson(){
+  var out = { schema_version:'1.0', generated_by:'meridian-engine '+E.version,
+              generated_at:new Date().toISOString(), levers_used:levers,
+              shock_schedule:shockSched, states:{} };
+  traj.forEach(function(s,i){
+    var c = JSON.parse(JSON.stringify(s));
+    // Drop the engine's carry-forward: not part of the published schema.
+    Object.keys(c).forEach(function(k){ if (k.charAt(0)==='_') delete c[k]; });
+    c.meta.state_label = 'Round ' + (i+1);
+    // Score the run SO FAR, so each round carries a live index rather than
+    // a zero until the last one.
+    c.score = E.score(traj.slice(0, i+1));
+    out.states['round_' + String(i+1).padStart(2,'0')] = c;
+  });
+  return JSON.stringify(out, null, 2);
+}
+
+/* ================= MAIN ================= */
+function recompute(){
+  stopPlay();          // a lever moved: this is a different world now
+  traj = E.runTrajectory(BASE, levers, shockSched, 12);
+  sc = E.score(traj);
+  var el = document.getElementById('score');
+  el.textContent = sc.total;
+  el.style.color = sc.total>=70 ? '#9BC08F' : (sc.total>=45 ? '#DDBE7E' : '#D98873');
+  document.getElementById('gates').innerHTML = sc.gates_failed.length
+    ? sc.gates_failed.map(function(g){
+        return '<span class="gatechip">'+g.replace('service_critical_','').replace(/_/g,' ')+'</span>'; }).join('')
+    : '<span class="gateok">no gates breached</span>';
+  renderCallout(); renderCards(); renderRound();
+  var j = document.getElementById('jsonout');
+  if (!document.getElementById('jsonwrap').hidden) j.value = exportJson();
+}
+
+document.getElementById('pips').addEventListener('click', function(e){
+  var b = e.target.closest('.pip'); if(!b) return;
+  stopPlay();
+  inspectRound = +b.dataset.r; inspectT = 0; renderRound();
+});
+document.getElementById('btnPlay').addEventListener('click', function(){
+  playing() ? stopPlay() : startPlay();
+});
+document.getElementById('playSpeed').addEventListener('change', function(){
+  if (playing()) startPlay();          // pick up the new speed at once
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === ' ' && e.target === document.body) { e.preventDefault(); playing() ? stopPlay() : startPlay(); }
+});
+document.getElementById('secrow').addEventListener('click', function(e){
+  var t = e.target.closest('[data-sec]'); if(!t) return;
+  selectedSector = (selectedSector === t.dataset.sec) ? null : t.dataset.sec;
+  renderSel(); renderCity();
+});
+window.addEventListener('resize', fitCity);
+document.getElementById('btnToggleJson').onclick = function(){
+  var w = document.getElementById('jsonwrap');
+  w.hidden = !w.hidden;
+  this.textContent = w.hidden ? 'Show JSON' : 'Hide JSON';
+  if (!w.hidden) document.getElementById('jsonout').value = exportJson();
+};
+document.getElementById('btnCopy').onclick = function(){
+  var b = this;
+  navigator.clipboard.writeText(exportJson()).then(function(){
+    b.textContent = 'Copied'; setTimeout(function(){ b.textContent='Copy world-states.json'; }, 1400);
+  }, function(){ b.textContent = 'Copy failed'; setTimeout(function(){ b.textContent='Copy world-states.json'; },1400); });
+};
+document.getElementById('btnExport').onclick = function(){
+  var b = this;
+  try {
+    var blob = new Blob([exportJson()], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'world-states.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  } catch (err) {
+    b.textContent = 'Use Copy instead';
+    setTimeout(function(){ b.textContent = 'Download file'; }, 2200);
+  }
+};
+
+buildPresets(); buildAlloc(); buildPolicy(); buildAuto(); buildSegs(); buildShocks();
+syncControls(); recompute();
+})();
+</script>

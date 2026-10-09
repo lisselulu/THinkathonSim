@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/app.css">
+<style>
+  .page{max-width:1240px;margin:0 auto;padding:26px 24px 80px}
+  .head h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:44px;line-height:1;margin:0}
+  .head p{margin:6px 0 20px;color:var(--muted2);max-width:62ch}
+  .cols{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .stack{display:flex;flex-direction:column;gap:18px}
+  .card{background:var(--panel);border:1.5px solid var(--line2);border-radius:6px;padding:16px 18px}
+  .card h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:25px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline}
+  .card h2 small{font-family:Archivo,sans-serif;font-size:12px;font-weight:700;color:var(--muted)}
+  .card>p{margin:0 0 12px;color:var(--muted2);font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .deal{border:1.5px solid var(--line);background:var(--panel2);border-radius:5px;padding:10px 12px;margin-bottom:10px}
+  .deal.tome{border-left:5px solid var(--good)} .deal.mine{border-left:5px solid var(--rust)} .deal.agreed{background:#F1F5EC}
+  .deal .t{display:flex;justify-content:space-between;gap:8px;font-weight:800;font-size:13px}
+  .deal .what{font-family:"Space Mono",monospace;font-size:13px;margin:4px 0}
+  .deal .meta{font-size:12px;color:var(--muted)}
+  .legs{display:flex;gap:14px;font-size:12.5px;font-weight:700;margin-top:4px}
+  .gives{color:var(--bad)} .gets{color:var(--good)}
+  .preview{margin-top:8px;padding:7px 9px;border:1.5px dashed var(--line2);border-radius:4px;font-size:12px;display:flex;gap:12px;flex-wrap:wrap}
+  .actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:flex-end}
+  .msgs{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .msg{font-size:13px;border-bottom:1px solid var(--line);padding-bottom:7px}
+  .msg b{font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+  .room{display:flex;flex-direction:column;gap:6px}
+  .room div{font-size:12.5px;border:1px solid var(--line);background:var(--panel2);border-radius:4px;padding:7px 9px}
+  .notice{padding:10px 12px;border-radius:5px;background:#F5E6C8;color:#6E5114;font-size:13px;margin-bottom:14px}
+  textarea.bundle{font-family:"Space Mono",monospace;font-size:11px}
+</style>
+</head>
+<body>
+<header id="nav"></header>
+<div class="page">
+  <div class="head">
+    <h1>Market</h1>
+    <p>Trade with the other societies in the room, talk to them, and hand in your system at the end. Agreed trades change your country from the round they are agreed.</p>
+  </div>
+  <div id="warn"></div>
+  <div class="cols">
+    <div class="stack" id="left"></div>
+    <div class="stack" id="right"></div>
+  </div>
+</div>
+
+<script src="/js/meridian.js"></script>
+<script src="/app/common.js"></script>
+<script>
+(function(){
+'use strict';
+var M = window.Meridian, E = M.E, MK = window.MeridianMarket, Store = M.Store, esc = M.esc;
+var S = { posts: [], messages: [], teams: {}, round: 1, mode: 'cash', countering: null, connected: false };
+
+function api(p, method, body) {
+  return fetch('/api' + p, { method: method || 'GET', headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+}
+function refresh() {
+  return api('/state').then(function (d) {
+    S.connected = true;
+    S.round = d.round || 1;
+    S.posts = d.posts || []; S.messages = d.messages || [];
+    S.teams = {}; (d.teams || []).forEach(function (t) { S.teams[t.name || t._id] = t; });
+    paint();
+  }).catch(function (e) { S.connected = false; paint(e); });
+}
+
+/* ---------------------------------------------------------------------
+   WHAT A DEAL DOES TO YOUR COUNTRY — the same accounting the studio used
+   --------------------------------------------------------------------- */
+function applyDeal(d, p) {
+  var me = Store.team, mine = p.from === me;
+  var mv = function (res, qty, sign) {
+    var r = MK.RESOURCES[res]; if (!r) return;
+    if (r.sector) { var b = E.SECTORS[r.sector].base_output_bn; d.capacity[r.sector] = (d.capacity[r.sector] || 1) * Math.max(.4, 1 + sign * (qty / b)); }
+    else if (res === 'labour') { if (sign > 0) d.headcount[MK.LABOUR_SECTOR] = (d.headcount[MK.LABOUR_SECTOR] || 0) + qty; }
+    else if (res === 'credits') d.reserves_bn += sign * qty;
+  };
+  if (p.type === 'aid') { if (mine) { mv(p.resource, p.quantity, -1); d.legitimacy_bonus += 3; } else { mv(p.resource, p.quantity, 1); d.cohesion_bonus += 3; } return; }
+  if (p.return_resource) {
+    if (mine) { mv(p.resource, p.quantity, -1); mv(p.return_resource, p.return_quantity, 1); }
+    else { mv(p.resource, p.quantity, 1); mv(p.return_resource, p.return_quantity, -1); }
+    return;
+  }
+  if (mine) { mv(p.resource, p.quantity, -1); d.reserves_bn += p.price; } else { mv(p.resource, p.quantity, 1); d.reserves_bn -= p.price; }
+}
+function tradesExo(extra) {
+  var d = { reserves_bn: 0, capacity: {}, headcount: {}, cohesion_bonus: 0, legitimacy_bonus: 0 };
+  S.posts.filter(function (p) { return p.status === 'agreed' && (p.from === Store.team || p.to === Store.team); }).forEach(function (p) { applyDeal(d, p); });
+  if (extra) applyDeal(d, extra);
+  var at = {}; at[Math.max(2, S.round)] = d;
+  return at;
+}
+function preview(p) {
+  var r = Math.max(2, S.round) - 1;
+  var before = M.trialRun(Store.saved, { exoAt: tradesExo(null) })[r];
+  var after = M.trialRun(Store.saved, { exoAt: tradesExo(p) })[r];
+  var worst = function (s) { return Math.min.apply(null, E.ESSENTIAL.map(function (k) { return s.sectors[k].quality; })); };
+  var rows = [];
+  if (Math.round(after.fiscal.reserves_bn) !== Math.round(before.fiscal.reserves_bn)) rows.push(['reserves', '$' + Math.round(before.fiscal.reserves_bn) + 'bn', '$' + Math.round(after.fiscal.reserves_bn) + 'bn', after.fiscal.reserves_bn - before.fiscal.reserves_bn]);
+  E.ORDER.forEach(function (k) {
+    var dq = after.sectors[k].quality - before.sectors[k].quality;
+    if (dq) rows.push([E.SECTORS[k].name.toLowerCase(), before.sectors[k].quality, after.sectors[k].quality, dq]);
+  });
+  if (worst(after) !== worst(before)) rows.push(['weakest service', worst(before), worst(after), worst(after) - worst(before)]);
+  return rows;
+}
+
+/* --------------------------------------------------------------------- */
+function legs(p) {
+  var mine = p.from === Store.team;
+  if (p.return_resource) return mine ? { g: p.quantity + ' ' + p.resource, t: p.return_quantity + ' ' + p.return_resource } : { g: p.return_quantity + ' ' + p.return_resource, t: p.quantity + ' ' + p.resource };
+  if (p.type === 'aid') return mine ? { g: p.quantity + ' ' + p.resource, t: 'standing' } : { g: 'nothing', t: p.quantity + ' ' + p.resource };
+  return mine ? { g: p.quantity + ' ' + p.resource, t: '$' + p.price + 'bn' } : { g: '$' + p.price + 'bn', t: p.quantity + ' ' + p.resource };
+}
+function dealCard(p, kind) {
+  var L = legs(p), involved = p.from === Store.team || p.to === Store.team, acts = '';
+  if (kind === 'tome') {
+    var pv = preview(p);
+    if (pv.length) acts += '<div class="preview"><b>If you accept, in ' + (2048 + Math.max(2, S.round) * 2) + ':</b>' + pv.slice(0, 5).map(function (r) {
+      return '<span>' + esc(r[0]) + ' ' + r[1] + ' → <b style="color:var(--' + (r[3] > 0 ? 'good' : 'bad') + ')">' + r[2] + '</b></span>'; }).join('') + '</div>';
+    acts += S.countering === p._id
+      ? '<div class="actions"><label class="field" style="width:90px"><span>Quantity</span><input type="number" id="cq" value="' + esc(p.quantity) + '" step="0.1"></label>' +
+        (p.type === 'aid' ? '' : '<label class="field" style="width:90px"><span>$bn</span><input type="number" id="cp" value="' + esc(p.price) + '" step="0.1"></label>') +
+        '<button class="btn sm pri" data-sendc="' + p._id + '">Send counter</button><button class="btn sm ghost" data-cancelc="1">Cancel</button></div>'
+      : '<div class="actions"><button class="btn sm pri" data-acc="' + p._id + '">Accept</button><button class="btn sm" data-rej="' + p._id + '">Reject</button><button class="btn sm ghost" data-cnt="' + p._id + '">Counter</button></div>';
+  } else if (kind === 'mine') acts = '<div class="actions"><button class="btn sm" data-wd="' + p._id + '">Withdraw</button></div>';
+  return '<div class="deal ' + (kind || '') + '"><div class="t"><span>' + esc(p.from) + ' → ' + esc(p.to) + '</span><span class="pill">' + esc(p.type) + (p.return_resource ? ' swap' : '') + '</span></div>' +
+    '<div class="what">' + esc(p.quantity) + ' ' + esc(p.resource) + (p.return_resource ? ' for ' + esc(p.return_quantity) + ' ' + esc(p.return_resource) : (p.type === 'aid' ? ' (a gift)' : ' for $' + esc(p.price) + 'bn')) + '</div>' +
+    (involved ? '<div class="legs"><span class="gives">You give ' + esc(L.g) + '</span><span class="gets">You get ' + esc(L.t) + '</span></div>' : '') +
+    '<div class="meta">Round ' + esc(p.round) + (p.type === 'forward' ? ' · delivered in ' + esc(p.deliver_in) + ' rounds' : '') + (p.note ? ' · ' + esc(p.note) : '') + '</div>' + acts + '</div>';
+}
+
+function paint(err) {
+  document.getElementById('warn').innerHTML = !Store.team
+    ? '<div class="notice"><a href="/setup">Choose your team on Setup</a> before you trade. The market matches offers on team names.</div>'
+    : (!S.connected ? '<div class="notice">Not connected to the room\'s server' + (err ? ': ' + esc(err.message) : '') + '.</div>' : '');
+  var me = Store.team;
+  var open = S.posts.filter(function (p) { return p.status === 'open'; });
+  var toMe = open.filter(function (p) { return p.to === me; });
+  var fromMe = open.filter(function (p) { return p.from === me; });
+  var agreed = S.posts.filter(function (p) { return p.status === 'agreed' && (p.from === me || p.to === me); });
+  var others = Object.keys(S.teams).filter(function (t) { return t !== me; });
+  var shelf = S.teams[me] || {};
+  var res = MK.RESOURCE_KEYS;
+
+  document.getElementById('left').innerHTML =
+    '<section class="card"><h2>On your table <small>' + toMe.length + '</small></h2>' +
+      (toMe.length ? toMe.map(function (p) { return dealCard(p, 'tome'); }).join('') : '<div class="empty">No offers waiting for you.</div>') + '</section>' +
+    '<section class="card"><h2>Make an offer</h2><p>Credits are money: they can be given as aid, never sold.</p>' +
+      '<div class="seg" role="group" aria-label="Kind of offer" style="margin-bottom:12px">' +
+        '<button data-mode="cash" aria-pressed="' + (S.mode === 'cash') + '">For money</button><button data-mode="swap" aria-pressed="' + (S.mode === 'swap') + '">Swap goods</button></div>' +
+      '<div class="grid">' +
+        '<label class="field"><span>To</span><select id="oTo">' + (others.length ? others.map(function (t) { return '<option>' + esc(t) + '</option>'; }).join('') : '<option value="">Nobody else has joined</option>') + '</select></label>' +
+        '<label class="field"><span>Type</span><select id="oType"><option value="spot">Now</option><option value="forward">Later (forward)</option><option value="aid">Gift (aid)</option></select></label>' +
+        '<label class="field"><span>You give</span><select id="oRes">' + res.map(function (r) { return '<option>' + r + '</option>'; }).join('') + '</select></label>' +
+        '<label class="field"><span>Quantity</span><input type="number" id="oQty" value="2" step="0.1"></label>' +
+        (S.mode === 'swap'
+          ? '<label class="field"><span>You want</span><select id="oRet">' + res.filter(function (r) { return r !== 'credits'; }).map(function (r) { return '<option>' + r + '</option>'; }).join('') + '</select></label>' +
+            '<label class="field"><span>Their quantity</span><input type="number" id="oRq" value="2" step="0.1"></label>'
+          : '<label class="field"><span>Price, $bn</span><input type="number" id="oPrice" value="2.5" step="0.1"></label>') +
+        '<label class="field"><span>Delivered in (rounds)</span><input type="number" id="oDel" value="1" min="1" max="6"></label>' +
+      '</div>' +
+      '<label class="field" style="margin-top:10px"><span>Note</span><input type="text" id="oNote" maxlength="120"></label>' +
+      '<div class="actions"><button class="btn pri" id="postOffer"' + (me && others.length ? '' : ' disabled') + '>Post the offer</button><span class="hint" id="postMsg"></span></div></section>' +
+    '<section class="card"><h2>Agreed <small>' + agreed.length + '</small></h2>' +
+      (agreed.length ? agreed.map(function (p) { return dealCard(p, 'agreed'); }).join('') : '<div class="empty">Deals you agree appear here.</div>') + '</section>' +
+    (fromMe.length ? '<section class="card"><h2>Waiting on others <small>' + fromMe.length + '</small></h2>' + fromMe.map(function (p) { return dealCard(p, 'mine'); }).join('') + '</section>' : '');
+
+  document.getElementById('right').innerHTML =
+    '<section class="card"><h2>Your shelf</h2><p>What you have spare and what you need, for everyone to see.</p>' +
+      '<label class="field"><span>Spare</span><input type="text" id="has" value="' + esc(shelf.has || '') + '"></label>' +
+      '<label class="field" style="margin-top:8px"><span>Needed</span><input type="text" id="wants" value="' + esc(shelf.wants || '') + '"></label>' +
+      '<div class="actions"><button class="btn sm" id="shelfGo"' + (me ? '' : ' disabled') + '>Update shelf</button></div></section>' +
+    '<section class="card"><h2>Messages</h2><p>Nothing said here is binding. Only a posted offer moves anything.</p>' +
+      '<div class="msgs" id="msgs">' + (S.messages.length ? S.messages.slice(-80).map(function (m) {
+        return '<div class="msg"><b>' + esc(m.from) + (m.to ? ' → ' + esc(m.to) : '') + '</b><br>' + esc(m.text) + '</div>'; }).join('') : '<div class="empty">Nobody has said anything yet.</div>') + '</div>' +
+      '<div class="grid"><label class="field" style="grid-column:1/-1"><span>Say</span><input type="text" id="mt" maxlength="400"></label>' +
+        '<label class="field"><span>To</span><select id="mto"><option value="">Everyone</option>' + others.map(function (t) { return '<option>' + esc(t) + '</option>'; }).join('') + '</select></label></div>' +
+      '<div class="actions"><button class="btn sm pri" id="send"' + (me ? '' : ' disabled') + '>Send</button></div></section>' +
+    '<section class="card"><h2>The room</h2><div class="room">' + (others.length ? others.map(function (t) {
+      var x = S.teams[t]; return '<div><b>' + esc(t) + '</b> · has ' + esc(x.has || '–') + ' · wants ' + esc(x.wants || '–') + '</div>'; }).join('') : '<div class="empty">Only you so far.</div>') + '</div></section>' +
+    '<section class="card"><h2>Hand in</h2><p>Your <b>saved</b> system (version ' + (Store.saved.version || 0) + ') and your agreed trades, as one file.</p>' +
+      '<div class="actions"><button class="btn pri" id="copy">Copy bundle</button><span class="hint">Save it as <code>bundles/' + esc(M.slug(Store.team || 'team')) + '.json</code></span></div>' +
+      '<textarea class="bundle" rows="10" readonly style="margin-top:10px">' + esc(JSON.stringify(bundle(), null, 2)) + '</textarea></section>';
+
+  var msgs = document.getElementById('msgs'); if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  wire();
+}
+
+function bundle() {
+  var s = Store.saved;
+  return {
+    team: Store.team, version: s.version || 0, saved_at: s.savedAt ? new Date(s.savedAt).toISOString() : null,
+    levers: s.levers,
+    government: s.government,
+    constitution: { name: s.constitution.name, commitments: s.constitution.commitments.filter(function (x) { return x && x.trim(); }),
+                    rules: s.constitution.rules, policies: s.constitution.policies },
+    rubric: s.case.rubric, case: s.case.text, trade: s.trade,
+    agreed_trades: S.posts.filter(function (p) { return p.status === 'agreed' && (p.from === Store.team || p.to === Store.team); })
+  };
+}
+
+function wire() {
+  var on = function (id, fn) { var el = document.getElementById(id); if (el) el.onclick = fn; };
+  document.querySelectorAll('[data-mode]').forEach(function (b) { b.onclick = function () { S.mode = b.dataset.mode; paint(); }; });
+  var val = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+  on('postOffer', function () {
+    var type = val('oType'), resource = val('oRes'), to = val('oTo');
+    if (!to) return;
+    var swap = S.mode === 'swap' && type !== 'aid';
+    if (resource === 'credits' && type !== 'aid') { document.getElementById('postMsg').textContent = 'Credits can be given as aid, not sold.'; return; }
+    api('/posts', 'POST', { data: { from: Store.team, to: to, resource: resource, type: type, quantity: +val('oQty') || 0,
+      price: (type === 'aid' || swap) ? 0 : (+val('oPrice') || 0), return_resource: swap ? val('oRet') : null, return_quantity: swap ? (+val('oRq') || 0) : 0,
+      deliver_in: type === 'forward' ? Math.max(1, Math.min(6, +val('oDel') || 1)) : 0, note: val('oNote').slice(0, 120),
+      round: S.round, status: 'open', ts: Date.now(), market_id: Date.now().toString(36) } }).then(refresh);
+  });
+  var patch = function (id, data) { return api('/posts/' + encodeURIComponent(id), 'PATCH', { data: data }).then(refresh); };
+  document.querySelectorAll('[data-acc]').forEach(function (b) { b.onclick = function () { patch(b.dataset.acc, { status: 'agreed', answered_by: Store.team, agreed_round: S.round, answered_ts: Date.now() }); }; });
+  document.querySelectorAll('[data-rej]').forEach(function (b) { b.onclick = function () { patch(b.dataset.rej, { status: 'rejected' }); }; });
+  document.querySelectorAll('[data-wd]').forEach(function (b) { b.onclick = function () { patch(b.dataset.wd, { status: 'withdrawn' }); }; });
+  document.querySelectorAll('[data-cnt]').forEach(function (b) { b.onclick = function () { S.countering = b.dataset.cnt; paint(); }; });
+  document.querySelectorAll('[data-cancelc]').forEach(function (b) { b.onclick = function () { S.countering = null; paint(); }; });
+  document.querySelectorAll('[data-sendc]').forEach(function (b) {
+    b.onclick = function () {
+      var o = S.posts.find(function (p) { return p._id === b.dataset.sendc; }); if (!o) return;
+      var q = +val('cq'), pr = +val('cp');
+      S.countering = null;
+      patch(o._id, { status: 'countered' }).then(function () {
+        return api('/posts', 'POST', { data: { from: Store.team, to: o.from, resource: o.resource, type: o.type, quantity: q > 0 ? q : o.quantity,
+          price: pr >= 0 && val('cp') !== '' ? pr : o.price, return_resource: o.return_resource || null, return_quantity: o.return_quantity || 0,
+          deliver_in: o.deliver_in, note: 'counter', counters: o.market_id || o._id, round: S.round, status: 'open', ts: Date.now(), market_id: Date.now().toString(36) } });
+      }).then(refresh);
+    };
+  });
+  on('shelfGo', function () {
+    api('/teams', 'POST', { id: M.slug(Store.team), data: { name: Store.team, has: val('has'), wants: val('wants'), updated: Date.now() } }).then(refresh);
+  });
+  on('send', function () {
+    var t = val('mt'); if (!t.trim()) return;
+    api('/messages', 'POST', { data: { from: Store.team, to: val('mto') || null, text: t.slice(0, 400), ts: Date.now(), round: S.round } }).then(refresh);
+  });
+  on('copy', function () {
+    var btn = this;
+    navigator.clipboard.writeText(JSON.stringify(bundle(), null, 2)).then(function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy bundle'; }, 1400); });
+  });
+}
+
+Store.init().then(function () {
+  M.nav('market');
+  refresh();
+  try { var es = new EventSource('/api/stream'); es.onmessage = function () { refresh(); }; }
+  catch (e) { setInterval(refresh, 3000); }
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1264 @@
+<title>Meridian Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Instrument+Serif&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE8DC; --panel:#F7F3EB; --panel2:#FCFAF4; --ink:#3B423E;
+    --rust:#A8624C; --muted:#868C86; --muted2:#585E59; --line:#D6D0C2;
+    --good:#7FA476; --mid:#C9A45E; --bad:#AE6450;
+    --ubi:#A8624C; --infra:#7FA3AC; --resv:#88A87E;
+    --head:76px;
+  }
+  *{box-sizing:border-box}
+  :where(button,[href],input,textarea,select):focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* The whole point: the page never scrolls. Each rail does. */
+  html,body{height:100%;margin:0;overflow:hidden}
+  body{background:var(--bg);color:var(--ink);
+    font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px}
+  h1,h2,h3{margin:0;font-weight:400}
+  .mono{font-family:"Space Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  .lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---------- header: always visible, always current ---------- */
+  header{height:var(--head);display:flex;align-items:center;gap:16px;padding:0 16px;
+    background:var(--ink);color:var(--panel);overflow-x:auto;overflow-y:hidden}
+  header .brand{font-family:"Instrument Serif",Georgia,serif;font-size:23px;line-height:1;
+    white-space:nowrap}
+  header .who{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+    color:#9BA29B;margin-top:2px;white-space:nowrap;cursor:pointer}
+  .clock{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  .clock .yr{font-family:"Space Mono",monospace;font-size:22px;font-weight:700;min-width:64px;
+    text-align:center;font-variant-numeric:tabular-nums}
+  .clock .rd{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9BA29B}
+  .cd{text-align:center;padding-left:8px;border-left:1px solid #4A4636;margin-left:2px}
+  .cd .cdv{font-family:"Space Mono",monospace;font-size:19px;font-weight:700;line-height:1;
+    font-variant-numeric:tabular-nums;color:#DDBE7E}
+  .cd.soon .cdv{color:#E39A86}
+  .hbtn{font-family:inherit;font-size:12px;font-weight:800;padding:5px 9px;cursor:pointer;
+    border:2px solid #4A4636;background:transparent;color:#9BA29B;line-height:1}
+  .hbtn:hover{border-color:var(--panel);color:var(--panel)}
+  .hbtn.on{background:var(--panel);color:var(--ink);border-color:var(--panel)}
+  .hm{display:flex;gap:12px;flex:1;min-width:0;overflow-x:auto}
+  .hmi{flex:0 0 auto;min-width:78px}
+  .hmi .v{font-family:"Space Mono",monospace;font-size:17px;font-weight:700;line-height:1.05;
+    font-variant-numeric:tabular-nums}
+  .hmi .k{font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    color:#9BA29B;margin-top:1px;white-space:nowrap}
+  .score{flex:0 0 auto;text-align:right}
+  .score .sv{font-family:"Space Mono",monospace;font-size:27px;font-weight:700;line-height:1}
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;display:inline-block}
+
+  /* ---------- three rails, each scrolling on its own ---------- */
+  .rails{display:grid;grid-template-columns:330px minmax(0,1fr) 380px;
+    height:calc(100% - var(--head));gap:1px;background:var(--line)}
+  @media(max-width:1300px){.rails{grid-template-columns:290px minmax(0,1fr) 330px}}
+  @media(max-width:1050px){.rails{grid-template-columns:1fr;grid-template-rows:auto}
+    .rail{max-height:none}}
+  .rail{background:var(--bg);display:flex;flex-direction:column;min-height:0;min-width:0}
+  .railtabs{display:flex;gap:0;background:var(--panel);border-bottom:2px solid var(--ink);flex:0 0 auto}
+  .railtabs button{flex:1;font-family:inherit;font-size:10px;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;padding:9px 4px;cursor:pointer;border:0;border-right:1px solid var(--line);
+    background:transparent;color:var(--muted)}
+  .railtabs button:last-child{border-right:0}
+  .railtabs button.on{background:var(--ink);color:var(--panel)}
+  .railbody{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px;min-height:0}
+
+  .box{background:var(--panel);border:2px solid var(--ink);padding:11px 12px;margin-bottom:11px}
+  .box h4{margin:0 0 9px;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+    padding-bottom:6px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;
+    align-items:baseline;gap:8px}
+  .box h4 .a{font-weight:600;letter-spacing:.03em;text-transform:none;color:var(--muted)}
+
+  label{display:block;margin-bottom:9px}
+  label>span{display:block;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:3px}
+  input[type=text],input[type=number],select,textarea{width:100%;font-family:inherit;font-size:12px;
+    padding:6px 7px;border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+  textarea{font-family:"Space Mono",monospace;font-size:10px;line-height:1.5;resize:vertical}
+  .row{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-end}
+  .row>label{flex:1;min-width:78px;margin-bottom:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:7px;
+    background:var(--line);border:2px solid var(--ink);outline:none;margin:0;cursor:pointer;padding:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:16px;
+    background:var(--panel2);border:2px solid var(--ink);cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:13px;height:16px;background:var(--panel2);
+    border:2px solid var(--ink);border-radius:0;cursor:pointer}
+
+  .btn{font-family:inherit;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:7px 10px;cursor:pointer;border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+  .btn:hover{background:var(--ink);color:var(--panel)}
+  .btn.pri{background:var(--rust);border-color:var(--rust);color:#FAF6EE}
+  .btn.pri:hover{background:var(--ink);border-color:var(--ink)}
+  .btn.on{background:var(--ink);color:var(--panel)}
+  .btn.sm{padding:5px 7px;font-size:9px}
+  .btnrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .seg{display:flex;gap:4px;flex-wrap:wrap}
+  .seg .btn{flex:1;min-width:42px}
+
+  .lvr{margin-bottom:10px}
+  .lvrh{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:3px}
+  .lvrh .n{font-family:"Space Mono",monospace;font-size:11px;font-weight:700}
+  .alloc{display:flex;gap:9px;align-items:flex-end;height:96px;margin-bottom:5px}
+  .ac{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+  .ab{position:relative;flex:1;width:100%;background:var(--line);border:2px solid var(--ink);
+    cursor:ns-resize;overflow:hidden}
+  .af{position:absolute;left:0;right:0;bottom:0}
+  .an{font-family:"Space Mono",monospace;font-size:11px;font-weight:700}
+
+  .cityfit{position:relative;width:100%;overflow:hidden;border:2px solid var(--ink);
+    background:linear-gradient(170deg,#E7E1D2,#EFEADD 55%,#E4DED0)}
+  .cityfit .city-scene{transform-origin:0 0}
+  .city-group{position:absolute;left:0;top:0;width:0;height:0;cursor:pointer}
+  .city-puff{position:absolute;width:34px;height:34px;border-radius:50%;background:#EDE3D0;
+    pointer-events:none;animation:puff 4.2s linear infinite;opacity:0}
+  @keyframes puff{0%{transform:translateY(0) scale(.6);opacity:.5}
+                  100%{transform:translateY(-72px) scale(1.6);opacity:0}}
+  .city-label{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:center;gap:7px;
+    padding:3px 9px;border-radius:999px;background:var(--panel);border:2px solid transparent;
+    box-shadow:0 2px 8px rgba(59,66,62,.1);cursor:pointer;font-family:inherit;white-space:nowrap}
+  .city-label.on{border-color:var(--ink);background:var(--panel2)}
+  .city-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .city-name{font-size:10px;font-weight:800;color:var(--ink)}
+  .city-q{font-size:14px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .city-plaza{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;
+    align-items:center;padding:6px 13px;background:var(--panel);border:2px solid var(--ink);
+    box-shadow:4px 4px 0 rgba(22,21,15,.14);z-index:55;white-space:nowrap}
+  .city-plaza-v{font-family:"Space Mono",monospace;font-size:18px;font-weight:700}
+  .city-plaza-u{font-size:10px;font-weight:700;color:var(--muted2)}
+
+  .pips{display:flex;gap:3px;flex:1;min-width:120px}
+  .pip{flex:1;height:22px;border:2px solid var(--ink);background:var(--panel2);cursor:pointer;
+    font-family:"Space Mono",monospace;font-size:9px;font-weight:700;color:var(--muted);padding:0}
+  .pip.on{background:var(--ink);color:var(--panel)}
+  .pip.past{background:var(--line)}
+  .scrub{display:flex;align-items:center;gap:7px;margin-bottom:9px;flex-wrap:wrap}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+  .card{background:var(--panel);border:2px solid var(--ink);padding:9px 10px}
+  .card .ch{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+  .card .cv{font-family:"Space Mono",monospace;font-size:19px;font-weight:700;line-height:1.15}
+  .card .cd{font-size:10px;font-weight:700}
+  .card svg{display:block;width:100%;height:auto;margin:3px 0}
+  .card .cf{font-size:10px;color:var(--muted2);line-height:1.4}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:6px}
+  .tile{border:2px solid var(--ink);background:var(--panel2);padding:6px 7px}
+  .tile .tn{font-size:10px;font-weight:800;display:flex;align-items:center;gap:5px;line-height:1.2}
+  .tile .tv{font-family:"Space Mono",monospace;font-size:16px;font-weight:700;margin-top:2px}
+  .tile .ts{font-size:9px;color:var(--muted2)}
+  .sqd{width:8px;height:8px;border:1px solid var(--ink);flex:0 0 auto}
+
+  .deal{border:2px solid var(--ink);background:var(--panel2);padding:8px 9px;margin-bottom:7px}
+  .deal.tome{border-left:6px solid var(--good)}
+  .deal.mine{border-left:6px solid var(--rust)}
+  .deal.agreed{border-left:6px solid var(--good);background:#F2F6EE}
+  .deal .dt{display:flex;justify-content:space-between;gap:7px;align-items:baseline}
+  .deal .dd{font-family:"Space Mono",monospace;font-size:12px;font-weight:700;margin-top:3px}
+  .deal .dm{font-size:10px;color:var(--muted2);margin-top:2px}
+  .chip{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 5px;border:1px solid var(--ink);background:var(--panel)}
+  .ledgerline{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px;padding-top:5px;
+    border-top:1px dashed var(--line);font-size:10px;font-weight:700}
+  .gives{color:var(--bad)}.gives::before{content:"− "}
+  .gets{color:var(--good)}.gets::before{content:"+ "}
+  .preview{margin-top:6px;padding:5px 7px;border:2px dashed var(--line);background:#FAF7F0;
+    display:flex;gap:9px;flex-wrap:wrap;font-size:10px}
+  .preview .pvl{font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+
+  .msg{padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;line-height:1.45}
+  .msg .f{font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+  .msg .t{color:var(--rust);font-weight:800}
+
+  .hint{font-size:10px;color:var(--muted2);line-height:1.45;margin-top:6px}
+  .empty{font-size:11px;color:var(--muted);padding:7px 0}
+  .ok{color:var(--good);font-weight:700}.err{color:var(--bad);font-weight:700}
+  .notice{padding:8px 10px;border:2px solid var(--ink);background:#F1ECE0;font-size:11px;
+    line-height:1.45;margin-bottom:10px}
+  .notice.bad{background:#F3E0DA;border-color:var(--bad)}
+  code{font-family:"Space Mono",monospace;font-size:10px;background:var(--panel2);
+    border:1px solid var(--line);padding:0 3px}
+  .gate{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 5px;background:#A85B49;color:#FAF6EE;margin-right:3px;display:inline-block}
+</style>
+
+<header>
+  <div style="flex:0 0 auto">
+    <div class="brand">Meridian studio</div>
+    <div class="who" id="who">pick a society</div>
+  </div>
+  <div class="clock">
+    <button class="hbtn" id="rBack">◀</button>
+    <div><div class="yr" id="yr">2050</div><div class="rd" id="rd">round 1</div></div>
+    <button class="hbtn" id="rFwd">▶</button>
+    <div id="cd" class="cd" hidden><div class="cdv" id="cdv">–</div><div class="rd">to the tick</div></div>
+    <button class="hbtn" id="play" title="space">▶ play</button>
+  </div>
+  <div class="hm" id="hm"></div>
+  <div class="score" title="A trial preview of the physics with no society in it. Results that count come from an agent run (Run society tab)."><div class="sv" id="sv">–</div><div class="rd" id="gates">trial · no gates</div></div>
+  <span class="dot" id="live" style="background:#A85B49" title="offline"></span>
+</header>
+
+<div class="rails">
+  <div class="rail">
+    <div class="railtabs" id="ltabs"></div>
+    <div class="railbody" id="lbody"></div>
+  </div>
+  <div class="rail">
+    <div class="railtabs" id="ctabs"></div>
+    <div class="railbody" id="cbody"></div>
+  </div>
+  <div class="rail">
+    <div class="railtabs" id="rtabs"></div>
+    <div class="railbody" id="rbody"></div>
+  </div>
+</div>
+
+<script>/*<!--INJECT:ENGINE-->*/</script>
+<script>/*<!--INJECT:MARKET-->*/</script>
+<script>/*<!--INJECT:CITY-->*/</script>
+<script id="baseline-json" type="application/json">/*<!--INJECT:BASELINE-->*/</script>
+<script>/*<!--INJECT:PRESETS-->*/</script>
+<script>
+(function(){
+'use strict';
+/* =====================================================================
+   MERIDIAN STUDIO — the lab and the console on one screen.
+   ---------------------------------------------------------------------
+   Three rails, each scrolling on its own; the page itself never scrolls.
+   The header carries what is always worth knowing — the year, the money,
+   the worst service, the score — so no answer is ever more than one click
+   and no scroll away.
+
+     left    how you govern      levers · harness · constitution
+     centre  what you govern     city · trajectory · this round
+     right   who you govern with market · messages · export
+   ===================================================================== */
+
+var E = window.MeridianEngine, MK = window.MeridianMarket, CITY = window.MeridianCity;
+var BASE = JSON.parse(document.getElementById('baseline-json').textContent);
+var SEC = E.ORDER, SN = {};
+SEC.forEach(function(k){ SN[k] = E.SECTORS[k].name; });
+
+var esc=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+var n0=function(v){return Math.round(v).toLocaleString('en-SG');};
+var pct=function(v){return Math.round(v*100)+'%';};
+var uid=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);};
+var band=function(q){return q>=65?'good':(q>=40?'mid':'bad');};
+
+function ssGet(k,d){try{var v=sessionStorage.getItem('mrd_'+k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function ssSet(k,v){try{sessionStorage.setItem('mrd_'+k,JSON.stringify(v));}catch(e){}}
+function lsGet(k,d){try{var v=localStorage.getItem('mrd_'+k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem('mrd_'+k,JSON.stringify(v));}catch(e){}}
+
+/* Every path a rule may name. The builder checks against this so a typo is
+   caught at the desk rather than in round seven. */
+var PATHS = ['round','year','worstEssential','effectiveUbi','realUbi','employmentPct']
+  .concat(['ubi_monthly_sgd','real_ubi_index','effective_ubi_index','employment_rate',
+           'gini','cohesion','legitimacy','consumption_index'].map(function(k){return 'indicators.'+k;}))
+  .concat(['gdp_bn','corporate_profit_bn','tax_revenue_bn','public_dividend_bn','reserves_bn']
+           .map(function(k){return 'fiscal.'+k;}))
+  .concat(['ubi','infrastructure','reserves'].map(function(k){return 'fiscal.allocation.'+k;}))
+  .concat(['corporate_tax_rate','compute_levy','reskilling_spend_pct','public_ownership_pct',
+           'ubi_design','working_week_days','care_job_guarantee']
+           .map(function(k){return 'levers.'+k;}));
+function pathsReady(){
+  if(PATHS._done) return PATHS;
+  E.ORDER.forEach(function(k){
+    PATHS.push('levers.automation_target.'+k);
+    ['quality','automation','capacity','margin','headcount'].forEach(function(f){
+      PATHS.push('sectors.'+k+'.'+f); });
+  });
+  PATHS._done=true; return PATHS;
+}
+function checkExpr(e){
+  if(!e||!e.trim()||e.trim()==='always') return {ok:true};
+  var P=pathsReady(), bad=[];
+  (e.match(/[A-Za-z_][A-Za-z0-9_.]*/g)||[]).forEach(function(t){
+    if(['always','true','false'].indexOf(t)>=0) return;
+    if(P.indexOf(t)<0 && bad.indexOf(t)<0) bad.push(t);
+  });
+  return bad.length?{ok:false,bad:bad}:{ok:true};
+}
+
+var S = {
+  L:'levers', C:'city', R:'market',
+  team: ssGet('team',null), lastTeam: lsGet('team',null), picking:false,
+  levers: JSON.parse(JSON.stringify(PRESET_LEVERS ? PRESET_LEVERS.baseline : E.DEFAULT_LEVERS)),
+  shocks: lsGet('shocks',{}),
+  round: 1, t: 0, sel:null, countering:null, offerMode:'cash',
+  traj: [], score: null,
+  posts:[], messages:[], teams:{}, diag:'', registered:false,
+  clock:null, clockAt:0,
+  constitution: Object.assign({name:'',commitments:['','',''],rules:[],policies:'',case:'',
+    rubric:{social_welfare:'',continuity_of_survival:'',quality_of_life:'',economic_profitability:''}},
+    lsGet('constitution',{})),
+  agentRun: lsGet('agentRun',null), agentStatus:null, agentForm: lsGet('agentForm',{profile:'local',rounds:12,population:'',substeps:''}),
+  harness: lsGet('harness',{kind:'policy',
+    rules:[], trade:{style:'reciprocal',never_sell:[]},
+    llm:{persona:'',doctrine:'',priorities:'',trading:''}})
+};
+
+/* ---------- the society, recomputed from everything decided so far ---- */
+function tradeDelta(extra){
+  var d={reserves_bn:0,capacity:{},headcount:{},cohesion_bonus:0,legitimacy_bonus:0};
+  S.posts.filter(function(p){return p.status==='agreed'&&(p.from===S.team||p.to===S.team);})
+    .forEach(function(p){ applyDeal(d,p); });
+  if(extra) applyDeal(d,extra);
+  return d;
+}
+function applyDeal(d,p){
+  var me=S.team, mine=p.from===me;
+  var mv=function(res,qty,sign){
+    var r=MK.RESOURCES[res]; if(!r) return;
+    if(r.sector){var b=E.SECTORS[r.sector].base_output_bn;
+      d.capacity[r.sector]=(d.capacity[r.sector]||1)*Math.max(.4,1+sign*(qty/b));}
+    else if(res==='labour'){ if(sign>0) d.headcount[MK.LABOUR_SECTOR]=(d.headcount[MK.LABOUR_SECTOR]||0)+qty; }
+    else if(res==='credits') d.reserves_bn+=sign*qty;
+  };
+  if(p.type==='aid'){ mine?(mv(p.resource,p.quantity,-1),d.legitimacy_bonus+=3)
+                          :(mv(p.resource,p.quantity,1),d.cohesion_bonus+=3); return; }
+  if(p.return_resource){
+    if(mine){mv(p.resource,p.quantity,-1);mv(p.return_resource,p.return_quantity,1);}
+    else{mv(p.resource,p.quantity,1);mv(p.return_resource,p.return_quantity,-1);}
+    return;
+  }
+  if(mine){mv(p.resource,p.quantity,-1);d.reserves_bn+=p.price;}
+  else{mv(p.resource,p.quantity,1);d.reserves_bn-=p.price;}
+}
+function applyToState(st,d){
+  if(!d||(!d.reserves_bn&&!Object.keys(d.capacity).length&&!Object.keys(d.headcount).length)) return st;
+  var o=JSON.parse(JSON.stringify(st));
+  o.fiscal.reserves_bn=Math.round((o.fiscal.reserves_bn+d.reserves_bn)*100)/100;
+  Object.keys(d.capacity).forEach(function(k){ if(o.sectors[k])
+    o.sectors[k].capacity=Math.round(o.sectors[k].capacity*d.capacity[k]*100)/100; });
+  Object.keys(d.headcount).forEach(function(k){ if(o.sectors[k])
+    o.sectors[k].headcount+=Math.round(d.headcount[k]); });
+  return o;
+}
+
+/* The full twelve rounds, always. Trade lands in the round it was agreed. */
+function compute(extra){
+  var d=tradeDelta(extra||null);
+  var traj=[E.seed(BASE)];
+  for(var r=1;r<12;r++){
+    var prev=traj[traj.length-1];
+    var drawn=(S.shocks[r+1]||[]).slice();
+    (prev._endogenousNext||[]).forEach(function(x){if(drawn.indexOf(x)<0)drawn.push(x);});
+    var exo=(r+1===S.round)?d:null;
+    var nx=E.step(prev,S.levers,drawn.filter(function(x){return E.SHOCKS[x];}),exo);
+    nx.personas=E.updatePersonas(prev.personas,nx,prev);
+    nx.news=E.bulletin(nx,prev);
+    traj.push(nx);
+  }
+  if(S.round===1) traj[0]=applyToState(traj[0],d);
+  return traj;
+}
+function recompute(){ stopPlay(); S.traj=compute(null); S.score=E.score(S.traj); paint();
+  /* Published for the feed, which runs on the same origin and reads them
+     so that society reacts to THIS team's country rather than to a demo
+     scenario. Nothing reads them back into the studio. */
+  lsSet('levers', S.levers); lsSet('shocks', S.shocks); lsSet('round', S.round); }
+function cur(){
+  var i=Math.max(0,Math.min(11,S.round-1));
+  if(S.t>0&&i<11) return E.interpolate(S.traj[i],S.traj[i+1],S.t);
+  return S.traj[i];
+}
+function worstOf(s){ return Math.min.apply(null,E.ESSENTIAL.map(function(k){return s.sectors[k].quality;})); }
+
+/* ---------- the board (shared), local server or hosted ---------- */
+var Board={kind:'none',onChange:function(){},
+  async connect(){
+    var api=window.MERIDIAN_LOCAL_BOARD;
+    if(api){ this.api=api; return this._local(); }
+    var c=await waitClaude(9000);
+    if(c){ try{ var db=await c.use('db'); if(db){this.db=db;return this._hosted();} }catch(e){
+      S.diag='database refused: '+((e&&e.code)||(e&&e.message)||'?'); } }
+    S.diag=S.diag||'No shared board here. Run node lab/serve-console.js for the room version.';
+    return false;
+  },
+  _hosted(){ var self=this;
+    var live=function(c,f){ self.db.collection(c).onSnapshot(function(sn){
+      f(sn.docs.map(function(d){var o=d.data()||{};o._id=d.id;return o;})); self.onChange();
+    },function(){}); };
+    try{
+      live('posts',function(d){S.posts=d;});
+      live('messages',function(d){S.messages=d.sort(function(a,b){return (a.ts||0)-(b.ts||0);});});
+      live('teams',function(d){S.teams={};d.forEach(function(x){S.teams[x.name||x._id]=x;});});
+      this.db.doc('meta/clock').onSnapshot(function(sn){var d=sn.data();
+        if(d&&d.round&&d.round!==S.round){S.round=d.round;S.t=0;recompute();}},function(){});
+      this.kind='hosted'; return true;
+    }catch(e){ S.diag='could not open the board: '+(e&&e.message); return false; }
+  },
+  async _local(){ var self=this;
+    try{ await this.refresh(); this.kind='local';
+      try{ var es=new EventSource(this.api+'/stream');
+        es.onmessage=function(){ self.refresh().then(function(){ self.onChange(); }); };
+      }catch(e){ setInterval(function(){ self.refresh().then(function(){self.onChange();}); },2500); }
+      return true;
+    }catch(e){ S.diag='cannot reach '+this.api+': '+(e&&e.message); return false; }
+  },
+  async refresh(){
+    var r=await fetch(this.api+'/state',{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
+    var d=await r.json();
+    var roundChanged = d.round && d.round!==S.round;
+    if(d.round) S.round=d.round;
+    S.posts=d.posts||[]; S.messages=d.messages||[];
+    S.teams={}; (d.teams||[]).forEach(function(t){ S.teams[t.name||t._id]=t; });
+    if(d.clock){ S.clock=d.clock; S.clockAt=Date.now(); }
+    if(roundChanged){ S.t=0; }
+    S.traj=compute(null); S.score=E.score(S.traj);
+  },
+  async _send(p,m,b){ var r=await fetch(this.api+p,{method:m,
+    headers:{'content-type':'application/json'},body:JSON.stringify(b)});
+    if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); },
+  async setTeam(id,data){ if(this.kind==='hosted') return this.db.collection('teams').doc(id).set(data);
+    if(this.kind==='local') return this._send('/teams','POST',{id:id,data:data}); throw new Error('no board'); },
+  async addPost(d){ if(this.kind==='hosted') return this.db.collection('posts').add(d);
+    if(this.kind==='local') return this._send('/posts','POST',{data:d}); throw new Error('no board'); },
+  async patchPost(id,d){ if(this.kind==='hosted') return this.db.collection('posts').doc(id).update(d);
+    if(this.kind==='local') return this._send('/posts/'+encodeURIComponent(id),'PATCH',{data:d}); throw new Error('no board'); },
+  async addMsg(d){ if(this.kind==='hosted') return this.db.collection('messages').add(d);
+    if(this.kind==='local') return this._send('/messages','POST',{data:d}); throw new Error('no board'); },
+  async setRound(r){ if(this.kind==='hosted') return this.db.collection('meta').doc('clock').set({round:r,updated:Date.now()});
+    if(this.kind==='local') return this._send('/round','POST',{round:r}); },
+  on(){ return this.kind!=='none'; }
+};
+function waitClaude(ms){return new Promise(function(res){var t0=Date.now();
+  (function p(){ if(typeof claude!=='undefined'&&claude&&claude.use) return res(claude);
+    if(Date.now()-t0>ms) return res(null); setTimeout(p,120); })();});}
+
+function slug(n){return String(n).trim().toLowerCase().replace(/[^a-z0-9]+/g,'-')
+  .replace(/^-+|-+$/g,'').slice(0,40)||'team';}
+async function joinBoard(extra){
+  if(!Board.on()||!S.team) return;
+  try{ await Board.setTeam(slug(S.team),Object.assign({name:S.team,has:'',wants:'',updated:Date.now()},extra||{}));
+    S.registered=true; if(Board.kind==='local') await Board.refresh(); }
+  catch(e){ S.registered=false; S.diag='could not join as "'+S.team+'": '+((e&&e.code)||(e&&e.message)); }
+  paint();
+}
+async function setRound(r){
+  r=Math.max(1,Math.min(12,r)); S.round=r; S.t=0; stopPlay(); recompute();
+  try{ await Board.setRound(r); }catch(e){}
+}
+
+/* ---------- the room's clock ----------
+   The server owns it; this only counts down what the server last told us,
+   so every screen in the room agrees within a second. The point of a clock
+   rather than a button is that time passes whether a team is ready or not:
+   a forward signed at ten comes due at two. */
+function remaining(){
+  if(!S.clock||!S.clock.running||S.clock.remainingMs==null) return null;
+  return Math.max(0, S.clock.remainingMs - (Date.now()-S.clockAt));
+}
+function hhmm(ms){
+  var t=Math.max(0,Math.round(ms/1000));
+  var h=Math.floor(t/3600), m=Math.floor((t%3600)/60), sec=t%60;
+  var p=function(x){return x<10?'0'+x:''+x;};
+  return h? h+':'+p(m)+':'+p(sec) : m+':'+p(sec);
+}
+setInterval(function(){
+  var el=document.getElementById('cd'); if(!el) return;
+  var r=remaining();
+  if(r==null){ el.hidden=true; return; }
+  el.hidden=false;
+  el.className='cd'+(r<5*60*1000?' soon':'');
+  document.getElementById('cdv').textContent=hhmm(r);
+},500);
+
+async function clockCmd(body){
+  if(Board.kind!=='local') return;
+  try{ await Board._send('/clock','POST',body); await Board.refresh(); paint(); }catch(e){}
+}
+
+/* ---------- playback ---------- */
+var timer=null;
+function playing(){return timer!==null;}
+function stopPlay(){ if(timer){clearInterval(timer);timer=null;} var b=document.getElementById('play');
+  if(b) b.textContent='▶ play'; }
+function startPlay(){
+  stopPlay();
+  if(S.round>=12&&S.t===0){S.round=1;S.t=0;}
+  var b=document.getElementById('play'); if(b) b.textContent='❚❚';
+  timer=setInterval(function(){
+    S.t+=0.1;
+    if(S.t>=1-1e-9){ S.t=0; if(S.round>=12){stopPlay();paint();return;} S.round++; }
+    paint();
+  },130);
+}
+
+/* ---------- charts ---------- */
+function spark(series,o){
+  o=o||{}; var W=280,H=64,P=3,B=2;
+  var all=[]; series.forEach(function(s){all=all.concat(s.data);});
+  var lo=o.min!=null?o.min:Math.min.apply(null,all), hi=o.max!=null?o.max:Math.max.apply(null,all);
+  if(hi-lo<1e-6) hi=lo+1;
+  var pad=(hi-lo)*.12; lo-=pad; hi+=pad; if(o.min!=null) lo=o.min;
+  var n=series[0].data.length;
+  var X=function(i){return P+i/(n-1)*(W-2*P);}, Y=function(v){return B+(1-(v-lo)/(hi-lo))*(H-2*B);};
+  var g='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">';
+  if(o.ref!=null&&o.ref>=lo&&o.ref<=hi)
+    g+='<line x1="'+P+'" y1="'+Y(o.ref).toFixed(1)+'" x2="'+(W-P)+'" y2="'+Y(o.ref).toFixed(1)+
+       '" stroke="#D6CBB0" stroke-width="1.3" stroke-dasharray="3 3"/>';
+  series.forEach(function(s){
+    g+='<polyline points="'+s.data.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' ')+
+      '" fill="none" stroke="'+s.color+'" stroke-width="'+(s.ghost?1.6:2.8)+'" stroke-linejoin="round"'+
+      (s.ghost?' stroke-dasharray="3 3" opacity=".7"':'')+'/>';
+  });
+  var m=series[series.length-1];
+  var ci=Math.max(0,Math.min(n-1,S.round-1));
+  g+='<circle cx="'+X(ci).toFixed(1)+'" cy="'+Y(m.data[ci]).toFixed(1)+'" r="3.6" fill="'+m.color+
+     '" stroke="#3B423E" stroke-width="1.5"/></svg>';
+  return g;
+}
+
+/* ================= HEADER ================= */
+function paintHead(){
+  var s=cur();
+  document.getElementById('who').textContent=S.team||'pick a society';
+  var exact=s.meta.year_exact!=null?s.meta.year_exact:s.meta.year;
+  document.getElementById('yr').textContent=Math.floor(exact);
+  document.getElementById('rd').textContent='round '+s.meta.round+(S.t>0?' · '+exact.toFixed(1):'');
+  var w=worstOf(s), wk=E.ESSENTIAL.find(function(k){return s.sectors[k].quality===w;});
+  var hm=[
+    ['payment','$'+n0(s.indicators.ubi_monthly_sgd),s.indicators.effective_ubi_index>=100?'good':(s.indicators.effective_ubi_index>=70?'mid':'bad')],
+    ['buys',s.indicators.effective_ubi_index,s.indicators.effective_ubi_index>=100?'good':(s.indicators.effective_ubi_index>=70?'mid':'bad')],
+    ['work',Math.round(s.indicators.employment_rate*100)+'%',s.indicators.employment_rate>=.45?'good':(s.indicators.employment_rate>=.25?'mid':'bad')],
+    ['worst svc',w+' '+SN[wk].split(' ')[0],band(w)],
+    ['reserves','$'+n0(s.fiscal.reserves_bn)+'bn',s.fiscal.reserves_bn>=60?'good':(s.fiscal.reserves_bn>=0?'mid':'bad')],
+    ['cohesion',s.indicators.cohesion,s.indicators.cohesion>=55?'good':(s.indicators.cohesion>=35?'mid':'bad')],
+    ['consumption',s.indicators.consumption_index,s.indicators.consumption_index>=95?'good':(s.indicators.consumption_index>=75?'mid':'bad')]
+  ];
+  document.getElementById('hm').innerHTML=hm.map(function(m){
+    return '<div class="hmi"><div class="v" style="color:var(--'+m[2]+')">'+m[1]+'</div>'+
+           '<div class="k">'+m[0]+'</div></div>';}).join('');
+  var sc=S.score;
+  var sv=document.getElementById('sv'); sv.textContent=sc.total;
+  sv.style.color=sc.total>=70?'#9BC08F':(sc.total>=45?'#DDBE7E':'#D98873');
+  document.getElementById('gates').innerHTML='trial · '+(sc.gates_failed.length
+    ? sc.gates_failed.length+' gate'+(sc.gates_failed.length>1?'s':'')
+    : 'no gates');
+  var d=document.getElementById('live');
+  d.style.background=Board.on()?'#7FA476':'#A85B49';
+  d.title=Board.on()?('connected — '+Board.kind+' board'):(S.diag||'offline');
+}
+
+/* ================= LEFT RAIL ================= */
+var LT=[['levers','Levers'],['harness','Harness'],['const','Constitution']];
+function paintLeft(){
+  document.getElementById('ltabs').innerHTML=LT.map(function(t){
+    return '<button data-l="'+t[0]+'"'+(S.L===t[0]?' class="on"':'')+'>'+t[1]+'</button>';}).join('');
+  var b=document.getElementById('lbody');
+  b.innerHTML = S.L==='levers'?viewLevers():(S.L==='harness'?viewHarness():viewConst());
+  wireLeft();
+}
+function viewLevers(){
+  var L=S.levers;
+  var sl=function(k,lab,mn,mx,st,f){
+    var v=L[k], t=(v-mn)/(mx-mn);
+    return '<div class="lvr"><div class="lvrh"><span class="lbl">'+lab+'</span>'+
+      '<span class="n">'+f(v)+'</span></div>'+
+      '<input type="range" data-lv="'+k+'" min="'+mn+'" max="'+mx+'" step="'+st+'" value="'+v+'"></div>';
+  };
+  return '<div class="notice"><b>Trial space.</b> Moving these shows the physics instantly, with nobody in the country deciding anything. ' +
+    'The result that counts is an agent run: open <b>Run society</b> on the right.</div>'+
+    (PRESET_LEVERS?'<div class="box"><h4>Start from</h4><div class="seg">'+
+      Object.keys(PRESET_LEVERS).map(function(k){
+        return '<button class="btn sm" data-preset="'+k+'">'+k+'</button>';}).join('')+'</div></div>':'')+
+    '<div class="box"><h4>Budget<span class="a">sums to 100</span></h4>'+
+      '<div class="alloc" id="alloc"></div></div>'+
+    '<div class="box"><h4>Policy</h4>'+
+      sl('corporate_tax_rate','corporate tax',0,.45,.01,pct)+
+      sl('compute_levy','compute levy',0,.3,.01,pct)+
+      sl('reskilling_spend_pct','reskilling',0,.3,.01,pct)+
+      sl('public_ownership_pct','public ownership',0,.5,.01,pct)+
+      '<div class="lbl" style="margin:10px 0 4px">UBI design</div><div class="seg">'+
+        ['flat','means_tested','age_weighted'].map(function(v){
+          return '<button class="btn sm'+(L.ubi_design===v?' on':'')+'" data-ubi="'+v+'">'+
+            v.replace('_',' ')+'</button>';}).join('')+'</div>'+
+      '<div class="lbl" style="margin:10px 0 4px">Working week</div><div class="seg">'+
+        [3,4,5].map(function(v){return '<button class="btn sm'+(L.working_week_days===v?' on':'')+
+          '" data-week="'+v+'">'+v+'d</button>';}).join('')+'</div>'+
+      '<div class="lbl" style="margin:10px 0 4px">Care job guarantee</div><div class="seg">'+
+        [['false','off'],['true','on']].map(function(v){
+          return '<button class="btn sm'+(String(L.care_job_guarantee)===v[0]?' on':'')+
+            '" data-guar="'+v[0]+'">'+v[1]+'</button>';}).join('')+'</div></div>'+
+    '<div class="box"><h4>AI adoption<span class="a">per sector</span></h4>'+
+      SEC.map(function(k){
+        var v=L.automation_target[k];
+        return '<div class="lvr"><div class="lvrh"><span class="lbl">'+SN[k]+'</span>'+
+          '<span class="n">'+pct(v)+'</span></div>'+
+          '<input type="range" data-auto="'+k+'" min="0" max="0.98" step="0.01" value="'+v+'"></div>';
+      }).join('')+
+      '<div class="hint">Past 80% the door closes behind you.</div></div>';
+}
+function paintAlloc(){
+  var host=document.getElementById('alloc'); if(!host) return;
+  var ks=['ubi','infrastructure','reserves'], cols={ubi:'--ubi',infrastructure:'--infra',reserves:'--resv'};
+  host.innerHTML=ks.map(function(k){
+    var v=S.levers.allocation[k];
+    return '<div class="ac"><div class="an">'+Math.round(v*100)+'%</div>'+
+      '<div class="ab" data-alloc="'+k+'"><div class="af" style="height:'+(v*100)+'%;'+
+      'background:var('+cols[k]+')"></div></div>'+
+      '<div class="lbl" style="font-size:9px">'+(k==='infrastructure'?'infra':k)+'</div></div>';
+  }).join('');
+  host.querySelectorAll('[data-alloc]').forEach(function(bar){
+    var drag=function(ev){ var r=bar.getBoundingClientRect();
+      setAlloc(bar.dataset.alloc,Math.max(0,Math.min(1,1-(ev.clientY-r.top)/r.height))); };
+    bar.addEventListener('pointerdown',function(ev){ ev.preventDefault();
+      bar.setPointerCapture(ev.pointerId); drag(ev);
+      var mv=function(e){drag(e);}, up=function(){bar.removeEventListener('pointermove',mv);
+        bar.removeEventListener('pointerup',up);};
+      bar.addEventListener('pointermove',mv); bar.addEventListener('pointerup',up); });
+  });
+}
+function setAlloc(k,v){
+  v=Math.round(v*100)/100;
+  var ks=['ubi','infrastructure','reserves'], others=ks.filter(function(o){return o!==k;});
+  var sum=others.reduce(function(a,o){return a+S.levers.allocation[o];},0), rest=1-v;
+  S.levers.allocation[k]=v;
+  if(sum<=1e-4) others.forEach(function(o){S.levers.allocation[o]=rest/2;});
+  else others.forEach(function(o){S.levers.allocation[o]=Math.round(S.levers.allocation[o]/sum*rest*100)/100;});
+  recompute();
+}
+function viewHarness(){
+  var h=S.harness;
+  return '<div class="box"><h4>How you decide</h4><div class="seg">'+
+    [['policy','Rules'],['llm','A model']].map(function(k){
+      return '<button class="btn sm'+(h.kind===k[0]?' on':'')+'" data-hk="'+k[0]+'">'+k[1]+'</button>';
+    }).join('')+'</div>'+
+    (h.kind==='llm'
+      ? '<div class="hint">Everything here becomes the briefing your model reads each round. '+
+        'The engine never sees a word of it — what leaves is nine numbers.</div>'+
+        '<label style="margin-top:9px"><span>Who is governing</span><textarea rows="3" data-h="persona">'+esc(h.llm.persona)+'</textarea></label>'+
+        '<label><span>Your doctrine</span><textarea rows="4" data-h="doctrine">'+esc(h.llm.doctrine)+'</textarea></label>'+
+        '<label><span>When things conflict</span><textarea rows="4" data-h="priorities">'+esc(h.llm.priorities)+'</textarea></label>'+
+        '<label><span>How you trade</span><textarea rows="3" data-h="trading">'+esc(h.llm.trading)+'</textarea></label>'
+      : '<div class="hint">The levers on the <b>Levers</b> tab are your opening position. '+
+        'The rules below adjust it, round by round.</div>')+
+    '</div>'+
+    (h.kind==='policy'?rulesBuilder():'');
+}
+
+/* THE RULES BUILDER — a government written as data.
+   Three verbs, and conditions in the same little language the constitution
+   uses, so there is one thing to learn and it gets used twice. Every rule
+   whose condition holds fires, in the order written, and later rules see
+   what earlier ones did: order is a policy decision. */
+function rulesBuilder(){
+  var rs=S.harness.rules||[];
+  return '<div class="box"><h4>Rules<span class="a">'+rs.length+'</span></h4>'+
+    (rs.length?rs.map(function(r,i){
+      var chk=checkExpr(r.when);
+      return '<div style="border:2px solid var(--ink);background:var(--panel2);padding:7px 8px;margin-bottom:8px">'+
+        '<div class="row"><label style="flex:1"><span>rule</span>'+
+          '<input type="text" data-pr="'+i+'" data-f="id" value="'+esc(r.id)+'" placeholder="defend-services"></label>'+
+          '<button class="btn sm" data-delpr="'+i+'">×</button></div>'+
+        '<label style="margin-top:6px"><span>when</span><input type="text" data-pr="'+i+'" data-f="when" '+
+          'value="'+esc(r.when||'')+'" placeholder="worstEssential &lt; 60"></label>'+
+        (r.then||[]).map(function(a,ai){
+          return '<div class="row" style="margin-bottom:5px">'+
+            '<label style="flex:0 0 62px"><span>do</span><select data-pa="'+i+'" data-ai="'+ai+'" data-f="verb">'+
+              ['shift','nudge','set'].map(function(v){
+                return '<option'+(a.verb===v?' selected':'')+'>'+v+'</option>';}).join('')+'</select></label>'+
+            '<label style="flex:2"><span>'+(a.verb==='shift'?'from → to':'lever')+'</span>'+
+              '<input type="text" data-pa="'+i+'" data-ai="'+ai+'" data-f="target" value="'+esc(a.target)+'" '+
+              'placeholder="'+(a.verb==='shift'?'ubi->infrastructure':'automation_target.care_services')+'"></label>'+
+            '<label style="flex:0 0 56px"><span>'+(a.verb==='shift'?'pts':(a.verb==='nudge'?'by':'value'))+'</span>'+
+              '<input type="text" data-pa="'+i+'" data-ai="'+ai+'" data-f="amount" value="'+esc(a.amount)+'"></label>'+
+            '<button class="btn sm" data-dela="'+i+'.'+ai+'">×</button></div>';
+        }).join('')+
+        '<button class="btn sm" data-adda="'+i+'">add an action</button>'+
+        '<div class="hint">'+(chk.ok
+          ? '<span class="ok">checkable</span>'
+          : '<span class="err">unknown: '+esc((chk.bad||[]).join(', '))+'</span>')+'</div></div>';
+    }).join(''):'<div class="empty">No rules. This government holds its opening position for '+
+      'twelve rounds — which is a choice, but make it on purpose.</div>')+
+    '<button class="btn" id="addPR">Add a rule</button>'+
+    '<div class="hint"><b>shift</b> moves budget between slices in points · <b>nudge</b> moves a '+
+    'lever by an amount · <b>set</b> puts one at a value. Try '+
+    '<code>worstEssential &lt; 60</code> → shift <code>ubi->infrastructure</code> 5.</div></div>'+
+    '<div class="box"><h4>How you trade</h4>'+
+      '<label><span>stance</span><select id="tStyle">'+
+        [['reciprocal','Reciprocal — deal fairly, honour forwards'],
+         ['protective','Protective — buy what defends services, give aid'],
+         ['extractive','Extractive — sell high, buy only when cheap'],
+         ['none','Do not trade']].map(function(o){
+          return '<option value="'+o[0]+'"'+(S.harness.trade.style===o[0]?' selected':'')+'>'+o[1]+'</option>';
+        }).join('')+'</select></label>'+
+      '<label><span>never sell</span><input type="text" id="tNever" value="'+
+        esc((S.harness.trade.never_sell||[]).join(', '))+'" placeholder="food"></label>'+
+      '<div class="hint">The one teams reach for after the round they sold the food they '+
+      'turned out to need.</div></div>';
+}
+function viewConst(){
+  var c=S.constitution;
+  var rb=c.rubric||{};
+  var ANG=[['social_welfare','social welfare'],['continuity_of_survival','continuity of survival'],
+           ['quality_of_life','quality of life'],['economic_profitability','economic profitability']];
+  return '<div class="box"><h4>Constitution<span class="a">compiled into policy</span></h4>'+
+    '<div class="hint">Your commitments are read by the government agent and compiled into policy: taxes, transfers, '+
+    'regulations, public provision, institutions and what you say publicly. Anything that cannot become policy is '+
+    'reported back to you, not silently dropped.</div>'+
+    '<label style="margin-top:9px"><span>Name</span><input type="text" data-c="name" value="'+esc(c.name)+'"></label>'+
+    c.commitments.map(function(x,i){
+      return '<label><span>Commitment '+(i+1)+'</span><input type="text" data-cm="'+i+'" value="'+esc(x)+'"></label>';
+    }).join('')+'</div>'+
+    '<div class="box"><h4>Checkable rules<span class="a">'+c.rules.length+'</span></h4>'+
+    (c.rules.length?c.rules.map(function(r,i){
+      return '<div style="border:2px solid var(--ink);background:var(--panel2);padding:7px 8px;margin-bottom:7px">'+
+        '<div class="row"><label style="flex:1"><span>name</span><input type="text" data-r="'+i+'" data-f="id" value="'+esc(r.id)+'"></label>'+
+        '<button class="btn sm" data-delr="'+i+'">×</button></div>'+
+        '<label style="margin-top:6px"><span>when</span><input type="text" data-r="'+i+'" data-f="when" value="'+esc(r.when||'always')+'"></label>'+
+        '<label><span>we promise</span><input type="text" data-r="'+i+'" data-f="assert" value="'+esc(r.assert)+'" placeholder="worstEssential >= 55"></label></div>';
+    }).join(''):'<div class="empty">No rules. A constitution with none commits to nothing.</div>')+
+    '<button class="btn" id="addRule">Add a rule</button>'+
+    '<div class="hint">e.g. <code>worstEssential &gt;= 55</code>, '+
+    '<code>levers.public_ownership_pct &gt;= 0.3</code></div></div>'+
+    '<div class="box"><h4>Policies you write yourself<span class="a">optional</span></h4>'+
+    '<div class="hint">Written policies always win over the compiler. One per fenced block:</div>'+
+    '<label><span>policies</span><textarea rows="7" data-c="policies" placeholder="```policy&#10;type: transfer&#10;to: carers&#10;sgd_month: 600&#10;name: Carer wage&#10;```">'+esc(c.policies||'')+'</textarea></label></div>'+
+    '<div class="box"><h4>What makes a society good<span class="a">your weighting</span></h4>'+
+    '<div class="hint">Weight the four angles of the guiding rubric, then argue your case. The simulation records this '+
+    'and never scores it: juries judge it, against the evidence your run produces.</div>'+
+    '<div class="row" style="margin-top:8px">'+ANG.map(function(a){
+      return '<label><span>'+a[1]+'</span><input type="number" min="0" max="100" data-rub="'+a[0]+'" value="'+esc(rb[a[0]])+'"></label>';
+    }).join('')+'</div>'+
+    '<label style="margin-top:9px"><span>our case</span><textarea rows="6" data-c="case" placeholder="Why this weighting, and what evidence would show we achieved it.">'+esc(c.case||'')+'</textarea></label></div>';
+}
+
+/* ================= CENTRE RAIL ================= */
+var CT=[['city','City'],['traj','Trajectory'],['round','This round']];
+function paintCentre(){
+  document.getElementById('ctabs').innerHTML=CT.map(function(t){
+    return '<button data-c="'+t[0]+'"'+(S.C===t[0]?' class="on"':'')+'>'+t[1]+'</button>';}).join('');
+  var b=document.getElementById('cbody');
+  b.innerHTML = S.C==='city'?viewCity():(S.C==='traj'?viewTraj():viewRound());
+  if(S.C==='city') drawCity();
+  wireCentre();
+}
+function pipRow(){
+  return '<div class="scrub"><div class="pips">'+S.traj.map(function(t,i){
+    var c=(i+1===S.round)?' on':(i+1<S.round?' past':'');
+    return '<button class="pip'+c+'" data-r="'+(i+1)+'">'+(i+1)+'</button>';}).join('')+'</div></div>';
+}
+function viewCity(){
+  return pipRow()+'<div class="cityfit" id="cityfit"><div id="city"></div></div>'+
+    '<div id="selbox"></div>'+
+    '<div class="hint">Height carries capacity · green 65+, amber 40–64, red below 40 · click a building</div>';
+}
+function drawCity(){
+  var host=document.getElementById('cityfit'); if(!host||!CITY) return;
+  CITY.render(cur(),document.getElementById('city'),{selected:S.sel,onSelect:function(k){
+    S.sel=(S.sel===k)?null:k; paintCentre(); }});
+  var k=Math.min(1,host.clientWidth/CITY.SCENE_W);
+  host.style.height=(CITY.SCENE_H*k)+'px';
+  var sc=host.querySelector('.city-scene'); if(sc) sc.style.transform='scale('+k+')';
+  var sb=document.getElementById('selbox');
+  if(sb&&S.sel){ var x=cur().sectors[S.sel];
+    sb.innerHTML='<div class="box" style="margin-top:10px"><h4>'+SN[S.sel]+
+      '<span class="a">'+band(x.quality)+'</span></h4><div class="tiles">'+
+      [['quality',x.quality],['automation',pct(x.automation)],['capacity',Math.round(x.capacity*100)+'%'],
+       ['staff',n0(x.headcount)],['margin',(x.margin>0?'+':'')+Math.round(x.margin*100)+'%']]
+      .map(function(r){return '<div class="tile"><div class="tv">'+r[1]+'</div><div class="ts">'+r[0]+'</div></div>';}).join('')+
+      '</div></div>';
+  } else if(sb) sb.innerHTML='';
+}
+function viewTraj(){
+  var g=function(f){return S.traj.map(f);};
+  var eff=g(function(s){return s.indicators.effective_ubi_index;});
+  var real=g(function(s){return s.indicators.real_ubi_index;});
+  var defs=[
+    ['UBI purchasing power',eff[S.round-1],[{data:real,color:'#C4A98C',ghost:1},{data:eff,color:'#A8624C'}],
+     {ref:100},'Solid: what it buys after inflation and after the services it must buy around.'],
+    ['Consumption',g(function(s){return s.indicators.consumption_index;})[S.round-1],
+     [{data:g(function(s){return s.indicators.consumption_index;}),color:'#7FA3AC'}],{ref:100},
+     'The loop-closing variable. Spending becomes next round’s demand.'],
+    ['Employment',Math.round(S.traj[S.round-1].indicators.employment_rate*100)+'%',
+     [{data:g(function(s){return s.indicators.employment_rate*100;}),color:'#8A8FA8'}],{min:0},
+     'Every point lost is a wage bill removed from household income.'],
+    ['Worst essential service',worstOf(S.traj[S.round-1]),
+     [{data:g(worstOf),color:'#C9A45E'}],{min:0,max:100,ref:40},
+     'Scored on your worst sector. 40 for two rounds is a gate.'],
+    ['Reserves','$'+Math.round(S.traj[S.round-1].fiscal.reserves_bn)+'bn',
+     [{data:g(function(s){return s.fiscal.reserves_bn;}),color:'#88A87E'}],{ref:0},
+     'The buffer that survives a shock you were not told about.'],
+    ['Cohesion',S.traj[S.round-1].indicators.cohesion,
+     [{data:g(function(s){return s.indicators.legitimacy;}),color:'#B0A48C',ghost:1},
+      {data:g(function(s){return s.indicators.cohesion;}),color:'#8C7BA0'}],{min:0,max:100,ref:35},
+     'Solid cohesion, dashed legitimacy. Below 35 is unrest.'],
+    ['GDP','$'+Math.round(S.traj[S.round-1].fiscal.gdp_bn)+'bn',
+     [{data:g(function(s){return s.fiscal.gdp_bn;}),color:'#9A9075'}],{},
+     'Output actually sold. Capacity you cannot sell into is not GDP.']
+  ];
+  return '<div class="cards">'+defs.map(function(d){
+    return '<div class="card"><div class="ch"><span class="lbl">'+d[0]+'</span></div>'+
+      '<div class="cv">'+d[1]+'</div>'+spark(d[2],d[3])+'<div class="cf">'+d[4]+'</div></div>';
+  }).join('')+'</div>'+
+  '<div class="box" style="margin-top:11px"><h4>Score<span class="a">'+S.score.total+' / 100</span></h4>'+
+    (S.score.gates_failed.length?'<div style="margin-bottom:7px">'+S.score.gates_failed.map(function(x){
+      return '<span class="gate">'+x.replace('service_critical_','').replace(/_/g,' ')+'</span>';}).join('')+'</div>':'')+
+    '<div class="tiles">'+Object.keys(S.score.components).map(function(k){
+      return '<div class="tile"><div class="tv">'+S.score.components[k]+'</div>'+
+        '<div class="ts">'+k.replace(/_/g,' ')+'</div></div>';}).join('')+'</div></div>';
+}
+function clockBox(){
+  if(Board.kind!=='local') return '';
+  var c=S.clock||{}, r=remaining(), mins=Math.round((c.lengthMs||0)/60000);
+  return '<div class="box"><h4>The round clock<span class="a">the facilitator drives this</span></h4>'+
+    '<div class="hint">Time passes whether a team is ready or not. A forward signed at ten '+
+    'comes due at two.</div>'+
+    '<div class="row" style="margin-top:8px">'+
+      '<label><span>minutes a round</span><input type="number" id="clkMin" value="'+(mins||120)+
+        '" min="1" max="600"></label>'+
+      '<button class="btn sm" id="clkSet">Set</button>'+
+      (c.running?'<button class="btn sm" id="clkPause">Pause</button>'
+                :'<button class="btn sm pri" id="clkStart">Start</button>')+
+      '<button class="btn sm" id="clkRestart">Restart round</button>'+
+    '</div>'+
+    '<div class="hint">'+(c.running
+      ? '<span class="ok">Running</span> — '+(r!=null?hhmm(r)+' to the next tick':'…')+
+        '. The whole run takes '+((mins*12)/60).toFixed(1)+' hours.'
+      : 'Stopped. Rounds advance only when somebody clicks ▶.')+'</div>'+
+    '<div class="btnrow"><button class="btn sm" id="clkDemo">Dry run — 30s rounds</button>'+
+    '<span class="hint" style="margin:0 0 0 4px">the whole 24 years in six minutes</span></div></div>';
+}
+
+function viewRound(){
+  var s=cur(), v=S.round<12?E.vitals(S.traj[S.round-1],S.traj[S.round]):null;
+  return pipRow()+clockBox()+
+  '<div class="box"><h4>Sectors</h4><div class="tiles">'+SEC.map(function(k){
+    var x=s.sectors[k];
+    return '<div class="tile"><div class="tn"><span class="sqd" style="background:var(--'+band(x.quality)+')"></span>'+
+      SN[k]+'</div><div class="tv" style="color:var(--'+band(x.quality)+')">'+x.quality+'</div>'+
+      '<div class="ts">auto '+pct(x.automation)+' · cap '+Math.round(x.capacity*100)+'% · '+
+      Math.round(x.headcount/1000)+'k</div></div>';}).join('')+'</div></div>'+
+  (v?'<div class="box"><h4>Meanwhile, whatever you do</h4><div class="tiles">'+
+    [['births a year',n0(v.births_per_year),'good'],['deaths a year',n0(v.deaths_per_year),'bad'],
+     ['turning 65',n0(v.turned_65),'mid'],['leaving school',n0(v.left_school),'mid']]
+    .map(function(r){return '<div class="tile"><div class="tv" style="color:var(--'+r[2]+')">'+r[1]+
+      '</div><div class="ts">'+r[0]+'</div></div>';}).join('')+'</div></div>':'')+
+  '<div class="box"><h4>Bulletin</h4>'+
+    ((s.news||[]).length?'<ul style="margin:0;padding-left:15px;font-size:11px;line-height:1.6">'+
+      s.news.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>'
+      :'<div class="empty">Round 1. Nothing of record yet.</div>')+'</div>'+
+  '<div class="box"><h4>Households</h4>'+(s.personas||[]).map(function(p){
+    var c=p.wellbeing>=65?'good':(p.wellbeing>=40?'mid':'bad');
+    return '<div style="display:flex;align-items:center;gap:7px;font-size:11px;margin-bottom:5px">'+
+      '<span style="font-weight:700;min-width:104px">'+esc(p.name)+'</span>'+
+      '<span style="color:var(--muted2);min-width:24px">'+p.age+'</span>'+
+      '<span style="flex:1;height:7px;background:var(--line);border:1px solid var(--ink);position:relative">'+
+      '<i style="position:absolute;left:0;top:0;bottom:0;width:'+p.wellbeing+'%;background:var(--'+c+')"></i></span>'+
+      '<span class="mono" style="font-weight:700;color:var(--'+c+')">'+p.wellbeing+'</span></div>';
+  }).join('')+'</div>'+
+  '<div class="box"><h4>Shocks<span class="a">click to land one</span></h4>'+
+    '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:10px;width:100%">'+
+    '<tr><th></th>'+[2,3,4,5,6,7,8,9,10,11,12].map(function(r){
+      return '<th class="mono" style="font-size:9px;color:var(--muted)">'+r+'</th>';}).join('')+'</tr>'+
+    ['pandemic','food_import_disruption','energy_price_spike','chip_export_controls','cyber_attack']
+    .map(function(sk){
+      return '<tr><th style="text-align:left;font-size:9px;font-weight:800;color:var(--muted);padding-right:5px">'+
+        E.SHOCKS[sk].label+'</th>'+[2,3,4,5,6,7,8,9,10,11,12].map(function(r){
+          var on=(S.shocks[r]||[]).indexOf(sk)>=0;
+          return '<td style="padding:1px"><button class="sc" data-sk="'+sk+'" data-sr="'+r+'" '+
+            'style="width:100%;height:17px;border:2px solid '+(on?'var(--ink)':'var(--line)')+';'+
+            'background:'+(on?'var(--rust)':'var(--panel2)')+';cursor:pointer;padding:0"></button></td>';
+        }).join('')+'</tr>';}).join('')+'</table></div></div>';
+}
+
+/* ================= RIGHT RAIL ================= */
+var RT=[['society','Run society'],['market','Market'],['talk','Messages'],['export','Export']];
+function paintRight(){
+  document.getElementById('rtabs').innerHTML=RT.map(function(t){
+    return '<button data-rt="'+t[0]+'"'+(S.R===t[0]?' class="on"':'')+'>'+t[1]+'</button>';}).join('');
+  var b=document.getElementById('rbody');
+  b.innerHTML = !S.team ? viewPick()
+    : (S.R==='society'?viewSociety():(S.R==='market'?viewMarket():(S.R==='talk'?viewTalk():viewExport())));
+  wireRight();
+}
+function viewPick(){
+  var known=Object.keys(S.teams);
+  return '<div class="box"><h4>Which society are you?</h4>'+
+    '<div class="hint">Use the name your team submits with — the market matches on it. '+
+    'Testing alone? Open this link in a second tab and pick a different name; each tab is its '+
+    'own society.</div>'+
+    '<label style="margin-top:9px"><span>Society</span>'+
+    '<input type="text" id="tin" value="'+esc(S.team||S.lastTeam||'')+'" maxlength="28"></label>'+
+    '<button class="btn pri" id="tgo">Continue</button>'+
+    (known.length?'<div class="hint">On the board: '+known.map(function(t){
+      return '<button class="btn sm" data-pick="'+esc(t)+'" style="margin:2px 2px 0 0">'+esc(t)+'</button>';
+    }).join('')+'</div>':'')+'</div>';
+}
+function legs(p){
+  var me=S.team, mine=p.from===me;
+  if(p.return_resource) return mine?{g:p.quantity+' '+p.resource,t:p.return_quantity+' '+p.return_resource}
+                                   :{g:p.return_quantity+' '+p.return_resource,t:p.quantity+' '+p.resource};
+  if(p.type==='aid') return mine?{g:p.quantity+' '+p.resource,t:'legitimacy'}:{g:'nothing',t:p.quantity+' '+p.resource};
+  return mine?{g:p.quantity+' '+p.resource,t:'$'+p.price+'bn'}:{g:'$'+p.price+'bn',t:p.quantity+' '+p.resource};
+}
+function preview(p){
+  var base=S.traj[S.round-1], w=compute(p);
+  var a=w[S.round-1];
+  var rows=[['reserves','$'+Math.round(base.fiscal.reserves_bn)+'bn','$'+Math.round(a.fiscal.reserves_bn)+'bn',
+             a.fiscal.reserves_bn-base.fiscal.reserves_bn]];
+  SEC.forEach(function(k){ var d=a.sectors[k].capacity-base.sectors[k].capacity;
+    if(Math.abs(d)>=.005) rows.push([SN[k].toLowerCase(),Math.round(base.sectors[k].capacity*100)+'%',
+      Math.round(a.sectors[k].capacity*100)+'%',d]); });
+  if(worstOf(a)!==worstOf(base)) rows.push(['worst svc',worstOf(base),worstOf(a),worstOf(a)-worstOf(base)]);
+  return rows.filter(function(r){return r[3]!==0;});
+}
+function dealCard(p,kind){
+  var L=legs(p), inv=(p.from===S.team||p.to===S.team), acts='';
+  if(kind==='tome'){
+    var pv=preview(p);
+    if(pv.length) acts+='<div class="preview"><span class="pvl">if you accept</span>'+
+      pv.map(function(r){return '<span><b>'+esc(r[0])+'</b> '+r[1]+' → <b style="color:var(--'+
+        (r[3]>0?'good':'bad')+')">'+r[2]+'</b></span>';}).join('')+'</div>';
+    if(S.countering===p._id){
+      acts+='<div class="row" style="margin-top:6px">'+
+        '<label><span>qty</span><input type="number" id="cq_'+p._id+'" value="'+esc(p.quantity)+'" step="0.1"></label>'+
+        (p.type==='aid'?'':'<label><span>$bn</span><input type="number" id="cp_'+p._id+'" value="'+esc(p.price)+'" step="0.1"></label>')+
+        '<button class="btn sm pri" data-sendc="'+p._id+'">Send</button>'+
+        '<button class="btn sm" data-cancelc="'+p._id+'">×</button></div>';
+    } else {
+      acts+='<div class="btnrow"><button class="btn sm pri" data-acc="'+p._id+'">Accept</button>'+
+        '<button class="btn sm" data-rej="'+p._id+'">Reject</button>'+
+        '<button class="btn sm" data-cnt="'+p._id+'">Counter</button></div>';
+    }
+  } else if(kind==='mine') acts='<div class="btnrow"><button class="btn sm" data-wd="'+p._id+'">Withdraw</button></div>';
+  return '<div class="deal '+(kind||'')+'"><div class="dt"><span style="font-weight:800;font-size:11px">'+
+    esc(p.from)+' → '+esc(p.to)+'</span><span class="chip">'+esc(p.type)+(p.return_resource?' swap':'')+'</span></div>'+
+    '<div class="dd">'+esc(p.quantity)+' '+esc(p.resource)+
+      (p.return_resource?' <span style="color:var(--muted2)">for</span> '+esc(p.return_quantity)+' '+esc(p.return_resource)
+       :(p.type==='aid'?' <span style="color:var(--muted2)">(gift)</span>':' for $'+esc(p.price)+'bn'))+'</div>'+
+    (inv?'<div class="ledgerline"><span class="gives">give '+esc(L.g)+'</span><span class="gets">get '+esc(L.t)+'</span></div>':'')+
+    '<div class="dm">round '+esc(p.round)+(p.type==='forward'?' · in '+esc(p.deliver_in):'')+
+      (p.note?' · '+esc(p.note):'')+'</div>'+acts+'</div>';
+}
+function viewMarket(){
+  var me=S.team, open=S.posts.filter(function(p){return p.status==='open';});
+  var toMe=open.filter(function(p){return p.to===me;}), fromMe=open.filter(function(p){return p.from===me;});
+  var others=open.filter(function(p){return p.to!==me&&p.from!==me;});
+  var agreed=S.posts.filter(function(p){return p.status==='agreed'&&(p.from===me||p.to===me);});
+  var oth=Object.keys(S.teams).filter(function(t){return t!==me;});
+  var mine=S.teams[me]||{has:'',wants:''};
+  return (!Board.on()?'<div class="notice bad">Not connected to a shared board.'+
+      (S.diag?'<br>'+esc(S.diag):'')+'<br><button class="btn sm" id="recon" style="margin-top:6px">Try again</button></div>':'')+
+    '<div class="box"><h4>Your shelf</h4>'+
+      '<label><span>spare</span><input type="text" id="has" value="'+esc(mine.has)+'"></label>'+
+      '<label><span>needed</span><input type="text" id="wants" value="'+esc(mine.wants)+'"></label>'+
+      '<button class="btn sm" id="shelf">Post</button></div>'+
+    '<div class="box"><h4>Propose<span class="a">'+(oth.length?oth.length+' other':'nobody yet')+'</span></h4>'+
+      '<div class="seg" style="margin-bottom:7px">'+['cash','swap'].map(function(m){
+        return '<button class="btn sm'+(S.offerMode===m?' on':'')+'" data-om="'+m+'">'+
+          (m==='cash'?'For money':'Swap')+'</button>';}).join('')+'</div>'+
+      '<div class="row"><label style="flex:2"><span>to</span><select id="oTo">'+
+        (oth.length?oth.map(function(t){return '<option>'+esc(t)+'</option>';}).join('')
+                   :'<option value="">nobody has joined</option>')+'</select></label>'+
+        '<label><span>type</span><select id="oType">'+['spot','forward','aid'].map(function(t){
+          return '<option>'+t+'</option>';}).join('')+'</select></label></div>'+
+      '<div class="row" style="margin-top:6px">'+
+        '<label><span>give</span><select id="oRes">'+MK.RESOURCE_KEYS.map(function(r){
+          return '<option>'+r+'</option>';}).join('')+'</select></label>'+
+        '<label><span>qty</span><input type="number" id="oQty" value="2" step="0.1"></label>'+
+        (S.offerMode==='swap'
+          ?'<label><span>want</span><select id="oRet">'+MK.RESOURCE_KEYS.filter(function(r){return r!=='credits';})
+             .map(function(r){return '<option>'+r+'</option>';}).join('')+'</select></label>'+
+           '<label><span>their qty</span><input type="number" id="oRq" value="2" step="0.1"></label>'
+          :'<label><span>$bn</span><input type="number" id="oPrice" value="2.5" step="0.1"></label>')+
+        '<label><span>in</span><input type="number" id="oDel" value="0" min="0" max="6"></label></div>'+
+      '<label style="margin-top:6px"><span>note</span><input type="text" id="oNote"></label>'+
+      '<button class="btn pri" id="postOffer">Post the offer</button>'+
+      '<div class="hint">Credits are the money: giveable as aid, never sold.</div></div>'+
+    '<div class="box"><h4>On your table<span class="a">'+toMe.length+'</span></h4>'+
+      (toMe.length?toMe.map(function(p){return dealCard(p,'tome');}).join(''):'<div class="empty">Nothing.</div>')+'</div>'+
+    '<div class="box"><h4>Agreed<span class="a">'+agreed.length+'</span></h4>'+
+      (agreed.length?agreed.map(function(p){return dealCard(p,'agreed');}).join('')
+        :'<div class="empty">Accepted deals appear here and move your numbers.</div>')+'</div>'+
+    (fromMe.length?'<div class="box"><h4>Waiting<span class="a">'+fromMe.length+'</span></h4>'+
+      fromMe.map(function(p){return dealCard(p,'mine');}).join('')+'</div>':'')+
+    (others.length?'<div class="box"><h4>Elsewhere</h4>'+
+      others.map(function(p){return dealCard(p,'');}).join('')+'</div>':'')+
+    '<div class="box"><h4>The room</h4>'+(oth.length?oth.map(function(t){
+      var x=S.teams[t];
+      return '<div style="border:1px solid var(--line);background:var(--panel2);padding:6px 7px;margin-bottom:5px">'+
+        '<div style="font-weight:800;font-size:11px">'+esc(t)+'</div>'+
+        '<div style="font-size:10px;color:var(--muted2)">has '+esc(x.has||'—')+' · wants '+esc(x.wants||'—')+'</div></div>';
+    }).join(''):'<div class="empty">Only you so far.</div>')+'</div>';
+}
+function viewTalk(){
+  var oth=Object.keys(S.teams).filter(function(t){return t!==S.team;});
+  return '<div class="box"><h4>Messages<span class="a">the market never reads these</span></h4>'+
+    '<div style="max-height:44vh;overflow-y:auto">'+
+      (S.messages.length?S.messages.slice(-60).map(function(m){
+        return '<div class="msg"><span class="f">'+esc(m.from)+(m.to?' <span class="t">→ '+esc(m.to)+'</span>':'')+
+          '</span> '+esc(m.text)+'</div>';}).join(''):'<div class="empty">Nobody has said anything.</div>')+'</div>'+
+    '<div class="row" style="margin-top:9px"><label style="flex:3"><span>say</span>'+
+      '<input type="text" id="mt" placeholder="We need food before round 6."></label>'+
+      '<label><span>to</span><select id="mto"><option value="">everyone</option>'+
+        oth.map(function(t){return '<option>'+esc(t)+'</option>';}).join('')+'</select></label></div>'+
+    '<button class="btn" id="sendm" style="margin-top:7px">Send</button></div>';
+}
+function bundle(){
+  var c=S.constitution,h=S.harness;
+  var out={team:S.team,generated_at:new Date().toISOString(),
+    constitution:{name:c.name||(S.team+' constitution'),
+      commitments:c.commitments.filter(function(x){return x&&x.trim();}),
+      rules:c.rules.filter(function(r){return r.assert&&r.assert.trim();}).map(function(r){
+        return {id:r.id||('r-'+uid().slice(0,4)),commitment:0,when:r.when||'always',assert:r.assert};})}};
+  if(h.kind==='llm') out.harness={kind:'llm',persona:h.llm.persona,
+    briefing_preamble:[h.llm.doctrine,h.llm.priorities,h.llm.trading].filter(Boolean).join('\n\n')};
+  else out.harness={kind:'policy',policy:{
+    opening:JSON.parse(JSON.stringify(S.levers)),
+    rules:(S.harness.rules||[]).filter(function(r){return (r.then||[]).length;}).map(function(r){
+      return {id:r.id||('r-'+uid().slice(0,4)), when:r.when||'always',
+        then:r.then.map(function(a){
+          if(a.verb==='shift') return {shift:a.target,points:Number(a.amount)||0};
+          if(a.verb==='nudge') return {nudge:a.target,by:Number(a.amount)||0};
+          var v=a.amount;
+          if(v==='true') v=true; else if(v==='false') v=false;
+          else if(v!==''&&!isNaN(Number(v))) v=Number(v);
+          return {set:a.target,value:v};
+        })};}),
+    trade:{style:S.harness.trade.style,never_sell:S.harness.trade.never_sell||[]}}};
+  var acc=S.posts.filter(function(p){return p.to===S.team&&p.status==='agreed';});
+  if(acc.length){ out.trade={responses:{}};
+    acc.forEach(function(p){ out.trade.responses[p.market_id||p._id]='accept'; }); }
+  return out;
+}
+/* ================= AGENT RUNS =================
+   The sliders are a trial space. This is where a team runs its society:
+   its levers and its constitution go to the server, every resident and
+   firm decides for themselves, and the run arrives round by round. */
+function viewSociety(){
+  var f=S.agentForm, api=window.MERIDIAN_LOCAL_BOARD;
+  if(!api) return '<div class="box"><h4>Run the society</h4><div class="notice bad">Agent runs need the studio server '+
+    '(<code>node lab/serve-console.js</code>). This copy of the page is standalone.</div></div>';
+  var opt=function(v,l){return '<option value="'+v+'"'+(f.profile===v?' selected':'')+'>'+l+'</option>';};
+  return '<div class="box"><h4>Run the society<span class="a">agents decide</span></h4>'+
+    '<div class="hint">Takes your current levers and your constitution. Residents and firms each decide what to do, '+
+    'your government compiles and amends policy, and organisers may change the world while it runs. '+
+    'This is the result that counts.</div>'+
+    '<div class="row" style="margin-top:9px">'+
+      '<label><span>size</span><select id="agProfile">'+opt('local','laptop')+opt('classroom','classroom')+opt('dgx','DGX')+'</select></label>'+
+      '<label><span>rounds</span><input type="number" id="agRounds" min="2" max="30" value="'+esc(f.rounds)+'"></label>'+
+      '<label><span>residents</span><input type="number" id="agPop" min="24" max="5000" placeholder="profile" value="'+esc(f.population)+'"></label>'+
+      '<label><span>sub-steps</span><input type="number" id="agSub" min="1" max="8" placeholder="profile" value="'+esc(f.substeps)+'"></label>'+
+    '</div>'+
+    '<div class="btnrow" style="margin-top:9px"><button class="btn pri" id="agRun">Run the society</button>'+
+    (S.agentRun?'<button class="btn" id="agStop">Stop</button>':'')+'</div></div>'+
+    '<div id="agStatus">'+agentStatusHtml()+'</div>';
+}
+function agentStatusHtml(){
+  var st=S.agentStatus;
+  if(!S.agentRun) return '<div class="empty">No run yet.</div>';
+  if(!st) return '<div class="empty">Checking on your run…</div>';
+  var link='<a href="/runs/'+encodeURIComponent(st.id)+'" target="_blank" rel="noopener">Open the evidence</a>';
+  var head='<div class="box"><h4>'+esc(st.team)+'<span class="a">'+esc(st.status)+(st.year?' · '+st.year:'')+'</span></h4>';
+  if(st.status==='failed') return head+'<div class="notice bad">'+esc(st.error)+'</div></div>';
+  var lines=(st.progress||[]).filter(function(e){return e.type==='round'||e.type==='notice'||e.type==='start';}).slice(-8).map(function(e){
+    if(e.type==='start') return '<div class="msg"><span class="f">started</span> '+e.population+' residents · '+e.firms+' firms · '+esc(e.model||'no model')+'</div>';
+    if(e.type==='notice') return '<div class="msg">'+esc(e.text)+'</div>';
+    var i=e.indicators||{};
+    return '<div class="msg"><span class="f">'+e.year+'</span> trust '+(e.polls?e.polls.trust:'–')+' · work '+Math.round((i.employment_rate||0)*100)+
+      '% · buys '+i.effective_ubi_index+' · weakest '+e.worst_essential+' · agents '+Math.round((e.agent_share||0)*100)+'%'+
+      (e.events&&e.events.length?' · <b>'+esc(e.events.join(', '))+'</b>':'')+
+      '<div class="hint" style="margin-top:2px">'+(e.society&&e.society.actions||[]).slice(0,4).map(function(a){
+        return esc(a.kind.replace('_',' '))+' '+a.share+'%';}).join(' · ')+'</div></div>';
+  }).join('');
+  var hl=st.headline;
+  var done=hl?'<div class="notice'+(hl.degraded?' bad':'')+'">'+(hl.degraded?'<b>Degraded</b>: the society did not decide for itself. ':'')+
+    hl.decided_by_agents_pct+'% of decisions made by agents. '+link+'</div>':'';
+  return head+done+(lines||'<div class="empty">Waiting for the first round…</div>')+
+    (hl?'':'<div class="hint">'+link+' (fills in as the run goes)</div>')+'</div>';
+}
+function pollAgentRun(){
+  var api=window.MERIDIAN_LOCAL_BOARD;
+  if(!api||!S.agentRun) return;
+  clearTimeout(S.agentTimer);
+  fetch('/api/runs/'+encodeURIComponent(S.agentRun),{cache:'no-store'}).then(function(r){
+    if(r.status===404){ S.agentRun=null; lsSet('agentRun',null); return null; }
+    return r.json();
+  }).then(function(st){
+    if(st){ delete st.evidence; S.agentStatus=st; }
+    var box=document.getElementById('agStatus'); if(box) box.innerHTML=agentStatusHtml();
+    if(st&&(st.status==='running'||st.status==='queued')) S.agentTimer=setTimeout(pollAgentRun,2500);
+  }).catch(function(){ S.agentTimer=setTimeout(pollAgentRun,5000); });
+}
+
+function viewExport(){
+  var b=bundle(), probs=[];
+  if(!b.constitution.commitments.length) probs.push('no commitments');
+  if(!b.constitution.rules.length) probs.push('no checkable rules — fidelity cannot be scored');
+  return '<div class="box"><h4>Hand this in</h4>'+
+    (probs.length?'<div class="notice bad">Not ready: '+probs.map(esc).join(' · ')+'</div>'
+      :'<div class="notice"><span class="ok">Ready.</span> A sealed constitution, a harness, and your trades.</div>')+
+    '<div class="btnrow"><button class="btn pri" id="cpb">Copy bundle</button>'+
+    '<button class="btn" id="dlb">Download</button></div>'+
+    '<div class="hint">Save as <code>bundles/'+esc(slug(S.team||'team'))+'.json</code>, then '+
+    '<code>node engine/run-bundle.js</code></div>'+
+    '<label style="margin-top:9px"><span>bundle</span><textarea rows="16" readonly>'+
+      esc(JSON.stringify(b,null,2))+'</textarea></label></div>';
+}
+
+/* ================= WIRING ================= */
+function paint(){ paintHead(); paintLeft(); paintCentre(); paintRight(); }
+function on(id,ev,fn){var e=document.getElementById(id); if(e) e.addEventListener(ev,fn);}
+function each(sel,fn){document.querySelectorAll(sel).forEach(fn);}
+
+function wireLeft(){
+  each('[data-lv]',function(i){ i.oninput=function(){ S.levers[i.dataset.lv]=+i.value; recompute(); }; });
+  each('[data-auto]',function(i){ i.oninput=function(){ S.levers.automation_target[i.dataset.auto]=+i.value; recompute(); }; });
+  each('[data-ubi]',function(b){ b.onclick=function(){ S.levers.ubi_design=b.dataset.ubi; recompute(); }; });
+  each('[data-week]',function(b){ b.onclick=function(){ S.levers.working_week_days=+b.dataset.week; recompute(); }; });
+  each('[data-guar]',function(b){ b.onclick=function(){ S.levers.care_job_guarantee=b.dataset.guar==='true'; recompute(); }; });
+  each('[data-preset]',function(b){ b.onclick=function(){
+    S.levers=JSON.parse(JSON.stringify(PRESET_LEVERS[b.dataset.preset])); recompute(); }; });
+  paintAlloc();
+  on('addPR','click',function(){ S.harness.rules=S.harness.rules||[];
+    S.harness.rules.push({id:'',when:'',then:[{verb:'shift',target:'ubi->infrastructure',amount:'5'}]});
+    lsSet('harness',S.harness); paintLeft(); });
+  each('[data-pr]',function(i){ var h=function(){ S.harness.rules[+i.dataset.pr][i.dataset.f]=i.value;
+    lsSet('harness',S.harness); if(i.dataset.f==='when') paintLeft(); };
+    i.addEventListener('change',h); i.addEventListener('blur',h); });
+  each('[data-pa]',function(i){ i.onchange=function(){
+    var a=S.harness.rules[+i.dataset.pa].then[+i.dataset.ai];
+    a[i.dataset.f]=i.value; lsSet('harness',S.harness);
+    if(i.dataset.f==='verb') paintLeft(); }; });
+  each('[data-adda]',function(b){ b.onclick=function(){
+    S.harness.rules[+b.dataset.adda].then.push({verb:'nudge',target:'public_ownership_pct',amount:'0.03'});
+    lsSet('harness',S.harness); paintLeft(); }; });
+  each('[data-dela]',function(b){ b.onclick=function(){ var q=b.dataset.dela.split('.');
+    S.harness.rules[+q[0]].then.splice(+q[1],1); lsSet('harness',S.harness); paintLeft(); }; });
+  each('[data-delpr]',function(b){ b.onclick=function(){
+    S.harness.rules.splice(+b.dataset.delpr,1); lsSet('harness',S.harness); paintLeft(); }; });
+  on('tStyle','change',function(e){ S.harness.trade.style=e.target.value; lsSet('harness',S.harness); });
+  on('tNever','change',function(e){ S.harness.trade.never_sell=e.target.value.split(',')
+    .map(function(x){return x.trim();}).filter(Boolean); lsSet('harness',S.harness); });
+  each('[data-hk]',function(b){ b.onclick=function(){ S.harness.kind=b.dataset.hk; lsSet('harness',S.harness); paintLeft(); }; });
+  each('[data-h]',function(t){ t.oninput=function(){ S.harness.llm[t.dataset.h]=t.value; lsSet('harness',S.harness); }; });
+  each('[data-c]',function(i){ i.oninput=function(){ S.constitution[i.dataset.c]=i.value; lsSet('constitution',S.constitution); }; });
+  each('[data-cm]',function(i){ i.oninput=function(){ S.constitution.commitments[+i.dataset.cm]=i.value; lsSet('constitution',S.constitution); }; });
+  each('[data-r]',function(i){ i.onchange=function(){ S.constitution.rules[+i.dataset.r][i.dataset.f]=i.value; lsSet('constitution',S.constitution); }; });
+  each('[data-delr]',function(b){ b.onclick=function(){ S.constitution.rules.splice(+b.dataset.delr,1); lsSet('constitution',S.constitution); paintLeft(); }; });
+  on('addRule','click',function(){ S.constitution.rules.push({id:'',when:'always',assert:''}); lsSet('constitution',S.constitution); paintLeft(); });
+  each('[data-rub]',function(i){ i.oninput=function(){ S.constitution.rubric=S.constitution.rubric||{};
+    S.constitution.rubric[i.dataset.rub]=i.value; lsSet('constitution',S.constitution); }; });
+}
+function wireCentre(){
+  on('clkSet','click',function(){ clockCmd({action:'length',
+    minutes:+(document.getElementById('clkMin')||{}).value||120}); });
+  on('clkStart','click',function(){ clockCmd({action:'start'}); });
+  on('clkPause','click',function(){ clockCmd({action:'pause'}); });
+  on('clkRestart','click',function(){ clockCmd({action:'restart'}); });
+  on('clkDemo','click',function(){ clockCmd({action:'length',seconds:30}).then(function(){
+    clockCmd({action:'start'}); }); });
+  each('.pip',function(b){ b.onclick=function(){ stopPlay(); S.round=+b.dataset.r; S.t=0; paint(); }; });
+  each('.sc',function(b){ b.onclick=function(){
+    var r=+b.dataset.sr,k=b.dataset.sk; S.shocks[r]=S.shocks[r]||[];
+    var i=S.shocks[r].indexOf(k); if(i>=0) S.shocks[r].splice(i,1); else S.shocks[r].push(k);
+    lsSet('shocks',S.shocks); recompute(); }; });
+}
+function wireRight(){
+  var saveForm=function(){ var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+    S.agentForm={profile:g('agProfile')||'local',rounds:g('agRounds'),population:g('agPop'),substeps:g('agSub')};
+    lsSet('agentForm',S.agentForm); };
+  ['agProfile','agRounds','agPop','agSub'].forEach(function(id){ on(id,'change',saveForm); });
+  on('agRun','click',function(){
+    saveForm();
+    var b=this; b.disabled=true; b.textContent='Starting…';
+    var f=S.agentForm;
+    fetch('/api/runs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+      team:S.team, levers:S.levers, constitution:S.constitution, profile:f.profile,
+      rounds:f.rounds, population:f.population, substeps:f.substeps })})
+    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+    .then(function(x){
+      if(!x.ok){ S.agentStatus={team:S.team,status:'failed',error:x.j.error||'could not start the run',progress:[]}; }
+      else { S.agentRun=x.j.id; lsSet('agentRun',S.agentRun); S.agentStatus=x.j; pollAgentRun(); }
+      paintRight();
+    }).catch(function(e){ S.agentStatus={team:S.team,status:'failed',error:String(e&&e.message),progress:[]}; paintRight(); });
+  });
+  on('agStop','click',function(){ if(!S.agentRun) return;
+    fetch('/api/runs/'+encodeURIComponent(S.agentRun)+'/stop',{method:'POST'}).then(function(){ pollAgentRun(); }); });
+  if(S.R==='society'&&S.agentRun&&!S.agentStatus) pollAgentRun();
+
+  on('tgo','click',function(){ var v=(document.getElementById('tin')||{}).value;
+    if(v&&v.trim()){ S.team=v.trim().slice(0,28); ssSet('team',S.team); lsSet('team',S.team); joinBoard(); paint(); } });
+  on('tin','keydown',function(e){ if(e.key==='Enter') document.getElementById('tgo').click(); });
+  each('[data-pick]',function(b){ b.onclick=function(){ S.team=b.dataset.pick; ssSet('team',S.team); lsSet('team',S.team); joinBoard(); paint(); }; });
+  on('recon','click',function(){ S.diag=''; Board.connect().then(function(){ if(S.team) joinBoard(); paint(); }); });
+  on('shelf','click',function(){ joinBoard({has:(document.getElementById('has')||{}).value||'',
+    wants:(document.getElementById('wants')||{}).value||''}); });
+  each('[data-om]',function(b){ b.onclick=function(){ S.offerMode=b.dataset.om; paintRight(); }; });
+  on('postOffer','click',async function(){
+    var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+    var type=g('oType'),res=g('oRes'),to=g('oTo');
+    if(!to) return;
+    var swap=S.offerMode==='swap'&&type!=='aid';
+    if(res==='credits'&&type!=='aid'){ S.diag='Credits can be given as aid, not sold.'; paint(); return; }
+    try{ await Board.addPost({from:S.team,to:to,resource:res,type:type,
+      quantity:+g('oQty')||0, price:(type==='aid'||swap)?0:(+g('oPrice')||0),
+      return_resource:swap?g('oRet'):null, return_quantity:swap?(+g('oRq')||0):0,
+      deliver_in:type==='forward'?Math.max(1,Math.min(6,+g('oDel')||1)):0,
+      note:g('oNote').slice(0,120),round:S.round,status:'open',ts:Date.now(),market_id:uid()});
+      if(Board.kind==='local') await Board.refresh();
+    }catch(e){ S.diag='could not post: '+(e&&e.message); }
+    paint();
+  });
+  var act=async function(id,d){ try{ await Board.patchPost(id,d);
+    if(Board.kind==='local') await Board.refresh(); }catch(e){} recompute(); };
+  each('[data-acc]',function(b){ b.onclick=function(){ act(b.dataset.acc,
+    {status:'agreed',answered_by:S.team,agreed_round:S.round,answered_ts:Date.now()}); }; });
+  each('[data-rej]',function(b){ b.onclick=function(){ act(b.dataset.rej,{status:'rejected'}); }; });
+  each('[data-wd]',function(b){ b.onclick=function(){ act(b.dataset.wd,{status:'withdrawn'}); }; });
+  each('[data-cnt]',function(b){ b.onclick=function(){ S.countering=b.dataset.cnt; paintRight(); }; });
+  each('[data-cancelc]',function(b){ b.onclick=function(){ S.countering=null; paintRight(); }; });
+  each('[data-sendc]',function(b){ b.onclick=async function(){
+    var id=b.dataset.sendc,o=S.posts.filter(function(p){return p._id===id;})[0]; if(!o) return;
+    var q=+(document.getElementById('cq_'+id)||{}).value, pr=+(document.getElementById('cp_'+id)||{}).value;
+    S.countering=null;
+    await Board.patchPost(id,{status:'countered'});
+    await Board.addPost({from:S.team,to:o.from,resource:o.resource,type:o.type,
+      quantity:q>0?q:o.quantity, price:pr>=0?pr:o.price, return_resource:o.return_resource||null,
+      return_quantity:o.return_quantity||0, deliver_in:o.deliver_in,
+      note:'counter', counters:o.market_id||id, round:S.round,status:'open',ts:Date.now(),market_id:uid()});
+    if(Board.kind==='local') await Board.refresh(); recompute(); }; });
+  on('sendm','click',async function(){
+    var t=(document.getElementById('mt')||{}).value; if(!t||!t.trim()) return;
+    try{ await Board.addMsg({from:S.team,to:(document.getElementById('mto')||{}).value||null,
+      text:t.slice(0,400),ts:Date.now(),round:S.round});
+      if(Board.kind==='local') await Board.refresh(); }catch(e){}
+    paintRight(); });
+  on('cpb','click',function(){ var b=this;
+    navigator.clipboard.writeText(JSON.stringify(bundle(),null,2)).then(function(){
+      b.textContent='Copied'; setTimeout(function(){b.textContent='Copy bundle';},1300); },function(){}); });
+  on('dlb','click',async function(){ var b=this;
+    try{ var dl=await claude.use('downloads');
+      if(!dl){ b.textContent='Use copy'; return; }
+      await dl.save({filename:slug(S.team||'team')+'.json',data:JSON.stringify(bundle(),null,2)});
+    }catch(e){ b.textContent='Use copy'; } });
+}
+
+document.getElementById('ltabs').addEventListener('click',function(e){
+  var b=e.target.closest('[data-l]'); if(b){S.L=b.dataset.l; paintLeft();} });
+document.getElementById('ctabs').addEventListener('click',function(e){
+  var b=e.target.closest('[data-c]'); if(b){S.C=b.dataset.c; paintCentre();} });
+document.getElementById('rtabs').addEventListener('click',function(e){
+  var b=e.target.closest('[data-rt]'); if(b){S.R=b.dataset.rt; paintRight();} });
+on('rFwd','click',function(){ setRound(S.round+1); });
+on('rBack','click',function(){ setRound(S.round-1); });
+on('play','click',function(){ playing()?stopPlay():startPlay(); });
+on('who','click',function(){ S.team=null; S.R='market'; paint(); });
+document.addEventListener('keydown',function(e){
+  if(e.key===' '&&e.target===document.body){ e.preventDefault(); playing()?stopPlay():startPlay(); } });
+window.addEventListener('resize',function(){ if(S.C==='city') drawCity(); });
+
+recompute();
+Board.onChange=function(){ S.traj=compute(null); S.score=E.score(S.traj); paint(); };
+Board.connect().then(function(){ if(S.team) joinBoard(); paint(); });
+})();
+</script>

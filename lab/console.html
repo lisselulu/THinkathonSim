@@ -1,0 +1,1515 @@
+<title>Meridian Team Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Instrument+Serif&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE8DC; --panel:#F7F3EB; --panel2:#FCFAF4; --ink:#3B423E;
+    --rust:#A8624C; --muted:#868C86; --muted2:#585E59; --line:#D6D0C2;
+    --good:#7FA476; --mid:#C9A45E; --bad:#AE6450;
+    --shadow:6px 6px 0 rgba(22,21,15,0.12);
+  }
+  *{box-sizing:border-box}
+  :where(button,[href],input,textarea,select):focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+  h1,h2,h3{text-wrap:balance}
+  .mono,.n{font-variant-numeric:tabular-nums}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px}
+  h1,h2,h3{margin:0;font-weight:400}
+  .serif{font-family:"Instrument Serif",Georgia,serif}
+  .mono{font-family:"Space Mono",ui-monospace,monospace}
+  .lbl{font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+
+  header{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:18px;
+    padding:0 24px;min-height:74px;background:var(--ink);color:var(--panel);flex-wrap:wrap}
+  header .title{font-family:"Instrument Serif",Georgia,serif;font-size:29px;line-height:1}
+  header .sub{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:#9BA29B;margin-top:3px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tabs button{font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.07em;
+    text-transform:uppercase;padding:9px 13px;cursor:pointer;border:2px solid #4A4636;
+    background:transparent;color:#9BA29B}
+  .tabs button.on{background:var(--panel);color:var(--ink);border-color:var(--panel)}
+  .who{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .whoname{font-family:"Space Mono",monospace;font-size:15px;font-weight:700}
+  .dotlive{width:9px;height:9px;border-radius:50%;background:#7FA476;flex:0 0 auto}
+  .dotdead{width:9px;height:9px;border-radius:50%;background:#A85B49;flex:0 0 auto}
+
+  .wrap{max-width:1220px;margin:0 auto;padding:20px 24px 70px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:3px solid var(--ink);box-shadow:var(--shadow);
+    padding:16px 18px;margin-bottom:18px}
+  .panel h3{font-size:12px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;
+    padding-bottom:9px;margin-bottom:14px;border-bottom:2px solid var(--ink);
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .panel h3 .aside{font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted)}
+
+  label{display:block;margin-bottom:11px}
+  label>span{display:block;font-size:11px;font-weight:800;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  input[type=text],input[type=number],select,textarea{width:100%;font-family:inherit;font-size:13px;
+    padding:8px 9px;border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+  textarea{font-family:"Space Mono",monospace;font-size:11px;line-height:1.5;resize:vertical}
+  .row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
+  .row>label{flex:1;min-width:110px;margin-bottom:0}
+
+  .btn{font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:9px 13px;cursor:pointer;border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+  .btn:hover{background:var(--ink);color:var(--panel)}
+  .btn.pri{background:var(--rust);border-color:var(--rust);color:#FAF6EE}
+  .btn.pri:hover{background:var(--ink);border-color:var(--ink)}
+  .btn.sm{padding:6px 9px;font-size:10px}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+  .card{border:2px solid var(--ink);background:var(--panel2);padding:11px 12px;margin-bottom:9px}
+  .card.mine{border-left:7px solid var(--rust)}
+  .card.tome{border-left:7px solid var(--good)}
+  .card .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .card .deal{font-family:"Space Mono",monospace;font-size:14px;font-weight:700}
+  .card .meta{font-size:11px;color:var(--muted2);margin-top:3px}
+  .chip{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:3px 7px;border:2px solid var(--ink);background:var(--panel)}
+  .chip.spot{background:#DCE7E6}.chip.forward{background:#F2E7C9}.chip.aid{background:#E4EDDC}
+  .chip.open{background:var(--panel2);color:var(--muted2)}
+  .chip.countered{background:#E8D9C8}
+  .thread{margin:8px 0 0 18px;padding-left:12px;border-left:2px dashed var(--line);font-size:12px;
+    color:var(--muted2)}
+  .card.agreed{border-left:7px solid var(--good);background:#F2F6EE}
+  .ledgerline{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px;padding-top:7px;
+    border-top:1px dashed var(--line);font-size:12px;font-weight:700}
+  .ledgerline .gives{color:var(--bad)}
+  .ledgerline .gives::before{content:"− "}
+  .ledgerline .gets{color:var(--good)}
+  .ledgerline .gets::before{content:"+ "}
+
+  .msg{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5}
+  .msg .from{font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .msg .to{color:var(--rust);font-weight:800}
+  .msgs{max-height:300px;overflow-y:auto}
+
+  .shelf{border:2px solid var(--ink);background:var(--panel2);padding:10px 11px}
+  .shelf .nm{font-weight:800;font-size:13px;margin-bottom:5px}
+  .shelf .kv{font-size:11px;color:var(--muted2);line-height:1.6}
+  .shelf .kv b{color:var(--ink)}
+
+  .rule{border:2px solid var(--ink);background:var(--panel2);padding:10px 11px;margin-bottom:9px}
+  .rule .rh{display:flex;gap:8px;align-items:center;margin-bottom:7px}
+  .rule .rh input{flex:1}
+  .panel.society{background:linear-gradient(160deg,#F7F3EB 0%,#F2EDE1 100%)}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px;
+    margin-bottom:12px}
+  .metric{border:2px solid var(--ink);background:var(--panel2);padding:9px 10px}
+  .metric .mv{font-family:"Space Mono",monospace;font-size:21px;font-weight:700;line-height:1.1;
+    font-variant-numeric:tabular-nums}
+  .metric .mu{font-size:11px;font-weight:700;color:var(--muted2);margin-left:3px}
+  .metric .mk{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--muted);margin-top:3px}
+  .sectorstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:5px}
+  .sq{display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+    background:var(--panel2);padding:4px 7px;font-size:11px}
+  .sqd{width:9px;height:9px;flex:0 0 auto;border:1px solid var(--ink)}
+  .sqn{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sqv{font-family:"Space Mono",monospace;font-weight:700;font-variant-numeric:tabular-nums}
+  .preview{margin-top:8px;padding:7px 9px;border:2px dashed var(--line);background:#FAF7F0;
+    display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;font-size:11px}
+  .preview .pvl{font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .preview .pvi{font-variant-numeric:tabular-nums}
+  .vitals{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+  .vital{border:2px solid var(--ink);background:var(--panel2);padding:8px 9px}
+  .vital .vv{font-family:"Space Mono",monospace;font-size:16px;font-weight:700;
+    font-variant-numeric:tabular-nums;line-height:1.1}
+  .vital .vk{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--muted);margin-top:3px}
+  .hint{font-size:11px;color:var(--muted2);line-height:1.5;margin-top:7px}
+  .ok{color:var(--good);font-weight:700}
+  .warn{color:var(--mid);font-weight:700}
+  .err{color:var(--bad);font-weight:700}
+  .notice{padding:10px 12px;border:2px solid var(--ink);background:#F1ECE0;font-size:12px;
+    line-height:1.5;margin-bottom:14px}
+  .notice.bad{background:#F3E0DA;border-color:var(--bad)}
+  .empty{font-size:12px;color:var(--muted);padding:10px 0}
+  code{font-family:"Space Mono",monospace;font-size:11px;background:var(--panel2);
+    border:1px solid var(--line);padding:1px 4px}
+</style>
+
+<header>
+  <div>
+    <div class="title">Meridian team console</div>
+    <div class="sub">market bulletin · constitution · harness</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="who">
+    <span id="livedot" class="dotdead" title="offline"></span>
+    <div style="text-align:right">
+      <div class="lbl" style="color:#9BA29B">you are</div>
+      <div class="whoname" id="whoname">—</div>
+    </div>
+    <button class="btn sm" id="btnWho" style="background:transparent;color:#9BA29B;border-color:#4A4636">change</button>
+  </div>
+</header>
+
+<div class="wrap" id="wrap"></div>
+
+<script>/*<!--INJECT:ENGINE-->*/</script>
+<script>/*<!--INJECT:MARKET-->*/</script>
+<script id="baseline-json" type="application/json">/*<!--INJECT:BASELINE-->*/</script>
+<script>
+(function(){
+'use strict';
+
+/* ==================================================================
+   The console is a NEGOTIATION SURFACE, not the settlement authority.
+   Teams haggle here; when they agree, the board emits the offer object
+   into their bundle, and the frozen engine settles it. That is how
+   "if your prose and your object disagree, the object wins" stays
+   true — the board generates the object, so they cannot disagree.
+   ================================================================== */
+
+/* Collection paths take an ODD number of segments — `posts` is a
+   collection, `board/posts` would be a document. Getting that wrong is
+   what broke the board the first time round. */
+var C = { posts: 'posts', messages: 'messages', teams: 'teams' };
+
+var RESOURCES = ['compute','energy','food','labour','credits'];
+/* Derived from the engine rather than restated. This page used to keep
+   its own hardcoded copy of the sector list — the third in the repo —
+   which nothing tested and which went stale the moment the table changed.
+   The engine is inlined above, so there is no reason to retype it. */
+var SECTORS = (window.MeridianEngine && window.MeridianEngine.ORDER) ? window.MeridianEngine.ORDER.slice() : [];
+var SECTOR_NAMES = SECTORS.reduce(function(o,k){
+  o[k] = window.MeridianEngine.SECTORS[k].name; return o; }, {});
+
+/* Every path the little expression language may name. The forms check
+   against this so a typo is caught at the desk, not in round 7. */
+var PATHS = ['round','year','worstEssential','effectiveUbi','realUbi','employmentPct']
+  .concat(['ubi_monthly_sgd','real_ubi_index','effective_ubi_index','employment_rate',
+           'gini','cohesion','legitimacy','consumption_index'].map(function(k){return 'indicators.'+k;}))
+  .concat(['gdp_bn','corporate_profit_bn','tax_revenue_bn','public_dividend_bn','reserves_bn']
+           .map(function(k){return 'fiscal.'+k;}))
+  .concat(['ubi','infrastructure','reserves'].map(function(k){return 'fiscal.allocation.'+k;}))
+  .concat(['corporate_tax_rate','compute_levy','reskilling_spend_pct','public_ownership_pct',
+           'ubi_design','working_week_days','care_job_guarantee']
+           .map(function(k){return 'levers.'+k;}))
+  .concat(SECTORS.map(function(k){return 'levers.automation_target.'+k;}))
+  .concat(SECTORS.reduce(function(a,k){
+    return a.concat(['quality','automation','capacity','margin','headcount']
+      .map(function(f){return 'sectors.'+k+'.'+f;}));},[]));
+
+var LEVER_FIELDS = [
+  {k:'corporate_tax_rate',   label:'Corporate tax',      min:0,max:0.45,step:0.01,pct:true},
+  {k:'compute_levy',         label:'Compute levy',       min:0,max:0.30,step:0.01,pct:true},
+  {k:'reskilling_spend_pct', label:'Reskilling',         min:0,max:0.30,step:0.01,pct:true},
+  {k:'public_ownership_pct', label:'Public ownership',   min:0,max:0.50,step:0.01,pct:true}
+];
+
+var state = {
+  tab: 'bulletin',
+  team: null,
+  db: null, room: null,
+  posts: [], messages: [], teams: {}, meta: {round:1},
+  constitution: null, harness: null,
+  status: '', diag: '', connected: false,
+  picking: false, countering: null, registered: false, offerMode: 'cash'
+};
+
+/* ---------- local storage for this team's own drafts ---------- */
+function lsGet(k, d){ try{ var v=localStorage.getItem('meridian_'+k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem('meridian_'+k, JSON.stringify(v)); }catch(e){} }
+
+/* WHO YOU ARE is per TAB, not per browser.
+   Two tabs of the same browser share localStorage, so if identity lived
+   there both windows would insist on being the same society and you could
+   never test a trade against yourself. sessionStorage is per tab, so two
+   tabs can be two governments. The last name used is still remembered in
+   localStorage, but only as the suggestion the picker starts on. */
+function ssGet(k, d){ try{ var v=sessionStorage.getItem('meridian_'+k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function ssSet(k, v){ try{ sessionStorage.setItem('meridian_'+k, JSON.stringify(v)); }catch(e){} }
+
+state.team = ssGet('team', null);
+state.lastTeam = lsGet('team', null);
+state.constitution = lsGet('constitution', {
+  name:'', commitments:['','',''], rules:[]
+});
+state.harness = lsGet('harness', {
+  kind:'policy',
+  policy:{ opening:{corporate_tax_rate:0.19,compute_levy:0.05,reskilling_spend_pct:0.08,
+                    public_ownership_pct:0.05,ubi_design:'flat',working_week_days:5,
+                    care_job_guarantee:false,
+                    allocation:{ubi:0.45,infrastructure:0.40,reserves:0.15},
+                    automation_target:{}},
+           rules:[], trade:{style:'reciprocal',never_sell:[]} },
+  llm:{ persona:'', doctrine:'', priorities:'', trading:'' }
+});
+SECTORS.forEach(function(k){
+  if(state.harness.policy.opening.automation_target[k]==null)
+    /* The round-1 automation of each sector, from the engine. Was a
+       second hardcoded copy of the same ten numbers. */
+    state.harness.policy.opening.automation_target[k]=
+      window.MeridianEngine.SECTORS[k].automation_r1;
+});
+
+/* ==================================================================
+   YOUR SOCIETY, RUNNING
+   ------------------------------------------------------------------
+   The console used to be a noticeboard: you agreed a deal and nothing
+   moved, because nothing was on screen to move. Now the engine runs
+   here too, on the levers from your Harness tab, so a team watches its
+   own country while it negotiates — and can see what a deal does to it
+   before agreeing to one.
+   ================================================================== */
+var E = window.MeridianEngine, MK = window.MeridianMarket;
+var BASELINE = null;
+try { BASELINE = JSON.parse(document.getElementById('baseline-json').textContent); } catch(e){}
+
+/* The levers the Harness tab is currently describing. A policy harness
+   declares an opening position; that is what the society runs on until a
+   round is advanced and its rules fire. */
+function myLevers(){
+  var h = state.harness;
+  var L = JSON.parse(JSON.stringify(E.DEFAULT_LEVERS));
+  if (h && h.kind === 'policy' && h.policy && h.policy.opening) {
+    var o = h.policy.opening;
+    Object.keys(o).forEach(function(k){
+      if (k === 'allocation' || k === 'automation_target') return;
+      L[k] = o[k];
+    });
+    if (o.allocation) {
+      var a = o.allocation, sum = (a.ubi + a.infrastructure + a.reserves) || 1;
+      L.allocation = { ubi:a.ubi/sum, infrastructure:a.infrastructure/sum, reserves:a.reserves/sum };
+    }
+    if (o.automation_target) {
+      Object.keys(o.automation_target).forEach(function(k){
+        if (E.ORDER.indexOf(k) >= 0) L.automation_target[k] = o.automation_target[k];
+      });
+    }
+  }
+  return L;
+}
+
+/* Trade this society has agreed, as the exogenous input the engine takes.
+   Rebuilt from the board every time, so accepting a deal changes the
+   numbers immediately rather than at some later tick. */
+function myTradeDeltas(){
+  var me = state.team;
+  var delta = { reserves_bn:0, capacity:{}, headcount:{}, cohesion_bonus:0, legitimacy_bonus:0 };
+  if (!MK || !me) return delta;
+  state.posts.filter(function(p){
+    return p.status === 'agreed' && (p.from === me || p.to === me);
+  }).forEach(function(p){ applyDeal(delta, p, me); });
+  return delta;
+}
+
+/* One agreed deal, from this society's side. Mirrors the settlement the
+   engine's market performs, so the preview and the outcome agree. */
+function applyDeal(delta, p, me){
+  var give = function(res, qty){ move(delta, res, qty, -1); };
+  var take = function(res, qty){ move(delta, res, qty, +1); };
+  if (p.type === 'aid') {
+    if (p.from === me) { give(p.resource, p.quantity); delta.legitimacy_bonus += 3; }
+    else { take(p.resource, p.quantity); delta.cohesion_bonus += 3; }
+    return;
+  }
+  if (p.return_resource) {                       // a swap: goods both ways
+    if (p.from === me) { give(p.resource, p.quantity); take(p.return_resource, p.return_quantity); }
+    else { take(p.resource, p.quantity); give(p.return_resource, p.return_quantity); }
+    return;
+  }
+  if (p.from === me) { give(p.resource, p.quantity); delta.reserves_bn += p.price; }
+  else { take(p.resource, p.quantity); delta.reserves_bn -= p.price; }
+}
+
+function move(delta, resource, qty, sign){
+  var r = MK.RESOURCES[resource];
+  if (!r) return;
+  if (r.sector) {
+    var base = E.SECTORS[r.sector].base_output_bn;
+    delta.capacity[r.sector] = (delta.capacity[r.sector] || 1) * Math.max(0.4, 1 + sign * (qty/base));
+  } else if (resource === 'labour') {
+    if (sign > 0) delta.headcount[MK.LABOUR_SECTOR] = (delta.headcount[MK.LABOUR_SECTOR]||0) + qty;
+  } else if (resource === 'credits') {
+    delta.reserves_bn += sign * qty;
+  }
+}
+
+/* The society, recomputed from scratch whenever anything changes. */
+function runSociety(extraDelta){
+  if (!E || !BASELINE) return null;
+  var L = myLevers();
+  var round = Math.max(1, Math.min(12, state.meta.round || 1));
+  var traj = [E.seed(BASELINE)];
+  var mine = myTradeDeltas();
+  for (var r = 1; r < round; r++) {
+    var prev = traj[traj.length-1];
+    // Trade lands in the round it was agreed; earlier rounds ran without it.
+    var exo = (r === round-1) ? mergeDelta(mine, extraDelta) : null;
+    var next = E.step(prev, L, prev._endogenousNext || [], exo);
+    next.personas = E.updatePersonas(prev.personas, next, prev);
+    next.news = E.bulletin(next, prev);
+    traj.push(next);
+  }
+  if (round === 1) {
+    /* Round 1 is the published baseline — no round has been played yet, so
+       there is no step to fold a trade into. Applying it to the state
+       directly keeps the comparison honest: goods and money move now,
+       while quality and the payment are outcomes of a whole round and do
+       not budge until one is played. Stepping here instead would show a
+       year passing and call it the trade's doing. */
+    traj[0] = applyDeltaToState(traj[0], mergeDelta(mine, extraDelta || null));
+  }
+  return traj;
+}
+
+/* Move goods and money on a state without advancing time. */
+function applyDeltaToState(state, d){
+  if (!d || !hasDelta(d)) return state;
+  var out = JSON.parse(JSON.stringify(state));
+  out.fiscal.reserves_bn = Math.round((out.fiscal.reserves_bn + d.reserves_bn) * 100) / 100;
+  Object.keys(d.capacity).forEach(function(k){
+    if (out.sectors[k]) out.sectors[k].capacity =
+      Math.round(out.sectors[k].capacity * d.capacity[k] * 100) / 100;
+  });
+  Object.keys(d.headcount).forEach(function(k){
+    if (out.sectors[k]) out.sectors[k].headcount += Math.round(d.headcount[k]);
+  });
+  return out;
+}
+
+function hasDelta(d){
+  return d && (d.reserves_bn !== 0 || Object.keys(d.capacity).length || Object.keys(d.headcount).length);
+}
+function mergeDelta(a, b){
+  if (!b) return a;
+  var out = { reserves_bn: a.reserves_bn + b.reserves_bn, capacity: {}, headcount: {},
+              cohesion_bonus: a.cohesion_bonus + b.cohesion_bonus,
+              legitimacy_bonus: a.legitimacy_bonus + b.legitimacy_bonus };
+  Object.keys(a.capacity).forEach(function(k){ out.capacity[k] = a.capacity[k]; });
+  Object.keys(b.capacity).forEach(function(k){ out.capacity[k] = (out.capacity[k]||1) * b.capacity[k]; });
+  Object.keys(a.headcount).forEach(function(k){ out.headcount[k] = a.headcount[k]; });
+  Object.keys(b.headcount).forEach(function(k){ out.headcount[k] = (out.headcount[k]||0) + b.headcount[k]; });
+  return out;
+}
+
+function nowState(){
+  var t = runSociety(null);
+  return t ? t[t.length-1] : null;
+}
+
+/* What one offer would do to this society, in the numbers a team reads. */
+function previewDeal(p){
+  var me = state.team;
+  var base = nowState();
+  if (!base) return null;
+  var d = { reserves_bn:0, capacity:{}, headcount:{}, cohesion_bonus:0, legitimacy_bonus:0 };
+  applyDeal(d, p, me);
+  var withIt = runSociety(d);
+  if (!withIt) return null;
+  var after = withIt[withIt.length-1];
+  var worst = function(s){ return Math.min.apply(null, E.ESSENTIAL.map(function(k){ return s.sectors[k].quality; })); };
+  var rows = [
+    ['reserves', '$'+Math.round(base.fiscal.reserves_bn)+'bn', '$'+Math.round(after.fiscal.reserves_bn)+'bn',
+     after.fiscal.reserves_bn - base.fiscal.reserves_bn],
+    ['worst service', worst(base), worst(after), worst(after)-worst(base)],
+    ['UBI', '$'+base.indicators.ubi_monthly_sgd, '$'+after.indicators.ubi_monthly_sgd,
+     after.indicators.ubi_monthly_sgd - base.indicators.ubi_monthly_sgd],
+    ['cohesion', base.indicators.cohesion, after.indicators.cohesion,
+     after.indicators.cohesion - base.indicators.cohesion]
+  ];
+  /* Which sector's capacity moves is the most direct thing a trade does,
+     and at round 1 it is the ONLY thing — quality and the payment are
+     outcomes of a whole round, not of a handshake. */
+  E.ORDER.forEach(function(k){
+    var d = after.sectors[k].capacity - base.sectors[k].capacity;
+    if (Math.abs(d) >= 0.005) rows.push([E.SECTORS[k].name.toLowerCase(),
+      Math.round(base.sectors[k].capacity*100)+'%', Math.round(after.sectors[k].capacity*100)+'%', d]);
+  });
+  return rows.filter(function(r){ return r[3] !== 0; });
+}
+
+var esc = function(s){ return String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+var uid = function(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); };
+
+/* ==================================================================
+   THE BOARD
+   ------------------------------------------------------------------
+   Two ways to share state, one interface. The console does not care
+   which it got:
+
+     hosted   the artifact's own database, when this page is running
+              inside the artifact viewer
+     local    a small server on somebody's laptop, when it is not
+
+   The local path is the one to reach for at a live event: no accounts,
+   no organisation, no internet. Run `node lab/serve-console.js` and
+   hand the address round.
+   ================================================================== */
+var Board = {
+  kind: 'none',
+  onChange: function(){},
+
+  async connect(){
+    // A local server announces itself by injecting this before the page.
+    var api = (typeof window !== 'undefined' && window.MERIDIAN_LOCAL_BOARD) || null;
+    if (api) { this.api = api; return this._connectLocal(); }
+
+    var c = await waitForClaude(10000);
+    if (c) {
+      try {
+        var db = await c.use('db');
+        if (db) { this.db = db; return this._connectHosted(); }
+      } catch(e){
+        state.diag = 'The shared database refused: ' + ((e && e.code) || (e && e.message) || 'unknown');
+      }
+    }
+    // Nothing shared available. The builders still work.
+    this.kind = 'none';
+    if (!state.diag) {
+      state.diag = c
+        ? 'This view was not granted a shared database. A hosted board is ' +
+          'organisation-internal, so every viewer must be signed in to the same ' +
+          'organisation. Run it locally instead: node lab/serve-console.js'
+        : 'Not running inside the artifact viewer, and no local board found.';
+    }
+    return false;
+  },
+
+  /* ---- hosted: the artifact database ---- */
+  _connectHosted(){
+    var self = this;
+    var live = function(coll, onDocs){
+      self.db.collection(coll).onSnapshot(function(snap){
+        onDocs(snap.docs.map(function(d){ var o = d.data() || {}; o._id = d.id; return o; }));
+        self.onChange();
+      }, function(err){
+        state.diag = 'Lost the ' + coll + ' feed: ' + ((err && err.code) || 'unknown') + '.';
+        self.onChange();
+      });
+    };
+    try {
+      live(C.posts,    function(d){ state.posts = d; });
+      live(C.messages, function(d){ state.messages = d.sort(function(a,b){ return (a.ts||0)-(b.ts||0); }); });
+      live(C.teams,    function(d){ state.teams = {}; d.forEach(function(x){ state.teams[x.name || x._id] = x; }); });
+      // The round is one shared document rather than a collection.
+      self.db.doc('meta/clock').onSnapshot(function(snap){
+        var d = snap.data();
+        if (d && d.round) { state.meta.round = d.round; self.onChange(); }
+      }, function(){});
+      this.kind = 'hosted';
+      return true;
+    } catch(e){
+      state.diag = 'Could not open the board: ' + (e && e.message || e);
+      this.kind = 'none';
+      return false;
+    }
+  },
+
+  /* ---- local: a server in the room ---- */
+  async _connectLocal(){
+    var self = this;
+    try {
+      await this.refresh();
+      this.kind = 'local';
+      // Server-sent events: the server pokes us whenever anything changes.
+      try {
+        var es = new EventSource(this.api + '/stream');
+        es.onmessage = function(){ self.refresh().then(function(){ self.onChange(); }); };
+        es.onerror = function(){ /* EventSource retries on its own */ };
+        this.es = es;
+      } catch(e){
+        // No EventSource: fall back to asking every couple of seconds.
+        setInterval(function(){ self.refresh().then(function(){ self.onChange(); }); }, 2500);
+      }
+      return true;
+    } catch(e){
+      state.diag = 'Could not reach the local board at ' + this.api + ': ' + (e && e.message || e);
+      this.kind = 'none';
+      return false;
+    }
+  },
+
+  async refresh(){
+    var r = await fetch(this.api + '/state', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var d = await r.json();
+    if (d.round) state.meta.round = d.round;   // the room's clock, not this tab's
+    state.posts = d.posts || [];
+    state.messages = d.messages || [];
+    state.teams = {};
+    (d.teams || []).forEach(function(t){ state.teams[t.name || t._id] = t; });
+  },
+
+  async _send(path, method, body){
+    var r = await fetch(this.api + path, {
+      method: method, headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  },
+
+  /* ---- the three writes, whichever backend is in play ---- */
+  async setTeamDoc(id, data){
+    if (this.kind === 'hosted') return this.db.collection(C.teams).doc(id).set(data);
+    if (this.kind === 'local')  return this._send('/teams', 'POST', { id: id, data: data });
+    throw new Error('no board connected');
+  },
+  async addPost(data){
+    if (this.kind === 'hosted') return this.db.collection(C.posts).add(data);
+    if (this.kind === 'local')  return this._send('/posts', 'POST', { data: data });
+    throw new Error('no board connected');
+  },
+  async updatePost(id, data){
+    if (this.kind === 'hosted') return this.db.collection(C.posts).doc(id).update(data);
+    if (this.kind === 'local')  return this._send('/posts/' + encodeURIComponent(id), 'PATCH', { data: data });
+    throw new Error('no board connected');
+  },
+  async addMessage(data){
+    if (this.kind === 'hosted') return this.db.collection(C.messages).add(data);
+    if (this.kind === 'local')  return this._send('/messages', 'POST', { data: data });
+    throw new Error('no board connected');
+  },
+  connected(){ return this.kind !== 'none'; }
+};
+
+/* The viewer injects `claude` shortly after the page loads, and the
+   capability promise resolves later still — never inside this script's
+   first run. So wait for it rather than assuming. */
+function waitForClaude(ms){
+  return new Promise(function(resolve){
+    var t0 = Date.now();
+    (function poll(){
+      if (typeof claude !== 'undefined' && claude && typeof claude.use === 'function') return resolve(claude);
+      if (Date.now() - t0 > ms) return resolve(null);
+      setTimeout(poll, 120);
+    })();
+  });
+}
+
+async function connect(){
+  var dot = document.getElementById('livedot');
+  state.diag = '';
+  Board.onChange = function(){ if (state.tab === 'bulletin') render(); };
+
+  var ok = await Board.connect();
+  state.db = ok;                      // kept for the older checks in the page
+  state.connected = ok;
+  dot.className = ok ? 'dotlive' : 'dotdead';
+  dot.title = ok ? ('connected — ' + Board.kind + ' board') : (state.diag || 'offline');
+  if (ok) await registerTeam();
+  render();
+}
+
+async function post(coll, data){
+  if(!Board.connected()){ state.status='The shared board is not connected.'; render(); return false; }
+  try {
+    if (coll === C.posts) await Board.addPost(data); else await Board.addMessage(data);
+    if (Board.kind === 'local') { await Board.refresh(); render(); }
+    return true;
+  } catch(e){ state.status='Could not post: '+(e && e.message || 'unknown'); render(); return false; }
+}
+
+async function patch(coll, id, data){
+  if(!Board.connected()) return false;
+  try {
+    await Board.updatePost(id, data);
+    if (Board.kind === 'local') { await Board.refresh(); render(); }
+    return true;
+  } catch(e){ state.status='Could not update: '+(e && e.message||''); render(); return false; }
+}
+
+/* ==================================================================
+   TEAM IDENTITY
+   ================================================================== */
+/* Artifacts run sandboxed, and a sandbox blocks window.prompt() — the
+   click just does nothing, silently. Everything that needs an answer from
+   the viewer is an in-page form. */
+function askTeam(){ state.picking = true; render(); }
+
+/* A document id may only contain letters, digits and - _ . ~ : @ +
+   A space is not allowed, so "Team Alpha" cannot BE an id. The slug is
+   the id; the name people typed lives inside the document. */
+function slug(name){
+  return String(name).trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'team';
+}
+
+/* Registration must not depend on whether the board happened to be ready
+   at the instant somebody typed their name. Call it whenever both a team
+   and a connection exist — on pick, and again when the board connects. */
+/* The round is the room's clock, not this browser's. Advancing it moves
+   every society on the board forward together. */
+async function setRound(r){
+  r = Math.max(1, Math.min(12, r));
+  state.meta.round = r;
+  render();
+  if (Board.kind === 'local') {
+    try { await Board._send('/round', 'POST', { round: r }); } catch(e){}
+  } else if (Board.kind === 'hosted' && Board.db) {
+    try { await Board.db.collection('meta').doc('clock').set({ round: r, updated: Date.now() }); } catch(e){}
+  }
+}
+
+async function registerTeam(extra){
+  if(!Board.connected() || !state.team) return;
+  try {
+    await Board.setTeamDoc(slug(state.team), Object.assign({
+      name: state.team, has: '', wants: '', updated: Date.now()
+    }, extra || {}));
+    if (Board.kind === 'local') await Board.refresh();
+    state.registered = true;
+    if(state.diag && /could not join/i.test(state.diag)) state.diag = '';
+  } catch(e){
+    state.registered = false;
+    state.diag = 'Could not join the board as "' + state.team + '": ' +
+      ((e && e.code) || (e && e.message) || 'unknown') + '.';
+    render();
+  }
+}
+
+function setTeam(name){
+  if(!name || !name.trim()) return;
+  state.team = name.trim().slice(0,28);
+  state.picking = false;
+  ssSet('team', state.team);   // this tab
+  lsSet('team', state.team);   // and the suggestion for next time
+  registerTeam();
+  render();
+}
+
+function pickerPanel(){
+  var known = Object.keys(state.teams);
+  return '<div class="panel"><h3>Which society are you governing?</h3>'+
+    '<p style="font-size:13px;line-height:1.6;margin:0 0 14px">Use the same name your team '+
+    'submits with — the market matches counterparties on it.</p>'+
+    '<div class="notice">Testing on your own? Open this same link in a <b>second tab of this '+
+    'browser</b> and pick a different name there. Each tab is its own society. Do not use a '+
+    'private window — it is not signed in, so it cannot reach the shared board.</div>'+
+    '<div class="row">'+
+      '<label style="flex:3"><span>Society name</span>'+
+        '<input type="text" id="teamInput" value="'+esc(state.team||state.lastTeam||'')+'" '+
+        'placeholder="Guardians" maxlength="28" autofocus></label>'+
+      '<button class="btn pri" id="confirmTeam">Continue</button>'+
+      (state.team ? '<button class="btn" id="cancelPick">Cancel</button>' : '')+
+    '</div>'+
+    (known.length ? '<div class="hint">Already on the board: '+
+      known.map(function(t){ return '<button class="btn sm" data-pickteam="'+esc(t)+'" '+
+        'style="margin:3px 3px 0 0">'+esc(t)+'</button>'; }).join('')+'</div>' : '')+
+  '</div>';
+}
+
+/* ==================================================================
+   RENDER
+   ================================================================== */
+var TABS = [['bulletin','Bulletin'],['constitution','Constitution'],
+            ['harness','Harness'],['export','Export']];
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = TABS.map(function(t){
+    return '<button data-tab="'+t[0]+'"'+(state.tab===t[0]?' class="on"':'')+'>'+t[1]+'</button>';
+  }).join('');
+  document.getElementById('whoname').textContent = state.team || 'pick a team';
+}
+
+function render(){
+  renderTabs();
+  var w = document.getElementById('wrap');
+  var notice = state.status ? '<div class="notice bad">'+esc(state.status)+'</div>' : '';
+  if(state.db && state.diag && state.tab==='bulletin'){
+    notice += '<div class="notice bad">'+esc(state.diag)+'</div>';
+  }
+  if(!state.db && state.tab==='bulletin'){
+    notice += '<div class="notice bad"><b>The shared board is not connected</b>, so nothing '+
+      'posted here reaches other teams.<br>'+ (state.diag ? esc(state.diag)+'<br>' : '') +
+      '<button class="btn sm" id="retryConn" style="margin-top:8px">Try again</button>'+
+      '<br><span style="color:var(--muted2)">The Constitution, Harness and Export tabs work '+
+      'regardless — they keep your drafts in this browser.</span></div>';
+  }
+  if(!state.team || state.picking){
+    w.innerHTML = notice + pickerPanel();
+    wirePicker();
+    return;
+  }
+  w.innerHTML = notice + ({
+    bulletin: viewBulletin, constitution: viewConstitution,
+    harness: viewHarness, export: viewExport
+  }[state.tab])();
+  wire();
+}
+
+/* ------------------------------ BULLETIN ------------------------- */
+/* What a deal means for YOU — not an abstract from/to, but what leaves
+   your country and what arrives. This is the line that was missing when a
+   trade vanished on accept. */
+function legs(p, me){
+  var iGive, iGet;
+  if (p.return_resource) {                       // a swap
+    iGive = p.from===me ? p.quantity+' '+p.resource : p.return_quantity+' '+p.return_resource;
+    iGet  = p.from===me ? p.return_quantity+' '+p.return_resource : p.quantity+' '+p.resource;
+  } else if (p.type==='aid') {
+    iGive = p.from===me ? p.quantity+' '+p.resource : 'nothing';
+    iGet  = p.from===me ? 'legitimacy' : p.quantity+' '+p.resource;
+  } else {                                        // goods for cash
+    iGive = p.from===me ? p.quantity+' '+p.resource : '$'+p.price+'bn';
+    iGet  = p.from===me ? '$'+p.price+'bn' : p.quantity+' '+p.resource;
+  }
+  return { give: iGive, get: iGet };
+}
+
+/* YOUR SOCIETY — the panel that makes everything else mean something.
+   Without it the market is a noticeboard: you agree a deal and no number
+   on screen moves, so nothing you do appears to matter. */
+function societyPanel(){
+  var s = nowState();
+  if (!s) return '<div class="panel"><h3>Your society</h3>'+
+    '<div class="empty">The engine could not start. Reload the page.</div></div>';
+
+  var worst = Math.min.apply(null, E.ESSENTIAL.map(function(k){ return s.sectors[k].quality; }));
+  var worstKey = E.ESSENTIAL.find(function(k){ return s.sectors[k].quality === worst; });
+  var band = function(q){ return q>=65?'good':(q>=40?'mid':'bad'); };
+  var n0 = function(v){ return Math.round(v).toLocaleString('en-SG'); };
+
+  var metrics = [
+    ['universal payment', '$'+n0(s.indicators.ubi_monthly_sgd), '/mo',
+     s.indicators.effective_ubi_index>=100?'good':(s.indicators.effective_ubi_index>=70?'mid':'bad')],
+    ['what it buys', s.indicators.effective_ubi_index, 'vs 100',
+     s.indicators.effective_ubi_index>=100?'good':(s.indicators.effective_ubi_index>=70?'mid':'bad')],
+    ['employment', Math.round(s.indicators.employment_rate*100), '%',
+     s.indicators.employment_rate>=0.45?'good':(s.indicators.employment_rate>=0.25?'mid':'bad')],
+    ['worst service', worst, E.SECTORS[worstKey].name, band(worst)],
+    ['reserves', '$'+n0(s.fiscal.reserves_bn), 'bn',
+     s.fiscal.reserves_bn>=60?'good':(s.fiscal.reserves_bn>=0?'mid':'bad')],
+    ['cohesion', s.indicators.cohesion, '/100',
+     s.indicators.cohesion>=55?'good':(s.indicators.cohesion>=35?'mid':'bad')]
+  ];
+
+  var vitalsHtml = '';
+  if (state.meta.round < 12) {
+    var traj = runSociety(null);
+    var nxt = E.step(traj[traj.length-1], myLevers(), [], null);
+    var v = E.vitals(s, nxt);
+    vitalsHtml = '<div class="lbl" style="margin:14px 0 7px">Meanwhile, whatever you do</div>'+
+      '<div class="vitals">'+
+      [['births a year', n0(v.births_per_year),'good'],
+       ['deaths a year', n0(v.deaths_per_year),'bad'],
+       ['turning 65', n0(v.turned_65),'mid'],
+       ['leaving school', n0(v.left_school),'mid']].map(function(r){
+        return '<div class="vital"><div class="vv" style="color:var(--'+r[2]+')">'+r[1]+'</div>'+
+               '<div class="vk">'+r[0]+'</div></div>'; }).join('')+'</div>';
+  }
+
+  var agreedCount = state.posts.filter(function(p){
+    return p.status==='agreed' && (p.from===state.team||p.to===state.team); }).length;
+
+  return '<div class="panel society"><h3>Your society'+
+    '<span class="aside">round '+s.meta.round+' · '+s.meta.year+'–'+(s.meta.year+2)+
+    (agreedCount? ' · '+agreedCount+' deal'+(agreedCount>1?'s':'')+' folded in':'')+'</span></h3>'+
+    '<div class="metrics">'+ metrics.map(function(m){
+      return '<div class="metric"><div class="mv" style="color:var(--'+m[3]+')">'+m[1]+
+        '<span class="mu">'+m[2]+'</span></div><div class="mk">'+m[0]+'</div></div>';
+    }).join('') +'</div>'+
+    '<div class="sectorstrip">'+ E.ORDER.map(function(k){
+      var q = s.sectors[k].quality;
+      return '<div class="sq" title="'+E.SECTORS[k].name+' — quality '+q+'">'+
+        '<span class="sqd" style="background:var(--'+band(q)+')"></span>'+
+        '<span class="sqn">'+E.SECTORS[k].name.replace(' & ',' &amp; ')+'</span>'+
+        '<span class="sqv">'+q+'</span></div>';
+    }).join('') +'</div>'+
+    vitalsHtml +
+    '<div class="hint">This runs on the opening position in your <b>Harness</b> tab, plus every '+
+    'deal you have agreed. Change either and these numbers move.</div>'+
+    '<div class="btnrow"><button class="btn sm" id="roundBack">◀ round</button>'+
+    '<button class="btn sm pri" id="roundFwd">advance the round ▶</button>'+
+    '<span class="hint" style="margin:0 0 0 6px">the facilitator drives this</span></div></div>';
+}
+
+function viewBulletin(){
+  var me = state.team;
+  var others_ = Object.keys(state.teams).filter(function(t){ return t!==me; });
+  var open = state.posts.filter(function(p){ return p.status==='open'; });
+  var toMe = open.filter(function(p){ return p.to===me; });
+  var fromMe = open.filter(function(p){ return p.from===me; });
+  var others = open.filter(function(p){ return p.to!==me && p.from!==me; });
+  var agreed = state.posts.filter(function(p){
+    return p.status==='agreed' && (p.from===me || p.to===me); });
+  var history = state.posts.filter(function(p){
+    return ['rejected','countered','withdrawn','expired'].indexOf(p.status)>=0 &&
+           (p.from===me || p.to===me); });
+  var mine = state.teams[me] || {has:'',wants:''};
+
+  var offerCard = function(p, kind){
+    var thread = p.counters ? '<div class="thread">counters '+esc(p.counters)+'</div>' : '';
+    var acts = '';
+    if(kind==='tome'){
+      var pv = previewDeal(p);
+      var pvHtml = (pv && pv.length)
+        ? '<div class="preview"><span class="pvl">if you accept</span>'+
+          pv.map(function(r){
+            var up = r[3] > 0;
+            return '<span class="pvi"><b>'+r[0]+'</b> '+r[1]+' → <b style="color:var(--'+
+              (up?'good':'bad')+')">'+r[2]+'</b></span>';
+          }).join('')+'</div>'
+        : '';
+      acts = pvHtml;
+      if(state.countering === p._id){
+        acts += '<div class="row" style="margin-top:9px">'+
+          '<label><span>Your quantity</span><input type="number" id="cQty_'+p._id+'" '+
+            'value="'+esc(p.quantity)+'" step="0.1" min="0"></label>'+
+          (p.type==='aid' ? '' :
+          '<label><span>Your price $bn</span><input type="number" id="cPrice_'+p._id+'" '+
+            'value="'+esc(p.price)+'" step="0.1" min="0"></label>')+
+          '<button class="btn sm pri" data-sendcounter="'+p._id+'">Send counter</button>'+
+          '<button class="btn sm" data-cancelcounter="'+p._id+'">Cancel</button></div>'+
+          '<div class="hint">This closes their offer and opens yours running the other way, '+
+          'carrying their terms except what you changed.</div>';
+      } else {
+        acts += '<div class="btnrow">'+
+          '<button class="btn sm pri" data-accept="'+p._id+'">Accept</button>'+
+          '<button class="btn sm" data-reject="'+p._id+'">Reject</button>'+
+          '<button class="btn sm" data-counter="'+p._id+'">Counter…</button></div>';
+      }
+    } else if(kind==='mine'){
+      acts = '<div class="btnrow"><button class="btn sm" data-withdraw="'+p._id+'">Withdraw</button></div>';
+    }
+    var L = legs(p, me);
+    var involved = (p.from===me || p.to===me);
+    return '<div class="card '+(kind==='tome'?'tome':(kind==='mine'?'mine':''))+'">'+
+      '<div class="top"><span class="deal">'+esc(p.from)+' → '+esc(p.to)+'</span>'+
+      '<span class="chip '+esc(p.type)+'">'+esc(p.type)+
+        (p.return_resource?' swap':'')+'</span></div>'+
+      '<div class="deal" style="margin-top:5px">'+esc(p.quantity)+' '+esc(p.resource)+
+        (p.return_resource ? ' <span style="color:var(--muted2)">for</span> '+
+            esc(p.return_quantity)+' '+esc(p.return_resource)
+          : p.type==='aid' ? ' <span style="color:var(--muted2)">(gift)</span>'
+                           : ' for $'+esc(p.price)+'bn')+'</div>'+
+      (involved ? '<div class="ledgerline"><span class="gives">you give '+esc(L.give)+
+        '</span><span class="gets">you get '+esc(L.get)+'</span></div>' : '')+
+      '<div class="meta">round '+esc(p.round)+
+        (p.type==='forward' ? ' · delivers in '+esc(p.deliver_in)+' rounds' : '')+
+        (p.note ? ' · '+esc(p.note) : '')+'</div>'+ thread + acts + '</div>';
+  };
+
+  var shelves = Object.keys(state.teams).filter(function(t){return t!==me;}).map(function(t){
+    var x = state.teams[t];
+    return '<div class="shelf"><div class="nm">'+esc(t)+'</div>'+
+      '<div class="kv"><b>has:</b> '+esc(x.has||'—')+'<br><b>wants:</b> '+esc(x.wants||'—')+'</div></div>';
+  }).join('') || '<div class="empty">No other teams have posted a shelf yet.</div>';
+
+  return societyPanel() + '<div class="grid2"><div>'+
+    '<div class="panel"><h3>Your shelf<span class="aside">'+esc(me)+'</span></h3>'+
+      '<label><span>What we have spare</span><input type="text" id="myHas" value="'+esc(mine.has)+'" placeholder="compute, some energy"></label>'+
+      '<label><span>What we need</span><input type="text" id="myWants" value="'+esc(mine.wants)+'" placeholder="food before round 6"></label>'+
+      '<button class="btn" id="saveShelf">Post to the board</button>'+
+      '<div class="hint">This is what you say you have, not what the engine says. '+
+      'The engine checks your real surplus when the deal settles.</div></div>'+
+
+    '<div class="panel"><h3>Propose a deal<span class="aside">'+
+      (others_.length ? others_.length+' other team'+(others_.length>1?'s':'')+' on the board'
+                      : 'waiting for someone else')+'</span></h3>'+
+      (others_.length ? '' :
+        '<div class="notice">You are the only society on the board so far. Open this same '+
+        'link in another window (a private window works) and pick a different name — you '+
+        'should then see each other here.</div>')+
+      '<div class="row">'+
+        '<label style="flex:2"><span>To</span><select id="oTo">'+
+          (others_.length ? others_.map(function(t){return '<option>'+esc(t)+'</option>';}).join('')
+                          : '<option value="">no other team has joined yet</option>')+
+          '</select></label>'+
+        '<label><span>Type</span><select id="oType">'+
+          ['spot','forward','aid'].map(function(t){return '<option>'+t+'</option>';}).join('')+
+        '</select></label>'+
+      '</div>'+
+      '<div class="btnrow" style="margin:4px 0 10px">'+
+        ['cash','swap'].map(function(mo){
+          return '<button class="btn sm'+(state.offerMode===mo?' pri':'')+'" data-omode="'+mo+'">'+
+            (mo==='cash'?'For money':'Swap for goods')+'</button>';}).join('')+'</div>'+
+      '<div class="row">'+
+        '<label><span>You give</span><select id="oRes">'+
+          RESOURCES.map(function(r){return '<option>'+r+'</option>';}).join('')+'</select></label>'+
+        '<label><span>Quantity</span><input type="number" id="oQty" value="2" step="0.1" min="0"></label>'+
+        (state.offerMode==='swap'
+          ? '<label><span>You want back</span><select id="oRet">'+
+              RESOURCES.filter(function(r){return r!=='credits';})
+                .map(function(r){return '<option>'+r+'</option>';}).join('')+'</select></label>'+
+            '<label><span>Their quantity</span><input type="number" id="oRetQty" value="2" step="0.1" min="0"></label>'
+          : '<label><span>They pay $bn</span><input type="number" id="oPrice" value="2.5" step="0.1" min="0"></label>')+
+        '<label><span>Delivers in</span><input type="number" id="oDel" value="0" min="0" max="6"></label>'+
+      '</div>'+
+      '<label style="margin-top:9px"><span>Note</span><input type="text" id="oNote" placeholder="why, or what you want in return"></label>'+
+      '<button class="btn pri" id="postOffer">Post the offer</button>'+
+      '<div class="hint">Credits may be <b>given</b> as aid but never sold — they are the money. '+
+      'A forward may promise more than you hold today; if you cannot deliver on the day it is a default.</div>'+
+    '</div>'+
+
+    '<div class="panel"><h3>The room</h3>'+
+      '<div class="grid3">'+shelves+'</div></div>'+
+    statusPanel()+
+    '</div><div>'+
+
+    '<div class="panel"><h3>On your table<span class="aside">'+toMe.length+'</span></h3>'+
+      (toMe.length ? toMe.map(function(p){return offerCard(p,'tome');}).join('')
+                   : '<div class="empty">Nothing yet. Nobody has offered you anything.</div>')+'</div>'+
+
+    '<div class="panel"><h3>Waiting on an answer<span class="aside">'+fromMe.length+'</span></h3>'+
+      (fromMe.length ? fromMe.map(function(p){return offerCard(p,'mine');}).join('')
+                     : '<div class="empty">You have nothing on the table.</div>')+'</div>'+
+
+    '<div class="panel"><h3>Agreed — settles at the round tick<span class="aside">'+
+      agreed.length+'</span></h3>'+
+      (agreed.length
+        ? agreed.map(function(p){
+            var L = legs(p, me);
+            return '<div class="card agreed">'+
+              '<div class="top"><span class="deal">'+esc(p.from)+' → '+esc(p.to)+'</span>'+
+              '<span class="chip '+esc(p.type)+'">agreed r'+esc(p.agreed_round||p.round)+'</span></div>'+
+              '<div class="ledgerline"><span class="gives">you give '+esc(L.give)+'</span>'+
+              '<span class="gets">you get '+esc(L.get)+'</span></div>'+
+              '<div class="meta">'+
+                (p.type==='forward'
+                  ? 'Both sides promised. Delivers '+esc(p.deliver_in)+' rounds after signing — '+
+                    'if you cannot deliver on the day it is a default.'
+                  : 'The engine moves this at the end of the round. Your sector capacity and '+
+                    'reserves change next round.')+'</div></div>';
+          }).join('')
+        : '<div class="empty">Nothing agreed yet. Accepted deals appear here with exactly '+
+          'what leaves and what arrives.</div>')+
+      '<div class="hint">Agreed is not yet settled. The engine checks you actually hold what '+
+      'you promised when the round ticks — <b>Export</b> carries these into your bundle.</div></div>'+
+
+    '<div class="panel"><h3>Elsewhere on the board<span class="aside">public</span></h3>'+
+      (others.length ? others.map(function(p){return offerCard(p,'other');}).join('')
+                     : '<div class="empty">Quiet.</div>')+'</div>'+
+
+    (history.length ? '<div class="panel"><h3>Earlier<span class="aside">'+history.length+
+      '</span></h3>'+ history.slice(-8).reverse().map(function(p){
+        return '<div class="card" style="opacity:.72">'+
+          '<div class="top"><span class="deal" style="font-size:12px">'+esc(p.from)+' → '+esc(p.to)+
+          '</span><span class="chip">'+esc(p.status)+'</span></div>'+
+          '<div class="meta">'+esc(p.quantity)+' '+esc(p.resource)+
+          (p.return_resource ? ' for '+esc(p.return_quantity)+' '+esc(p.return_resource)
+                             : (p.type==='aid'?'':' · $'+esc(p.price)+'bn'))+'</div></div>';
+      }).join('')+'</div>' : '')+
+
+    '<div class="panel"><h3>Messages</h3>'+
+      '<div class="msgs" id="msgs">'+
+        (state.messages.length ? state.messages.slice(-40).map(function(m){
+          return '<div class="msg"><span class="from">'+esc(m.from)+
+            (m.to?' <span class="to">→ '+esc(m.to)+'</span>':'')+'</span> '+esc(m.text)+'</div>';
+        }).join('') : '<div class="empty">Nobody has said anything yet.</div>')+'</div>'+
+      '<div class="row" style="margin-top:10px">'+
+        '<label style="flex:3"><span>Say something</span><input type="text" id="msgText" placeholder="We need food before round 6. We have compute."></label>'+
+        '<label><span>To</span><select id="msgTo"><option value="">everyone</option>'+
+          others_.map(function(t){return '<option>'+esc(t)+'</option>';}).join('')+'</select></label>'+
+      '</div>'+
+      '<button class="btn" id="sendMsg" style="margin-top:9px">Send</button>'+
+      '<div class="hint">The market never reads this. Talk here, then post the offer — '+
+      'only the object settles.</div></div>'+
+    '</div></div>';
+}
+
+/* A plain account of what the board actually did, because three rounds of
+   guessing at a silent failure is three rounds too many. */
+function statusPanel(){
+  var rows = [
+    ['board', Board.kind === 'local' ? 'local server (' + Board.api + ')'
+            : Board.kind === 'hosted' ? 'hosted database'
+            : 'NOT CONNECTED'],
+    ['you are', esc(state.team) + (state.db ? ' → saved as ' + esc(slug(state.team)) : '')],
+    ['joined the board', state.registered ? 'yes' : 'NO'],
+    ['teams on the board', Object.keys(state.teams).length
+        ? Object.keys(state.teams).map(esc).join(', ')
+        : 'none — nobody has joined'],
+    ['offers on the board', String(state.posts.length)],
+    ['messages', String(state.messages.length)]
+  ];
+  if(state.diag) rows.push(['last error', esc(state.diag)]);
+  return '<div class="panel"><h3>Board status<span class="aside">for when something looks wrong</span></h3>'+
+    '<div class="kv" style="font-size:12px;line-height:1.9">'+
+      rows.map(function(r){
+        var bad = /ABSENT|NOT GRANTED|^NO$|none —/.test(r[1]);
+        return '<div><span style="display:inline-block;min-width:150px;color:var(--muted)">'+
+          r[0]+'</span><b'+(bad?' class="err"':'')+'>'+r[1]+'</b></div>';
+      }).join('')+
+    '</div>'+
+    '<div class="btnrow"><button class="btn sm" id="rejoin">Re-join the board</button>'+
+    '<button class="btn sm" id="reconnect">Reconnect</button></div></div>';
+}
+
+/* --------------------------- CONSTITUTION ------------------------ */
+function checkExpr(e){
+  if(!e || e.trim()==='' || e.trim()==='always') return {ok:true};
+  var bad = [];
+  // pull out every bare path token and check it exists
+  (e.match(/[A-Za-z_][A-Za-z0-9_.]*/g)||[]).forEach(function(tok){
+    if(['always','true','false','and','or'].indexOf(tok)>=0) return;
+    if(PATHS.indexOf(tok)<0 && !/^[0-9]/.test(tok) && bad.indexOf(tok)<0) bad.push(tok);
+  });
+  return bad.length ? {ok:false, bad:bad} : {ok:true};
+}
+
+function viewConstitution(){
+  var c = state.constitution;
+  var rules = c.rules.map(function(r,i){
+    var chk = checkExpr(r.assert);
+    return '<div class="rule">'+
+      '<div class="rh"><input type="text" data-rid="'+i+'" data-f="id" value="'+esc(r.id)+'" placeholder="short-name">'+
+      '<button class="btn sm" data-delrule="'+i+'">remove</button></div>'+
+      '<div class="row">'+
+        '<label><span>Applies when</span><input type="text" data-rid="'+i+'" data-f="when" value="'+esc(r.when||'always')+'" placeholder="always"></label>'+
+        '<label style="flex:2"><span>We promise that</span><input type="text" data-rid="'+i+'" data-f="assert" value="'+esc(r.assert)+'" placeholder="worstEssential >= 55"></label>'+
+        '<label style="flex:0 0 130px"><span>Enforces</span><select data-rid="'+i+'" data-f="commitment">'+
+          c.commitments.map(function(x,ci){ return '<option value="'+ci+'"'+(r.commitment===ci?' selected':'')+'>#'+(ci+1)+'</option>'; }).join('')+
+        '</select></label>'+
+      '</div>'+
+      '<div class="hint">'+(chk.ok
+        ? '<span class="ok">checkable</span> — the auditor can test this every round'
+        : '<span class="err">unknown: '+esc(chk.bad.join(', '))+'</span> — a rule naming something that does not exist proves nothing')+'</div>'+
+    '</div>';
+  }).join('');
+
+  return '<div class="panel"><h3>Your constitution<span class="aside">sealed in week one, worth 15 marks</span></h3>'+
+    '<p style="font-size:13px;line-height:1.6;margin:0 0 14px">Two halves that must agree. The '+
+    '<b>commitments</b> are prose — judges read those. The <b>rules</b> are the same promises '+
+    'stated precisely enough for a machine to check every round. Most teams find that writing '+
+    'the rule changes the commitment, which is the exercise.</p>'+
+    '<label><span>Name</span><input type="text" id="cName" value="'+esc(c.name)+'" placeholder="The Guardian Compact"></label>'+
+    c.commitments.map(function(x,i){
+      return '<label><span>Commitment '+(i+1)+'</span><input type="text" data-cmt="'+i+'" value="'+esc(x)+'" placeholder="'+
+        ['No essential service is allowed to fail.',
+         'Care is never automated past the point where the person delivering it is the service.',
+         'The public owns a meaningful share of the machines that replaced its wages.'][i]+'"></label>';
+    }).join('')+
+    '</div>'+
+    '<div class="panel"><h3>Checkable rules<span class="aside">'+c.rules.length+'</span></h3>'+
+      (rules || '<div class="empty">No rules yet. A constitution with no checkable rules commits to nothing.</div>')+
+      '<button class="btn" id="addRule">Add a rule</button>'+
+      '<div class="hint">Write <code>worstEssential &gt;= 55</code>, <code>levers.automation_target.care_services &lt;= 0.25</code>, '+
+      '<code>fiscal.reserves_bn &gt;= 30</code>. Combine with <code>&amp;&amp;</code> and <code>||</code>. '+
+      'Applies-when takes the same language, or <code>always</code>.</div></div>';
+}
+
+/* ------------------------------ HARNESS -------------------------- */
+function viewHarness(){
+  var h = state.harness;
+  var kindSel = '<div class="btnrow" style="margin-bottom:16px">'+
+    ['policy','llm'].map(function(k){
+      return '<button class="btn'+(h.kind===k?' pri':'')+'" data-kind="'+k+'">'+
+        (k==='policy'?'Rules — no code':'A model decides')+'</button>';
+    }).join('')+'</div>';
+
+  if(h.kind==='llm'){
+    return '<div class="panel"><h3>Your government<span class="aside">a model decides each round</span></h3>'+
+      kindSel+
+      '<p style="font-size:13px;line-height:1.6;margin:0 0 14px">Everything you write here becomes '+
+      'the briefing your model reads every round. The engine never sees a word of it — what leaves '+
+      'is nine numbers. Write a better briefing and you get a better country.</p>'+
+      '<label><span>Who is governing</span><textarea id="hPersona" rows="3" placeholder="You are the Chancellor of Meridian. You are numerate, cautious, and you would rather be defensible than impressive.">'+esc(h.llm.persona)+'</textarea></label>'+
+      '<label><span>Your doctrine — what this society is for</span><textarea id="hDoctrine" rows="4" placeholder="We govern the worst number on the board, not the headline one. Care work is paid work.">'+esc(h.llm.doctrine)+'</textarea></label>'+
+      '<label><span>What to do when things conflict</span><textarea id="hPriorities" rows="4" placeholder="If a service is failing, defend it before raising the payment. Never let reserves fall below $30bn. Automation in care never rises above a quarter.">'+esc(h.llm.priorities)+'</textarea></label>'+
+      '<label><span>How you trade</span><textarea id="hTrading" rows="3" placeholder="We honour every forward we sign, even at cost. We give aid to any society whose services have failed.">'+esc(h.llm.trading)+'</textarea></label>'+
+      '<div class="hint">Your team supplies the model call itself — see <code>engine/harnesses/llm.js</code>. '+
+      'This tab writes the prompt; the Export tab bundles it.</div></div>';
+  }
+
+  var p = h.policy;
+  var rules = p.rules.map(function(r,i){
+    var chk = checkExpr(r.when);
+    var acts = (r.then||[]).map(function(a,ai){
+      return '<div class="row" style="margin-bottom:6px">'+
+        '<label><span>Do</span><select data-pr="'+i+'" data-ai="'+ai+'" data-f="verb">'+
+          ['shift','nudge','set'].map(function(v){return '<option'+(a.verb===v?' selected':'')+'>'+v+'</option>';}).join('')+
+        '</select></label>'+
+        '<label style="flex:2"><span>'+(a.verb==='shift'?'From → to':'Lever')+'</span>'+
+          '<input type="text" data-pr="'+i+'" data-ai="'+ai+'" data-f="target" value="'+esc(a.target)+'" placeholder="'+
+          (a.verb==='shift'?'ubi->infrastructure':'automation_target.care_services')+'"></label>'+
+        '<label><span>'+(a.verb==='shift'?'Points':(a.verb==='nudge'?'By':'Value'))+'</span>'+
+          '<input type="text" data-pr="'+i+'" data-ai="'+ai+'" data-f="amount" value="'+esc(a.amount)+'"></label>'+
+        '<button class="btn sm" data-delact="'+i+'.'+ai+'">×</button></div>';
+    }).join('');
+    return '<div class="rule">'+
+      '<div class="rh"><input type="text" data-pri="'+i+'" data-f="id" value="'+esc(r.id)+'" placeholder="rule-name">'+
+      '<button class="btn sm" data-delprule="'+i+'">remove</button></div>'+
+      '<label><span>When</span><input type="text" data-pri="'+i+'" data-f="when" value="'+esc(r.when)+'" placeholder="worstEssential &lt; 60"></label>'+
+      acts+
+      '<button class="btn sm" data-addact="'+i+'">add an action</button>'+
+      '<div class="hint">'+(chk.ok?'<span class="ok">checkable</span>':'<span class="err">unknown: '+esc((chk.bad||[]).join(', '))+'</span>')+'</div>'+
+    '</div>';
+  }).join('');
+
+  return '<div class="panel"><h3>Your government<span class="aside">rules, no code</span></h3>'+
+    kindSel+
+    '<p style="font-size:13px;line-height:1.6;margin:0 0 14px">Declare an opening position and the '+
+    'rules that adjust it. Every rule whose condition holds fires, in the order written, and later '+
+    'rules see what earlier ones did — so order is a policy decision.</p>'+
+    '<div class="grid3">'+
+      LEVER_FIELDS.map(function(f){
+        return '<label><span>'+f.label+'</span><input type="number" data-open="'+f.k+'" '+
+          'value="'+p.opening[f.k]+'" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'"></label>';
+      }).join('')+
+      '<label><span>UBI design</span><select data-open="ubi_design">'+
+        ['flat','means_tested','age_weighted'].map(function(v){
+          return '<option'+(p.opening.ubi_design===v?' selected':'')+'>'+v+'</option>';}).join('')+
+      '</select></label>'+
+      '<label><span>Working week</span><select data-open="working_week_days">'+
+        [3,4,5].map(function(v){return '<option'+(+p.opening.working_week_days===v?' selected':'')+'>'+v+'</option>';}).join('')+
+      '</select></label>'+
+      '<label><span>Care job guarantee</span><select data-open="care_job_guarantee">'+
+        ['false','true'].map(function(v){return '<option'+(String(p.opening.care_job_guarantee)===v?' selected':'')+'>'+v+'</option>';}).join('')+
+      '</select></label>'+
+    '</div>'+
+    '<div class="lbl" style="margin:16px 0 7px">Budget split — must sum to 100</div>'+
+    '<div class="row">'+
+      ['ubi','infrastructure','reserves'].map(function(k){
+        return '<label><span>'+k+'</span><input type="number" data-alloc="'+k+'" '+
+          'value="'+Math.round(p.opening.allocation[k]*100)+'" min="0" max="100" step="1"></label>';
+      }).join('')+
+    '</div>'+
+    '<div class="lbl" style="margin:16px 0 7px">AI adoption target, per sector (%)</div>'+
+    '<div class="grid3">'+
+      SECTORS.map(function(k){
+        return '<label><span>'+SECTOR_NAMES[k]+'</span><input type="number" data-auto="'+k+'" '+
+          'value="'+Math.round(p.opening.automation_target[k]*100)+'" min="0" max="98" step="1"></label>';
+      }).join('')+
+    '</div></div>'+
+
+    '<div class="panel"><h3>Rules<span class="aside">'+p.rules.length+'</span></h3>'+
+      (rules || '<div class="empty">No rules. This government will hold its opening position for twelve rounds.</div>')+
+      '<button class="btn" id="addPRule">Add a rule</button></div>'+
+
+    '<div class="panel"><h3>How you trade</h3>'+
+      '<div class="row">'+
+        '<label><span>Stance</span><select id="tStyle">'+
+          [['reciprocal','Reciprocal — deal fairly, honour forwards'],
+           ['protective','Protective — buy what defends services, give aid'],
+           ['extractive','Extractive — sell high, buy only when cheap'],
+           ['none','Do not trade']].map(function(o){
+            return '<option value="'+o[0]+'"'+(p.trade.style===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+
+        '</select></label>'+
+        '<label style="flex:2"><span>Never sell</span><input type="text" id="tNever" value="'+
+          esc((p.trade.never_sell||[]).join(', '))+'" placeholder="food, compute"></label>'+
+      '</div>'+
+      '<div class="hint">The one teams reach for after the round they sold the food they turned out to need.</div>'+
+    '</div>';
+}
+
+/* ------------------------------- EXPORT -------------------------- */
+function bundle(){
+  var c = state.constitution, h = state.harness;
+  var out = {
+    team: state.team,
+    generated_at: new Date().toISOString(),
+    constitution: {
+      name: c.name || (state.team + ' constitution'),
+      commitments: c.commitments.filter(function(x){return x && x.trim();}),
+      rules: c.rules.filter(function(r){return r.assert && r.assert.trim();}).map(function(r){
+        return { id: r.id||('rule-'+uid().slice(0,4)), commitment: +r.commitment||0,
+                 when: r.when||'always', assert: r.assert };
+      })
+    }
+  };
+  if(h.kind==='llm'){
+    out.harness = { kind:'llm',
+      persona: h.llm.persona,
+      briefing_preamble: [h.llm.doctrine, h.llm.priorities, h.llm.trading]
+        .filter(function(x){return x && x.trim();}).join('\n\n') };
+  } else {
+    var p = h.policy, alloc = p.opening.allocation;
+    var sum = alloc.ubi + alloc.infrastructure + alloc.reserves || 1;
+    out.harness = { kind:'policy', policy: {
+      opening: Object.assign({}, p.opening, {
+        allocation: { ubi: alloc.ubi/sum, infrastructure: alloc.infrastructure/sum,
+                      reserves: alloc.reserves/sum }
+      }),
+      rules: p.rules.filter(function(r){return (r.then||[]).length;}).map(function(r){
+        return { id: r.id||('rule-'+uid().slice(0,4)), when: r.when||'always',
+          then: r.then.map(function(a){
+            if(a.verb==='shift') return { shift:a.target, points:Number(a.amount)||0 };
+            if(a.verb==='nudge') return { nudge:a.target, by:Number(a.amount)||0 };
+            var v = a.amount;
+            if(v==='true') v=true; else if(v==='false') v=false;
+            else if(v!=='' && !isNaN(Number(v))) v=Number(v);
+            return { set:a.target, value:v };
+          })};
+      }),
+      trade: { style: p.trade.style,
+               never_sell: (p.trade.never_sell||[]).filter(function(x){return x;}) }
+    }};
+  }
+  // trade instructions staged on the bulletin for this round
+  var acc = state.posts.filter(function(p){ return p.to===state.team && p.status==='agreed'; });
+  var mine = state.posts.filter(function(p){ return p.from===state.team && p.status==='open'; });
+  if(acc.length || mine.length){
+    out.trade = { responses: {}, offers: [] };
+    acc.forEach(function(p){ out.trade.responses[p.market_id||p._id] = 'accept'; });
+    mine.forEach(function(p){
+      var o = { to:p.to, resource:p.resource, quantity:p.quantity, type:p.type,
+                deliver_in:p.deliver_in, note:p.note };
+      if(p.return_resource){ o.return_resource=p.return_resource; o.return_quantity=p.return_quantity; }
+      else o.price = p.price;
+      out.trade.offers.push(o);
+    });
+  }
+  return out;
+}
+
+function viewExport(){
+  var b = bundle();
+  var probs = [];
+  if(!b.constitution.commitments.length) probs.push('no commitments written');
+  if(!b.constitution.rules.length) probs.push('no checkable rules — constitutional fidelity cannot be scored');
+  if(b.harness.kind==='policy' && !b.harness.policy.rules.length)
+    probs.push('no policy rules — your government will not react to anything');
+  if(b.harness.kind==='llm' && !b.harness.persona) probs.push('no persona for the model');
+  state.constitution.rules.forEach(function(r){
+    var chk = checkExpr(r.assert);
+    if(!chk.ok) probs.push('constitution rule "'+(r.id||'?')+'" names '+chk.bad.join(', '));
+  });
+
+  return '<div class="panel"><h3>Hand this in<span class="aside">'+esc(state.team)+'</span></h3>'+
+    (probs.length
+      ? '<div class="notice bad"><b>Not ready:</b><br>· '+probs.map(esc).join('<br>· ')+'</div>'
+      : '<div class="notice"><span class="ok">Ready.</span> This bundle is a complete government: '+
+        'a sealed constitution, a harness, and how you trade.</div>')+
+    '<div class="btnrow"><button class="btn pri" id="copyBundle">Copy the bundle</button>'+
+    '<button class="btn" id="dlBundle">Download</button></div>'+
+    '<div class="hint">Save it as <code>bundles/'+esc((state.team||'team').toLowerCase().replace(/\s+/g,'-'))+
+    '.json</code> and run <code>node engine/run-bundle.js</code>.</div>'+
+    '<label style="margin-top:14px"><span>The bundle</span>'+
+    '<textarea rows="22" readonly id="bundleOut">'+esc(JSON.stringify(b,null,2))+'</textarea></label></div>';
+}
+
+function wirePicker(){
+  var input = document.getElementById('teamInput');
+  var go = function(){ setTeam(input ? input.value : ''); };
+  var btn = document.getElementById('confirmTeam');
+  if(btn) btn.onclick = go;
+  if(input){
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') go(); });
+    setTimeout(function(){ try{ input.focus(); }catch(e){} }, 30);
+  }
+  var cancel = document.getElementById('cancelPick');
+  if(cancel) cancel.onclick = function(){ state.picking = false; render(); };
+  document.querySelectorAll('[data-pickteam]').forEach(function(b){
+    b.onclick = function(){ setTeam(b.dataset.pickteam); };
+  });
+}
+
+/* ==================================================================
+   WIRING
+   ================================================================== */
+function wire(){
+  var $ = function(id){ return document.getElementById(id); };
+  var on = function(id, ev, fn){ var e=$(id); if(e) e.addEventListener(ev, fn); };
+
+  on('retryConn','click', function(){ state.db=null; state.diag='reconnecting…'; render(); connect(); });
+  on('roundFwd','click', function(){ setRound((state.meta.round||1) + 1); });
+  on('roundBack','click', function(){ setRound((state.meta.round||1) - 1); });
+
+  on('rejoin','click', async function(){
+    var b=this; b.textContent='joining…';
+    await registerTeam();
+    b.textContent = state.registered ? 'joined' : 'failed — see last error';
+    setTimeout(function(){ render(); }, 900);
+  });
+  on('reconnect','click', function(){
+    state.db=null; state.registered=false; state.diag='reconnecting…'; render(); connect();
+  });
+
+  /* ---- bulletin ---- */
+  on('saveShelf','click', async function(){
+    var b = this;
+    await registerTeam({ has: $('myHas').value.slice(0,140),
+                         wants: $('myWants').value.slice(0,140) });
+    if(state.registered){ b.textContent='Posted'; setTimeout(function(){
+      b.textContent='Post to the board'; }, 1200); }
+  });
+  document.querySelectorAll('[data-omode]').forEach(function(b){
+    b.onclick = function(){ state.offerMode = b.dataset.omode; render(); };
+  });
+  on('postOffer','click', async function(){
+    var type = $('oType').value, res = $('oRes').value;
+    var swap = state.offerMode === 'swap' && type !== 'aid';
+    if(res==='credits' && type!=='aid'){
+      state.status='Credits are the money — they can be given as aid, but not sold. '+
+        'To ask for money, use "For money" and set a price.'; render(); return;
+    }
+    var to = $('oTo').value;
+    if(!to){ state.status='No counterparty: no other team has joined the board yet.'; render(); return; }
+    var ret = swap && $('oRet') ? $('oRet').value : null;
+    if(swap && ret === res){
+      state.status='Swapping '+res+' for '+res+' is not a trade.'; render(); return;
+    }
+    var ok = await post(C.posts, {
+      from: state.team, to: to, resource: res, type: type,
+      quantity: Number($('oQty').value)||0,
+      price: (type==='aid'||swap) ? 0 : Number(($('oPrice')||{}).value)||0,
+      return_resource: ret,
+      return_quantity: swap ? Number(($('oRetQty')||{}).value)||0 : 0,
+      deliver_in: type==='forward' ? Math.max(1,Math.min(6,Number($('oDel').value)||1)) : 0,
+      note: $('oNote').value.slice(0,160), round: state.meta.round,
+      status: 'open', ts: Date.now(), market_id: uid()
+    });
+    if(ok){ state.status=''; }
+  });
+  on('sendMsg','click', async function(){
+    var t = $('msgText').value.trim();
+    if(!t) return;
+    await post(C.messages, { from: state.team, to: $('msgTo').value||null,
+      text: t.slice(0,400), ts: Date.now(), round: state.meta.round });
+    if($('msgText')) $('msgText').value='';
+  });
+
+  document.querySelectorAll('[data-accept]').forEach(function(b){
+    b.onclick = function(){ patch(C.posts, b.dataset.accept,
+      { status:'agreed', answered_by: state.team, answered_ts: Date.now(),
+        agreed_round: state.meta.round }); };
+  });
+  document.querySelectorAll('[data-reject]').forEach(function(b){
+    b.onclick = function(){ patch(C.posts, b.dataset.reject,
+      { status:'rejected', answered_by: state.team, answered_ts: Date.now() }); };
+  });
+  document.querySelectorAll('[data-withdraw]').forEach(function(b){
+    b.onclick = function(){ patch(C.posts, b.dataset.withdraw, { status:'withdrawn' }); };
+  });
+  document.querySelectorAll('[data-counter]').forEach(function(b){
+    b.onclick = function(){ state.countering = b.dataset.counter; render(); };
+  });
+  document.querySelectorAll('[data-cancelcounter]').forEach(function(b){
+    b.onclick = function(){ state.countering = null; render(); };
+  });
+  document.querySelectorAll('[data-sendcounter]').forEach(function(b){
+    b.onclick = async function(){
+      var id = b.dataset.sendcounter;
+      var orig = state.posts.filter(function(p){return p._id===id;})[0];
+      if(!orig) return;
+      var q = Number((document.getElementById('cQty_'+id)||{}).value);
+      var pr = Number((document.getElementById('cPrice_'+id)||{}).value);
+      state.countering = null;
+      await patch(C.posts, orig._id, { status:'countered' });
+      await post(C.posts, {
+        from: state.team, to: orig.from, resource: orig.resource, type: orig.type,
+        quantity: isFinite(q) && q > 0 ? q : orig.quantity,
+        price: isFinite(pr) && pr >= 0 ? pr : orig.price,
+        deliver_in: orig.deliver_in, note: 'counter to ' + (orig.note || orig.market_id || ''),
+        counters: orig.market_id || orig._id, round: state.meta.round,
+        status: 'open', ts: Date.now(), market_id: uid()
+      });
+    };
+  });
+
+  /* ---- constitution ---- */
+  on('cName','input', function(e){ state.constitution.name=e.target.value; lsSet('constitution',state.constitution); });
+  document.querySelectorAll('[data-cmt]').forEach(function(i){
+    i.oninput = function(){ state.constitution.commitments[+i.dataset.cmt]=i.value;
+      lsSet('constitution',state.constitution); };
+  });
+  on('addRule','click', function(){
+    state.constitution.rules.push({id:'',when:'always',assert:'',commitment:0});
+    lsSet('constitution',state.constitution); render();
+  });
+  document.querySelectorAll('[data-rid]').forEach(function(i){
+    var h = function(){ state.constitution.rules[+i.dataset.rid][i.dataset.f]=
+      i.dataset.f==='commitment' ? +i.value : i.value;
+      lsSet('constitution',state.constitution);
+      if(i.dataset.f==='assert') render(); };
+    i.addEventListener('change', h);
+    if(i.dataset.f!=='commitment') i.addEventListener('blur', h);
+  });
+  document.querySelectorAll('[data-delrule]').forEach(function(b){
+    b.onclick=function(){ state.constitution.rules.splice(+b.dataset.delrule,1);
+      lsSet('constitution',state.constitution); render(); };
+  });
+
+  /* ---- harness ---- */
+  document.querySelectorAll('[data-kind]').forEach(function(b){
+    b.onclick=function(){ state.harness.kind=b.dataset.kind; lsSet('harness',state.harness); render(); };
+  });
+  ['hPersona','hDoctrine','hPriorities','hTrading'].forEach(function(id){
+    on(id,'input',function(e){
+      state.harness.llm[{hPersona:'persona',hDoctrine:'doctrine',
+        hPriorities:'priorities',hTrading:'trading'}[id]] = e.target.value;
+      lsSet('harness',state.harness);
+    });
+  });
+  document.querySelectorAll('[data-open]').forEach(function(i){
+    i.onchange=function(){
+      var k=i.dataset.open, v=i.value;
+      if(k==='care_job_guarantee') v = (v==='true');
+      else if(k==='working_week_days') v = Number(v);
+      else if(k!=='ubi_design') v = Number(v);
+      state.harness.policy.opening[k]=v; lsSet('harness',state.harness);
+    };
+  });
+  document.querySelectorAll('[data-alloc]').forEach(function(i){
+    i.onchange=function(){ state.harness.policy.opening.allocation[i.dataset.alloc]=
+      (Number(i.value)||0)/100; lsSet('harness',state.harness); };
+  });
+  document.querySelectorAll('[data-auto]').forEach(function(i){
+    i.onchange=function(){ state.harness.policy.opening.automation_target[i.dataset.auto]=
+      (Number(i.value)||0)/100; lsSet('harness',state.harness); };
+  });
+  on('addPRule','click', function(){
+    state.harness.policy.rules.push({id:'',when:'',then:[{verb:'shift',target:'ubi->infrastructure',amount:'5'}]});
+    lsSet('harness',state.harness); render();
+  });
+  document.querySelectorAll('[data-pri]').forEach(function(i){
+    var h=function(){ state.harness.policy.rules[+i.dataset.pri][i.dataset.f]=i.value;
+      lsSet('harness',state.harness); if(i.dataset.f==='when') render(); };
+    i.addEventListener('change',h); i.addEventListener('blur',h);
+  });
+  document.querySelectorAll('[data-pr]').forEach(function(i){
+    i.onchange=function(){
+      var r=state.harness.policy.rules[+i.dataset.pr], a=r.then[+i.dataset.ai];
+      a[i.dataset.f]=i.value; lsSet('harness',state.harness);
+      if(i.dataset.f==='verb') render();
+    };
+  });
+  document.querySelectorAll('[data-addact]').forEach(function(b){
+    b.onclick=function(){ state.harness.policy.rules[+b.dataset.addact].then.push(
+      {verb:'nudge',target:'public_ownership_pct',amount:'0.03'});
+      lsSet('harness',state.harness); render(); };
+  });
+  document.querySelectorAll('[data-delact]').forEach(function(b){
+    b.onclick=function(){ var p=b.dataset.delact.split('.');
+      state.harness.policy.rules[+p[0]].then.splice(+p[1],1);
+      lsSet('harness',state.harness); render(); };
+  });
+  document.querySelectorAll('[data-delprule]').forEach(function(b){
+    b.onclick=function(){ state.harness.policy.rules.splice(+b.dataset.delprule,1);
+      lsSet('harness',state.harness); render(); };
+  });
+  on('tStyle','change',function(e){ state.harness.policy.trade.style=e.target.value; lsSet('harness',state.harness); });
+  on('tNever','change',function(e){ state.harness.policy.trade.never_sell=
+    e.target.value.split(',').map(function(x){return x.trim();}).filter(Boolean);
+    lsSet('harness',state.harness); });
+
+  /* ---- export ---- */
+  on('copyBundle','click', function(){
+    var b=this; navigator.clipboard.writeText(JSON.stringify(bundle(),null,2)).then(function(){
+      b.textContent='Copied'; setTimeout(function(){ b.textContent='Copy the bundle'; },1400);
+    }, function(){ b.textContent='Copy failed'; });
+  });
+  on('dlBundle','click', async function(){
+    var b=this;
+    try {
+      var dl = await claude.use('downloads');
+      if(!dl){ b.textContent='Use Copy instead'; setTimeout(function(){b.textContent='Download';},2000); return; }
+      await dl.save({ filename: (state.team||'team').toLowerCase().replace(/\s+/g,'-')+'.json',
+                      data: JSON.stringify(bundle(),null,2) });
+    } catch(e){ b.textContent='Use Copy instead'; setTimeout(function(){b.textContent='Download';},2000); }
+  });
+}
+
+document.getElementById('tabs').addEventListener('click', function(e){
+  var b=e.target.closest('[data-tab]'); if(!b) return;
+  state.tab=b.dataset.tab; state.status=''; render();
+});
+document.getElementById('btnWho').addEventListener('click', askTeam);
+
+render();
+connect();
+})();
+</script>

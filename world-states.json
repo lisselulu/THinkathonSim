@@ -1,0 +1,1176 @@
+{
+  "schema_version": "1.0",
+  "field_notes": {
+    "meta.round": "1-12. Each round = 2 simulated years.",
+    "meta.year": "2050 at round 1, 2074 at round 12.",
+    "population.by_exposure": "Working-age population split by AI displacement risk. Sums to population.by_age.age_20_64.",
+    "population.employed_total": "Sum of all sector headcounts. Divided by age_20_64 gives indicators.employment_rate.",
+    "sectors.*.automation": "0.0-1.0. Share of sector output produced without human labour.",
+    "sectors.*.capacity": "0.0-1.0+. Output relative to what the population currently demands. Below 1.0 means unmet demand.",
+    "sectors.*.quality": "0-100 service quality. Below 40 = critical (triggers fail gate after 2 consecutive rounds). 40-64 = strained. 65+ = healthy.",
+    "sectors.*.margin": "Operating margin. Negative means the sector runs at a public loss.",
+    "sectors.*.note": "One line of status text shown in the building popup. Written by the sector operator agent.",
+    "fiscal.reserves_bn": "Sovereign reserves in SGD billions. Negative = deficit financing, triggers fiscal crisis gate at sustained negative.",
+    "fiscal.allocation": "Must sum to 1.0. The single most consequential lever split.",
+    "indicators.real_ubi_index": "UBI purchasing power indexed to round 1 = 100. This is the headline scored metric, NOT the nominal dollar figure.",
+    "indicators.consumption_index": "Aggregate household demand indexed to round 1 = 100. Feeds next round's sector output. This is the loop-closing variable.",
+    "indicators.cohesion": "0-100 social cohesion. Below 35 triggers unrest.",
+    "indicators.legitimacy": "0-100. Driven by the gap between the team's founding constitution and what personas actually experience. Below 25 triggers political crisis.",
+    "levers": "The nine student-adjustable controls. Everything else in this file is computed by the engine from these.",
+    "trade.reputation": "0-100. Moved by contract delivery and default. Multiplies the terms other societies will offer.",
+    "personas": "Sample of the fixed 40-household population provided to all teams. Same households, same behavioural responses, every society.",
+    "score": "Societal Resilience Index. Composite out of 100. gates_failed non-empty caps the total regardless of UBI."
+  },
+  "states": {
+    "baseline_2050": {
+      "meta": {
+        "state_label": "Baseline",
+        "society_name": "Republic of Meridian",
+        "round": 1,
+        "year": 2050,
+        "narrative": "Mixed economy. Automation is real but partial. Most people still work. UBI is a modest supplement, not a livelihood."
+      },
+      "population": {
+        "total": 5940000,
+        "by_age": {
+          "age_0_19": 950000,
+          "age_20_64": 3325000,
+          "age_65_plus": 1665000
+        },
+        "by_exposure": {
+          "high": 1330000,
+          "medium": 1165000,
+          "low": 830000
+        },
+        "employed_total": 2125000
+      },
+      "sectors": {
+        "healthcare": {
+          "automation": 0.22,
+          "headcount": 200000,
+          "capacity": 1.02,
+          "quality": 78,
+          "margin": 0.09,
+          "note": "Diagnostics automated, care delivery still human. Waiting times stable."
+        },
+        "care_services": {
+          "automation": 0.12,
+          "headcount": 210000,
+          "capacity": 0.94,
+          "quality": 71,
+          "margin": -0.09,
+          "note": "Chronically understaffed. Ageing demand climbing 4% a round."
+        },
+        "education_research": {
+          "automation": 0.2,
+          "headcount": 170000,
+          "capacity": 1,
+          "quality": 79,
+          "margin": -0.04,
+          "note": "Tutoring augmented, teaching human. Reskilling intake rising."
+        },
+        "transport_logistics": {
+          "automation": 0.45,
+          "headcount": 180000,
+          "capacity": 1.08,
+          "quality": 81,
+          "margin": 0.16,
+          "note": "Autonomous fleet at 45%. Driver redeployment programme running."
+        },
+        "energy_utilities": {
+          "automation": 0.55,
+          "headcount": 55000,
+          "capacity": 1.15,
+          "quality": 77,
+          "margin": 0.14,
+          "note": "The grid. Ninety per cent of demand is now compute, and it is keeping up."
+        },
+        "compute_telecom": {
+          "automation": 0.6,
+          "headcount": 80000,
+          "capacity": 1.15,
+          "quality": 77,
+          "margin": 0.21,
+          "note": "Surplus capacity. Chip imports secure. Exportable."
+        },
+        "housing_construction": {
+          "automation": 0.3,
+          "headcount": 150000,
+          "capacity": 1.04,
+          "quality": 76,
+          "margin": 0.12,
+          "note": "Grid management automated. Maintenance crews unchanged."
+        },
+        "food_agri": {
+          "automation": 0.35,
+          "headcount": 100000,
+          "capacity": 0.98,
+          "quality": 72,
+          "margin": 0.07,
+          "note": "91% imported. Vertical farms cover 9% of calories."
+        },
+        "manufacturing": {
+          "automation": 0.5,
+          "headcount": 260000,
+          "capacity": 1.06,
+          "quality": 74,
+          "margin": 0.19,
+          "note": "Precision engineering and pharma. Highly automated, still the largest single slice of output."
+        },
+        "finance": {
+          "automation": 0.55,
+          "headcount": 200000,
+          "capacity": 1.12,
+          "quality": 80,
+          "margin": 0.24,
+          "note": "Back-office fully automated. Advisory roles holding."
+        },
+        "retail_commerce": {
+          "automation": 0.5,
+          "headcount": 320000,
+          "capacity": 1.06,
+          "quality": 74,
+          "margin": 0.11,
+          "note": "Checkout and logistics automated. Largest displacement exposure."
+        },
+        "public_admin": {
+          "automation": 0.25,
+          "headcount": 100000,
+          "capacity": 1.03,
+          "quality": 82,
+          "margin": -0.06,
+          "note": "The apparatus itself. Slow to automate, and nobody has asked it to."
+        },
+        "public_safety": {
+          "automation": 0.28,
+          "headcount": 100000,
+          "capacity": 1.03,
+          "quality": 82,
+          "margin": -0.02,
+          "note": "Monitoring automated. Response teams human."
+        }
+      },
+      "fiscal": {
+        "gdp_bn": 782,
+        "corporate_profit_bn": 164,
+        "tax_revenue_bn": 118,
+        "reserves_bn": 42,
+        "allocation": {
+          "ubi": 0.45,
+          "infrastructure": 0.4,
+          "reserves": 0.15
+        }
+      },
+      "indicators": {
+        "ubi_monthly_sgd": 680,
+        "real_ubi_index": 100,
+        "employment_rate": 0.64,
+        "gini": 0.37,
+        "cohesion": 72,
+        "legitimacy": 78,
+        "consumption_index": 100
+      },
+      "levers": {
+        "corporate_tax_rate": 0.19,
+        "compute_levy": 0.05,
+        "allocation": {
+          "ubi": 0.45,
+          "infrastructure": 0.4,
+          "reserves": 0.15
+        },
+        "ubi_design": "flat",
+        "reskilling_spend_pct": 0.08,
+        "public_ownership_pct": 0.05,
+        "working_week_days": 5,
+        "care_job_guarantee": false
+      },
+      "trade": {
+        "reputation": 50,
+        "active_contracts": []
+      },
+      "shocks": [],
+      "personas": [
+        {
+          "id": "H07",
+          "name": "Mdm Tan Ah Choo",
+          "age": 68,
+          "household": "Lives alone, 2-room flat",
+          "status": "Retired cleaner. UBI plus small savings. Managing.",
+          "wellbeing": 64
+        },
+        {
+          "id": "H14",
+          "name": "Rahim bin Yusof",
+          "age": 34,
+          "household": "Married, two children",
+          "status": "Logistics coordinator. Employed, watching automation approach his role.",
+          "wellbeing": 71
+        },
+        {
+          "id": "H22",
+          "name": "Nurul Aisyah",
+          "age": 22,
+          "household": "Lives with parents",
+          "status": "Recent ITE graduate. Six months searching for entry-level work.",
+          "wellbeing": 52
+        },
+        {
+          "id": "H31",
+          "name": "Sister Grace Lim",
+          "age": 45,
+          "household": "Single, rental flat",
+          "status": "Nurse. Overworked but secure. Sector is short-staffed.",
+          "wellbeing": 67
+        }
+      ],
+      "news": [
+        "Parliament approves first universal payment at $680 a month.",
+        "Retail sector automation crosses 50% for the first time.",
+        "Care services report third consecutive quarter of staffing shortfall."
+      ],
+      "score": {
+        "total": 58,
+        "gates_failed": []
+      }
+    },
+    "boom_2060": {
+      "meta": {
+        "state_label": "The boom",
+        "society_name": "Republic of Meridian",
+        "round": 6,
+        "year": 2060,
+        "narrative": "Aggressive automation everywhere. Profits and UBI at record highs. The headline number looks like a win. Care and education are quietly failing and reserves are being spent down."
+      },
+      "population": {
+        "total": 5780000,
+        "by_age": {
+          "age_0_19": 880000,
+          "age_20_64": 3090000,
+          "age_65_plus": 1810000
+        },
+        "by_exposure": {
+          "high": 1360000,
+          "medium": 1050000,
+          "low": 680000
+        },
+        "employed_total": 680000
+      },
+      "sectors": {
+        "healthcare": {
+          "automation": 0.71,
+          "headcount": 87008,
+          "capacity": 1.09,
+          "quality": 74,
+          "margin": 0.21,
+          "note": "Throughput up 40%. Patient satisfaction slipping."
+        },
+        "care_services": {
+          "automation": 0.38,
+          "headcount": 148917,
+          "capacity": 0.71,
+          "quality": 58,
+          "margin": -0.14,
+          "note": "Demand outpacing capacity badly. Home visits cut to fortnightly."
+        },
+        "education_research": {
+          "automation": 0.62,
+          "headcount": 76969,
+          "capacity": 0.88,
+          "quality": 61,
+          "margin": 0.06,
+          "note": "Class sizes up. Reskilling backlog at 14 months."
+        },
+        "transport_logistics": {
+          "automation": 0.92,
+          "headcount": 28445,
+          "capacity": 1.22,
+          "quality": 83,
+          "margin": 0.31,
+          "note": "Fully autonomous network. Highest margin in the economy."
+        },
+        "energy_utilities": {
+          "automation": 0.81,
+          "headcount": 14724,
+          "capacity": 0.96,
+          "quality": 69,
+          "margin": 0.24,
+          "note": "Straining. Every new data centre lands on a grid built for a smaller country."
+        },
+        "compute_telecom": {
+          "automation": 0.88,
+          "headcount": 51870,
+          "capacity": 0.96,
+          "quality": 69,
+          "margin": 0.29,
+          "note": "Running near ceiling. Energy costs up 34% since 2050."
+        },
+        "housing_construction": {
+          "automation": 0.78,
+          "headcount": 43504,
+          "capacity": 1.14,
+          "quality": 77,
+          "margin": 0.24,
+          "note": "Predictive maintenance. Outages down."
+        },
+        "food_agri": {
+          "automation": 0.85,
+          "headcount": 17569,
+          "capacity": 1.05,
+          "quality": 70,
+          "margin": 0.18,
+          "note": "Import dependency unchanged at 89%. Efficient but exposed."
+        },
+        "manufacturing": {
+          "automation": 0.95,
+          "headcount": 69606,
+          "capacity": 1.18,
+          "quality": 76,
+          "margin": 0.35,
+          "note": "Running hot. Automated lines at capacity and every order filled."
+        },
+        "finance": {
+          "automation": 0.94,
+          "headcount": 31791,
+          "capacity": 1.31,
+          "quality": 79,
+          "margin": 0.42,
+          "note": "Near-total automation. Largest single tax contributor."
+        },
+        "retail_commerce": {
+          "automation": 0.95,
+          "headcount": 34301,
+          "capacity": 1.18,
+          "quality": 76,
+          "margin": 0.27,
+          "note": "Human-free storefronts. Volumes still rising."
+        },
+        "public_admin": {
+          "automation": 0.59,
+          "headcount": 26772,
+          "capacity": 1.01,
+          "quality": 72,
+          "margin": 0,
+          "note": "Well funded and well staffed. Permits clear in days."
+        },
+        "public_safety": {
+          "automation": 0.66,
+          "headcount": 48524,
+          "capacity": 1.01,
+          "quality": 72,
+          "margin": 0.04,
+          "note": "Response times holding. Community trust declining."
+        }
+      },
+      "fiscal": {
+        "gdp_bn": 1148,
+        "corporate_profit_bn": 412,
+        "tax_revenue_bn": 289,
+        "reserves_bn": 31,
+        "allocation": {
+          "ubi": 0.7,
+          "infrastructure": 0.22,
+          "reserves": 0.08
+        }
+      },
+      "indicators": {
+        "ubi_monthly_sgd": 3240,
+        "real_ubi_index": 268,
+        "employment_rate": 0.22,
+        "gini": 0.44,
+        "cohesion": 61,
+        "legitimacy": 58,
+        "consumption_index": 118
+      },
+      "levers": {
+        "corporate_tax_rate": 0.34,
+        "compute_levy": 0.11,
+        "allocation": {
+          "ubi": 0.7,
+          "infrastructure": 0.22,
+          "reserves": 0.08
+        },
+        "ubi_design": "flat",
+        "reskilling_spend_pct": 0.04,
+        "public_ownership_pct": 0.09,
+        "working_week_days": 5,
+        "care_job_guarantee": false
+      },
+      "trade": {
+        "reputation": 62,
+        "active_contracts": [
+          {
+            "id": "C-041",
+            "type": "spot",
+            "counterparty": "Aurelia",
+            "resource": "compute",
+            "quantity": 1200,
+            "price_bn": 3.4,
+            "delivery_round": 6,
+            "status": "settled"
+          },
+          {
+            "id": "C-047",
+            "type": "forward",
+            "counterparty": "Kestrel",
+            "resource": "food",
+            "quantity": 4800,
+            "price_bn": 6.1,
+            "delivery_round": 8,
+            "status": "open"
+          }
+        ]
+      },
+      "shocks": [],
+      "personas": [
+        {
+          "id": "H07",
+          "name": "Mdm Tan Ah Choo",
+          "age": 78,
+          "household": "Lives alone, 2-room flat",
+          "status": "UBI covers costs comfortably. Home care visits cut from weekly to fortnightly.",
+          "wellbeing": 66
+        },
+        {
+          "id": "H14",
+          "name": "Rahim bin Yusof",
+          "age": 44,
+          "household": "Married, two children",
+          "status": "Displaced in 2056. UBI exceeds his old wage. Has not worked in four years.",
+          "wellbeing": 58
+        },
+        {
+          "id": "H22",
+          "name": "Nurul Aisyah",
+          "age": 32,
+          "household": "Renting, single",
+          "status": "Never entered formal employment. Financially fine, describes life as aimless.",
+          "wellbeing": 49
+        },
+        {
+          "id": "H31",
+          "name": "Sister Grace Lim",
+          "age": 55,
+          "household": "Single, rental flat",
+          "status": "Still nursing. Caseload doubled. Considering leaving the profession.",
+          "wellbeing": 51
+        }
+      ],
+      "news": [
+        "UBI hits record $3,240 as automation dividend peaks.",
+        "Care sector union warns of 'silent collapse' in home visits.",
+        "Reserves down for the fourth consecutive round."
+      ],
+      "score": {
+        "total": 64,
+        "gates_failed": []
+      }
+    },
+    "doom_loop_2068": {
+      "meta": {
+        "state_label": "The doom loop",
+        "society_name": "Republic of Meridian",
+        "round": 10,
+        "year": 2068,
+        "narrative": "The boom path taken to its conclusion. Nobody earns wages, so consumption fell. Falling consumption cut output, which cut profit, which cut the tax base funding the UBI. The transfer that replaced work can no longer be paid for."
+      },
+      "population": {
+        "total": 5650000,
+        "by_age": {
+          "age_0_19": 790000,
+          "age_20_64": 2910000,
+          "age_65_plus": 1950000
+        },
+        "by_exposure": {
+          "high": 1420000,
+          "medium": 940000,
+          "low": 550000
+        },
+        "employed_total": 407400
+      },
+      "sectors": {
+        "healthcare": {
+          "automation": 0.79,
+          "headcount": 51870,
+          "capacity": 0.61,
+          "quality": 42,
+          "margin": -0.08,
+          "note": "Equipment unmaintained. Two of six regional hospitals at reduced service."
+        },
+        "care_services": {
+          "automation": 0.44,
+          "headcount": 73622,
+          "capacity": 0.49,
+          "quality": 24,
+          "margin": -0.22,
+          "note": "Waiting list at 31 months. Home visits effectively ended."
+        },
+        "education_research": {
+          "automation": 0.7,
+          "headcount": 40157,
+          "capacity": 0.62,
+          "quality": 38,
+          "margin": -0.11,
+          "note": "Reskilling programmes suspended. No jobs to reskill toward."
+        },
+        "transport_logistics": {
+          "automation": 0.94,
+          "headcount": 17569,
+          "capacity": 0.74,
+          "quality": 55,
+          "margin": 0.03,
+          "note": "Fleet shrinking. Off-peak routes suspended to cut losses."
+        },
+        "energy_utilities": {
+          "automation": 0.84,
+          "headcount": 8822,
+          "capacity": 0.88,
+          "quality": 53,
+          "margin": 0.06,
+          "note": "Deferred maintenance everywhere. It has not failed yet."
+        },
+        "compute_telecom": {
+          "automation": 0.91,
+          "headcount": 39656,
+          "capacity": 0.88,
+          "quality": 53,
+          "margin": 0.11,
+          "note": "Capacity idle. Nothing to compute for a shrinking economy."
+        },
+        "housing_construction": {
+          "automation": 0.81,
+          "headcount": 28445,
+          "capacity": 0.83,
+          "quality": 58,
+          "margin": 0.02,
+          "note": "Deferred maintenance across three estates. Outages up."
+        },
+        "food_agri": {
+          "automation": 0.87,
+          "headcount": 15059,
+          "capacity": 0.79,
+          "quality": 47,
+          "margin": -0.03,
+          "note": "Import bill exceeds what households can spend. Rationing discussed."
+        },
+        "manufacturing": {
+          "automation": 0.96,
+          "headcount": 41702,
+          "capacity": 0.58,
+          "quality": 31,
+          "margin": 0.02,
+          "note": "Capacity intact, nobody buying. The plants run at a third and the rest is dark."
+        },
+        "finance": {
+          "automation": 0.96,
+          "headcount": 18406,
+          "capacity": 0.68,
+          "quality": 51,
+          "margin": 0.09,
+          "note": "Transaction volume down 44%. Nothing left to intermediate."
+        },
+        "retail_commerce": {
+          "automation": 0.96,
+          "headcount": 21752,
+          "capacity": 0.58,
+          "quality": 31,
+          "margin": -0.06,
+          "note": "Demand collapsed. Automated stores closing faster than they opened."
+        },
+        "public_admin": {
+          "automation": 0.65,
+          "headcount": 16039,
+          "capacity": 0.81,
+          "quality": 49,
+          "margin": -0.09,
+          "note": "Hollowed out. The state can still write rules and can barely enforce them."
+        },
+        "public_safety": {
+          "automation": 0.72,
+          "headcount": 34301,
+          "capacity": 0.81,
+          "quality": 49,
+          "margin": -0.05,
+          "note": "Unrest response consuming the budget. Preventive work stopped."
+        }
+      },
+      "fiscal": {
+        "gdp_bn": 694,
+        "corporate_profit_bn": 118,
+        "tax_revenue_bn": 96,
+        "reserves_bn": -8,
+        "allocation": {
+          "ubi": 0.82,
+          "infrastructure": 0.14,
+          "reserves": 0.04
+        }
+      },
+      "indicators": {
+        "ubi_monthly_sgd": 940,
+        "real_ubi_index": 61,
+        "employment_rate": 0.14,
+        "gini": 0.51,
+        "cohesion": 29,
+        "legitimacy": 21,
+        "consumption_index": 61
+      },
+      "levers": {
+        "corporate_tax_rate": 0.41,
+        "compute_levy": 0.14,
+        "allocation": {
+          "ubi": 0.82,
+          "infrastructure": 0.14,
+          "reserves": 0.04
+        },
+        "ubi_design": "means_tested",
+        "reskilling_spend_pct": 0.02,
+        "public_ownership_pct": 0.09,
+        "working_week_days": 5,
+        "care_job_guarantee": false
+      },
+      "trade": {
+        "reputation": 18,
+        "active_contracts": [
+          {
+            "id": "C-088",
+            "type": "forward",
+            "counterparty": "Kestrel",
+            "resource": "food",
+            "quantity": 4800,
+            "price_bn": 6.1,
+            "delivery_round": 10,
+            "status": "defaulted"
+          }
+        ]
+      },
+      "shocks": [
+        "civil_unrest",
+        "fiscal_crisis",
+        "service_failure_cascade"
+      ],
+      "personas": [
+        {
+          "id": "H07",
+          "name": "Mdm Tan Ah Choo",
+          "age": 86,
+          "household": "Lives alone, 2-room flat",
+          "status": "No home care for 14 months. UBI no longer covers her medication.",
+          "wellbeing": 21
+        },
+        {
+          "id": "H14",
+          "name": "Rahim bin Yusof",
+          "age": 52,
+          "household": "Married, two children",
+          "status": "Twelve years without work. UBI cut twice. Both children unemployed.",
+          "wellbeing": 26
+        },
+        {
+          "id": "H22",
+          "name": "Nurul Aisyah",
+          "age": 40,
+          "household": "Returned to parents' flat",
+          "status": "Has never held a job. Three generations in one flat on three transfers.",
+          "wellbeing": 23
+        },
+        {
+          "id": "H31",
+          "name": "Sister Grace Lim",
+          "age": 63,
+          "household": "Single, rental flat",
+          "status": "Left nursing in 2064. One of the last trained carers to go.",
+          "wellbeing": 34
+        }
+      ],
+      "news": [
+        "Treasury misses UBI disbursement date for the first time.",
+        "Third night of protests over care waiting lists.",
+        "Kestrel declares Meridian in default on food forward contract."
+      ],
+      "score": {
+        "total": 19,
+        "gates_failed": [
+          "insolvency",
+          "service_critical_care_services",
+          "service_critical_retail",
+          "legitimacy_collapse"
+        ]
+      }
+    },
+    "shock_2058": {
+      "meta": {
+        "state_label": "Under shock",
+        "society_name": "Republic of Meridian",
+        "round": 5,
+        "year": 2058,
+        "narrative": "Two shocks land in the same round: a respiratory pandemic and a climate event disrupting regional food exports. Healthcare and food are red, reserves are being spent, and the team must decide what to sacrifice."
+      },
+      "population": {
+        "total": 5830000,
+        "by_age": {
+          "age_0_19": 900000,
+          "age_20_64": 3150000,
+          "age_65_plus": 1780000
+        },
+        "by_exposure": {
+          "high": 1340000,
+          "medium": 1090000,
+          "low": 720000
+        },
+        "employed_total": 1197000
+      },
+      "sectors": {
+        "healthcare": {
+          "automation": 0.58,
+          "headcount": 196604,
+          "capacity": 0.62,
+          "quality": 44,
+          "margin": -0.31,
+          "note": "Surge capacity exceeded. Emergency hiring at 3x normal wage."
+        },
+        "care_services": {
+          "automation": 0.24,
+          "headcount": 138041,
+          "capacity": 0.66,
+          "quality": 54,
+          "margin": -0.19,
+          "note": "Elderly isolation protocol in force. Visits halved on safety grounds."
+        },
+        "education_research": {
+          "automation": 0.44,
+          "headcount": 107087,
+          "capacity": 0.78,
+          "quality": 63,
+          "margin": -0.06,
+          "note": "Schools remote. Reskilling intake paused."
+        },
+        "transport_logistics": {
+          "automation": 0.74,
+          "headcount": 98720,
+          "capacity": 0.86,
+          "quality": 60,
+          "margin": 0.08,
+          "note": "Ridership down 38%. Fleet reassigned to medical logistics."
+        },
+        "energy_utilities": {
+          "automation": 0.73,
+          "headcount": 25919,
+          "capacity": 1.09,
+          "quality": 73,
+          "margin": 0.17,
+          "note": "Holding, at a price. Import costs passed through to every household."
+        },
+        "compute_telecom": {
+          "automation": 0.79,
+          "headcount": 20079,
+          "capacity": 1.09,
+          "quality": 73,
+          "margin": 0.22,
+          "note": "Surplus redirected to healthcare modelling. Export contracts paused."
+        },
+        "housing_construction": {
+          "automation": 0.61,
+          "headcount": 90354,
+          "capacity": 1.01,
+          "quality": 71,
+          "margin": 0.14,
+          "note": "Holding. Household energy use up with everyone indoors."
+        },
+        "food_agri": {
+          "automation": 0.68,
+          "headcount": 80315,
+          "capacity": 0.58,
+          "quality": 51,
+          "margin": -0.12,
+          "note": "Regional harvest failure. Import prices up 61%. Buffer stock at 40 days."
+        },
+        "manufacturing": {
+          "automation": 0.79,
+          "headcount": 122528,
+          "capacity": 0.84,
+          "quality": 66,
+          "margin": 0.14,
+          "note": "Order books thin. Lines idling while the shock works through demand."
+        },
+        "finance": {
+          "automation": 0.81,
+          "headcount": 76969,
+          "capacity": 1.04,
+          "quality": 74,
+          "margin": 0.28,
+          "note": "Unaffected operationally. Now the primary revenue source."
+        },
+        "retail_commerce": {
+          "automation": 0.79,
+          "headcount": 127165,
+          "capacity": 0.84,
+          "quality": 66,
+          "margin": 0.06,
+          "note": "Physical retail closed. Delivery volumes at record."
+        },
+        "public_admin": {
+          "automation": 0.43,
+          "headcount": 47126,
+          "capacity": 0.92,
+          "quality": 68,
+          "margin": -0.13,
+          "note": "Stretched by emergency coordination but holding."
+        },
+        "public_safety": {
+          "automation": 0.48,
+          "headcount": 66093,
+          "capacity": 0.92,
+          "quality": 68,
+          "margin": -0.09,
+          "note": "Enforcing movement rules. Compliance high so far."
+        }
+      },
+      "fiscal": {
+        "gdp_bn": 891,
+        "corporate_profit_bn": 208,
+        "tax_revenue_bn": 171,
+        "reserves_bn": 19,
+        "allocation": {
+          "ubi": 0.52,
+          "infrastructure": 0.44,
+          "reserves": 0.04
+        }
+      },
+      "indicators": {
+        "ubi_monthly_sgd": 1880,
+        "real_ubi_index": 148,
+        "employment_rate": 0.38,
+        "gini": 0.4,
+        "cohesion": 55,
+        "legitimacy": 64,
+        "consumption_index": 88
+      },
+      "levers": {
+        "corporate_tax_rate": 0.31,
+        "compute_levy": 0.09,
+        "allocation": {
+          "ubi": 0.52,
+          "infrastructure": 0.44,
+          "reserves": 0.04
+        },
+        "ubi_design": "age_weighted",
+        "reskilling_spend_pct": 0.06,
+        "public_ownership_pct": 0.18,
+        "working_week_days": 4,
+        "care_job_guarantee": true
+      },
+      "trade": {
+        "reputation": 71,
+        "active_contracts": [
+          {
+            "id": "C-062",
+            "type": "aid",
+            "counterparty": "Aurelia",
+            "resource": "food",
+            "quantity": 2200,
+            "price_bn": 0,
+            "delivery_round": 5,
+            "status": "received"
+          },
+          {
+            "id": "C-064",
+            "type": "spot",
+            "counterparty": "Solano",
+            "resource": "skilled_labour",
+            "quantity": 3400,
+            "price_bn": 2.8,
+            "delivery_round": 5,
+            "status": "settled"
+          }
+        ]
+      },
+      "shocks": [
+        "pandemic",
+        "food_import_disruption"
+      ],
+      "personas": [
+        {
+          "id": "H07",
+          "name": "Mdm Tan Ah Choo",
+          "age": 76,
+          "household": "Lives alone, 2-room flat",
+          "status": "Shielding. Has not left the flat in nine weeks. Food delivery arriving.",
+          "wellbeing": 44
+        },
+        {
+          "id": "H14",
+          "name": "Rahim bin Yusof",
+          "age": 42,
+          "household": "Married, two children",
+          "status": "Redeployed to emergency logistics under the job guarantee. Working again.",
+          "wellbeing": 62
+        },
+        {
+          "id": "H22",
+          "name": "Nurul Aisyah",
+          "age": 30,
+          "household": "Renting, single",
+          "status": "Hired into the care corps three months ago. First job. Exhausted but valued.",
+          "wellbeing": 58
+        },
+        {
+          "id": "H31",
+          "name": "Sister Grace Lim",
+          "age": 53,
+          "household": "Single, rental flat",
+          "status": "Sixty-hour weeks. Sector is holding only because of surge hiring.",
+          "wellbeing": 41
+        }
+      ],
+      "news": [
+        "Health service declares surge protocol. Elective care suspended.",
+        "Food buffer stock drops to 40 days as regional harvest fails.",
+        "Aurelia sends 2,200 units of grain as unconditional aid."
+      ],
+      "score": {
+        "total": 51,
+        "gates_failed": []
+      }
+    },
+    "resilient_2074": {
+      "meta": {
+        "state_label": "The resilient society",
+        "society_name": "Republic of Meridian",
+        "round": 12,
+        "year": 2074,
+        "narrative": "Lower headline UBI than the boom state, and a higher score. Automation was taken in sectors where output scales and deliberately withheld in care and education. Public ownership of automated capital pays a dividend that does not depend on taxing a shrinking profit base."
+      },
+      "population": {
+        "total": 5520000,
+        "by_age": {
+          "age_0_19": 810000,
+          "age_20_64": 2760000,
+          "age_65_plus": 1950000
+        },
+        "by_exposure": {
+          "high": 1080000,
+          "medium": 940000,
+          "low": 740000
+        },
+        "employed_total": 1435000
+      },
+      "sectors": {
+        "healthcare": {
+          "automation": 0.55,
+          "headcount": 171506,
+          "capacity": 1.12,
+          "quality": 84,
+          "margin": 0.11,
+          "note": "Diagnosis automated, treatment human. Waiting times at a record low."
+        },
+        "care_services": {
+          "automation": 0.2,
+          "headcount": 344685,
+          "capacity": 1.08,
+          "quality": 89,
+          "margin": -0.16,
+          "note": "Largest employer in the economy. Job guarantee at living wage."
+        },
+        "education_research": {
+          "automation": 0.31,
+          "headcount": 199114,
+          "capacity": 1.14,
+          "quality": 88,
+          "margin": -0.08,
+          "note": "Smallest class sizes on record. Lifelong learning is now the norm."
+        },
+        "transport_logistics": {
+          "automation": 0.89,
+          "headcount": 51870,
+          "capacity": 1.18,
+          "quality": 86,
+          "margin": 0.26,
+          "note": "Fully autonomous, publicly part-owned. Free at point of use since 2070."
+        },
+        "energy_utilities": {
+          "automation": 0.79,
+          "headcount": 31073,
+          "capacity": 1.24,
+          "quality": 82,
+          "margin": 0.18,
+          "note": "Overbuilt on purpose in the fifties, and that decision is why the rest works."
+        },
+        "compute_telecom": {
+          "automation": 0.86,
+          "headcount": 108760,
+          "capacity": 1.24,
+          "quality": 82,
+          "margin": 0.23,
+          "note": "Net exporter of compute. 40% publicly owned."
+        },
+        "housing_construction": {
+          "automation": 0.74,
+          "headcount": 73622,
+          "capacity": 1.11,
+          "quality": 81,
+          "margin": 0.17,
+          "note": "Grid fully renewable. Maintenance crews retained deliberately."
+        },
+        "food_agri": {
+          "automation": 0.72,
+          "headcount": 61909,
+          "capacity": 1.06,
+          "quality": 79,
+          "margin": 0.09,
+          "note": "Import dependency cut to 64%. Buffer stock at 180 days."
+        },
+        "manufacturing": {
+          "automation": 0.91,
+          "headcount": 146890,
+          "capacity": 1.09,
+          "quality": 77,
+          "margin": 0.27,
+          "note": "Steady. Automated, profitable, and no longer the thing most people do."
+        },
+        "finance": {
+          "automation": 0.93,
+          "headcount": 38484,
+          "capacity": 1.21,
+          "quality": 78,
+          "margin": 0.35,
+          "note": "35% publicly owned. Dividend funds a third of the UBI."
+        },
+        "retail_commerce": {
+          "automation": 0.91,
+          "headcount": 80315,
+          "capacity": 1.09,
+          "quality": 77,
+          "margin": 0.19,
+          "note": "Automated fulfilment, human storefronts kept for neighbourhood centres."
+        },
+        "public_admin": {
+          "automation": 0.47,
+          "headcount": 56496,
+          "capacity": 1.07,
+          "quality": 85,
+          "margin": -0.07,
+          "note": "Smaller than it was and works better than it did."
+        },
+        "public_safety": {
+          "automation": 0.52,
+          "headcount": 70276,
+          "capacity": 1.07,
+          "quality": 85,
+          "margin": -0.03,
+          "note": "Community policing restored. Incident rate lowest since 2048."
+        }
+      },
+      "fiscal": {
+        "gdp_bn": 1042,
+        "corporate_profit_bn": 318,
+        "tax_revenue_bn": 247,
+        "public_dividend_bn": 71,
+        "reserves_bn": 96,
+        "allocation": {
+          "ubi": 0.48,
+          "infrastructure": 0.36,
+          "reserves": 0.16
+        }
+      },
+      "indicators": {
+        "ubi_monthly_sgd": 2150,
+        "real_ubi_index": 214,
+        "employment_rate": 0.52,
+        "gini": 0.29,
+        "cohesion": 84,
+        "legitimacy": 87,
+        "consumption_index": 141
+      },
+      "levers": {
+        "corporate_tax_rate": 0.28,
+        "compute_levy": 0.16,
+        "allocation": {
+          "ubi": 0.48,
+          "infrastructure": 0.36,
+          "reserves": 0.16
+        },
+        "ubi_design": "age_weighted",
+        "reskilling_spend_pct": 0.12,
+        "public_ownership_pct": 0.35,
+        "working_week_days": 4,
+        "care_job_guarantee": true
+      },
+      "trade": {
+        "reputation": 94,
+        "active_contracts": [
+          {
+            "id": "C-201",
+            "type": "forward",
+            "counterparty": "Aurelia",
+            "resource": "compute",
+            "quantity": 6400,
+            "price_bn": 14.2,
+            "delivery_round": 12,
+            "status": "settled"
+          },
+          {
+            "id": "C-206",
+            "type": "aid",
+            "counterparty": "Kestrel",
+            "resource": "food",
+            "quantity": 1800,
+            "price_bn": 0,
+            "delivery_round": 12,
+            "status": "sent"
+          }
+        ]
+      },
+      "shocks": [],
+      "personas": [
+        {
+          "id": "H07",
+          "name": "Mdm Tan Ah Choo",
+          "age": 92,
+          "household": "Assisted living, 2-room flat",
+          "status": "Daily home care. Medication fully covered. Died peacefully in 2076.",
+          "wellbeing": 79
+        },
+        {
+          "id": "H14",
+          "name": "Rahim bin Yusof",
+          "age": 58,
+          "household": "Married, two adult children",
+          "status": "Retrained as a care coordinator in 2059. Four-day week. Both children employed.",
+          "wellbeing": 83
+        },
+        {
+          "id": "H22",
+          "name": "Nurul Aisyah",
+          "age": 46,
+          "household": "Own flat, two children",
+          "status": "Runs a neighbourhood care team of eleven. Entered via the job guarantee.",
+          "wellbeing": 86
+        },
+        {
+          "id": "H31",
+          "name": "Sister Grace Lim",
+          "age": 69,
+          "household": "Single, own flat",
+          "status": "Retired from nursing in 2072 after a full career. Mentors new intake weekly.",
+          "wellbeing": 81
+        }
+      ],
+      "news": [
+        "Sovereign compute dividend now funds a third of the universal payment.",
+        "Care corps becomes the largest employer in the republic.",
+        "Meridian sends unconditional food aid to Kestrel for a second round."
+      ],
+      "score": {
+        "total": 89,
+        "gates_failed": [],
+        "components": {
+          "sustained_real_ubi": 22,
+          "minimum_ubi": 14,
+          "worst_service": 19,
+          "cohesion_equality": 14,
+          "constitutional_fidelity": 13,
+          "fiscal_sustainability": 7
+        }
+      }
+    }
+  }
+}

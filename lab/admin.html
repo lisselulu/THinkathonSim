@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Organisers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Instrument+Serif&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE8DC; --panel:#F7F3EB; --panel2:#FCFAF4; --ink:#3B423E;
+    --rust:#A8624C; --muted:#868C86; --muted2:#585E59; --line:#D6D0C2;
+    --good:#7FA476; --mid:#C9A45E; --bad:#AE6450;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px}
+  :where(button,input,select,textarea):focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+  header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 20px;background:var(--ink);color:var(--panel)}
+  header .brand{font-family:"Instrument Serif",Georgia,serif;font-size:26px;line-height:1}
+  header .sub{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9BA29B}
+  header .tok{margin-left:auto;display:flex;gap:8px;align-items:center}
+  header input{background:#2E3430;color:var(--panel);border:1px solid #58605A;padding:6px 8px;font-family:"Space Mono",monospace;width:130px}
+  .status{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;padding:18px 20px 40px;max-width:1400px;margin:0 auto}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+  section{background:var(--panel);border:2px solid var(--ink);padding:14px 16px}
+  h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:24px;margin:0 0 4px}
+  .lede{color:var(--muted2);font-size:12.5px;margin:0 0 12px;max-width:62ch;line-height:1.5}
+  .mean{border:2px solid var(--line);border-left-width:4px;background:var(--panel2);padding:8px 10px;margin-bottom:8px;overflow-wrap:anywhere}
+  .lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:14px}
+  .card{border:2px solid var(--line);background:var(--panel2);padding:9px 10px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+  .card:hover{border-color:var(--muted)}
+  .card.on{border-color:var(--rust);box-shadow:3px 3px 0 rgba(168,98,76,.25)}
+  .card b{display:block;font-size:13.5px}
+  .card span{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .perceived{font-size:12.5px;line-height:1.5;color:var(--muted2);border-left:3px solid var(--rust);padding:4px 0 4px 10px;margin:4px 0 12px}
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;margin-bottom:12px}
+  label{display:flex;flex-direction:column;gap:4px}
+  input,select,textarea{font:inherit;color:var(--ink);background:var(--panel2);border:2px solid var(--line);padding:6px 8px}
+  textarea{font-family:"Space Mono",monospace;font-size:12px;min-height:130px;resize:vertical}
+  input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--rust)}
+  .sev{font-family:"Space Mono",monospace;font-weight:700}
+  .btn{font:inherit;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;
+    border:2px solid var(--ink);background:var(--panel2);color:var(--ink);cursor:pointer}
+  .btn.pri{background:var(--rust);border-color:var(--rust);color:#FBF7F0}
+  .btn.sm{padding:4px 8px;font-size:10px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .list{display:flex;flex-direction:column;gap:7px}
+  .ev{border:2px solid var(--line);background:var(--panel2);padding:8px 10px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+  .ev.cancelled{opacity:.5}
+  .ev .t{font-weight:800}
+  .ev .m{font-size:11px;color:var(--muted2);font-family:"Space Mono",monospace}
+  .pill{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--ink);background:var(--panel)}
+  .pill.running{background:#E4EEDD;border-color:var(--good)}
+  .pill.failed{background:#F3E0DA;border-color:var(--bad)}
+  .pill.queued{background:#F4EAD4;border-color:var(--mid)}
+  .note{font-size:12px;line-height:1.5;padding:8px 10px;border:2px solid var(--ink);background:#F1ECE0;margin:8px 0}
+  .note.bad{background:#F3E0DA;border-color:var(--bad)}
+  .stack{display:flex;flex-direction:column;gap:18px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--ink);padding:4px 6px 5px 0}
+  td{border-bottom:1px solid var(--line);padding:6px 6px 6px 0;font-variant-numeric:tabular-nums}
+  a{color:var(--rust)}
+  .muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand">Meridian organisers</div>
+    <div class="sub">the environment · weather, crises, conflict</div>
+  </div>
+  <div class="tok">
+    <span class="status" id="tokStatus">no token</span>
+    <input id="token" type="password" placeholder="admin token" aria-label="Organiser token" autocomplete="off">
+  </div>
+</header>
+
+<main>
+  <div class="stack">
+    <section aria-labelledby="fireTitle">
+      <h2 id="fireTitle">Change the world</h2>
+      <p class="lede">An event has a physical effect the economy feels and a description people hear. Nobody's decision is edited: citizens and firms respond to what happened however they respond.</p>
+      <div class="lbl" style="margin-bottom:6px">From the library</div>
+      <div class="lib" id="lib"></div>
+      <div id="perceived" class="perceived" hidden></div>
+      <div class="controls">
+        <label><span class="lbl">Severity <span class="sev" id="sevOut">1.0</span></span>
+          <input id="sev" type="range" min="0.2" max="3" step="0.1" value="1"></label>
+        <label><span class="lbl">Duration (rounds)</span><input id="dur" type="number" min="1" max="12" placeholder="library default"></label>
+        <label><span class="lbl">When</span>
+          <select id="when"><option value="0">Next round of each run</option></select></label>
+        <label><span class="lbl">Teams</span><input id="teams" type="text" placeholder="all teams, or: alpha, beta"></label>
+      </div>
+      <div class="row">
+        <button class="btn pri" id="fire" disabled>Fire event</button>
+        <span id="fireMsg" class="muted" style="font-size:12px"></span>
+      </div>
+    </section>
+
+    <section aria-labelledby="customTitle">
+      <h2 id="customTitle">Invent an event</h2>
+      <p class="lede">Write one yourself, or describe it and let the model draft it. A draft is never fired until you press the button.</p>
+      <div class="row" style="margin-bottom:8px">
+        <input id="brief" type="text" style="flex:1;min-width:220px" placeholder="e.g. a strike at the port spreads to the shipyards">
+        <button class="btn" id="draft">Draft with the model</button>
+      </div>
+      <label><span class="lbl">Event</span>
+        <textarea id="custom" spellcheck="false">{
+  "label": "Port strike",
+  "category": "labour",
+  "duration": 1,
+  "perceived": "Dock workers have walked out. Ships are queuing offshore and shelves are emptying.",
+  "effects": {
+    "capacity_mult": { "transport_logistics": 0.7, "food_agri": 0.9 },
+    "import_price": 0.06,
+    "cohesion": -2
+  }
+}</textarea></label>
+      <div class="row" style="margin-top:8px">
+        <button class="btn pri" id="fireCustom">Fire this event</button>
+        <span id="customMsg" class="muted" style="font-size:12px"></span>
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section aria-labelledby="forceTitle">
+      <h2 id="forceTitle">In force</h2>
+      <p class="lede">Every event fired this session, scheduled or live. Cancelling stops it from the next round on.</p>
+      <div class="list" id="events"></div>
+    </section>
+
+    <section aria-labelledby="weatherTitle">
+      <h2 id="weatherTitle">Unannounced weather</h2>
+      <p class="lede">Random events drawn from the room's seed, so every team given that seed gets the same ones. Nobody is told in advance.</p>
+      <div class="controls">
+        <label style="flex-direction:row;align-items:center;gap:8px"><input id="wOn" type="checkbox"> <span>Enabled</span></label>
+        <label><span class="lbl">Chance per round <span class="sev" id="wRateOut">15%</span></span>
+          <input id="wRate" type="range" min="0" max="0.6" step="0.05" value="0.15"></label>
+      </div>
+      <div class="row"><button class="btn" id="wSave">Save weather</button><span id="wMsg" class="muted" style="font-size:12px"></span></div>
+    </section>
+
+    <section aria-labelledby="clockTitle">
+      <h2 id="clockTitle">The room clock</h2>
+      <p class="lede">Rounds advance whether teams are ready or not. Every screen in the room follows this clock.</p>
+      <div class="controls">
+        <label><span class="lbl">Minutes a round</span><input id="clkMin" type="number" min="1" max="600" value="120"></label>
+        <label><span class="lbl">Round now</span><input id="clkRound" type="number" min="1" max="12" value="1"></label>
+      </div>
+      <div class="row">
+        <button class="btn" id="clkSet">Set length</button>
+        <button class="btn pri" id="clkStart">Start</button>
+        <button class="btn" id="clkPause">Pause</button>
+        <button class="btn" id="clkRestart">Restart round</button>
+        <button class="btn" id="clkGo">Go to round</button>
+        <button class="btn" id="clkDemo">Dry run: 30-second rounds</button>
+      </div>
+      <div class="muted" id="clkMsg" style="font-size:12.5px;margin-top:8px"></div>
+    </section>
+
+    <section aria-labelledby="holdTitle">
+      <h2 id="holdTitle">Hold the room</h2>
+      <p class="lede">Pauses every run between decisions. Nothing is skipped and nothing is replaced by a rule; runs carry on from where they stopped. Runs also wait by themselves when the model server stops answering, and say so here.</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn" id="holdBtn">Pause the room</button>
+        <span class="muted" id="holdMsg" style="font-size:12.5px"></span>
+      </div>
+      <div id="holdList" style="margin-top:10px"></div>
+    </section>
+
+    <section aria-labelledby="meanTitle">
+      <h2 id="meanTitle">What actions mean</h2>
+      <p class="lede">The <b>starter dictionary</b> fixes what ordinary actions mean for every team. Everything beyond it belongs to the team whose people invented it, and no other team's run ever reads it. Correct one here and your version wins in every run from now on; the report marks it as an organiser's.</p>
+      <div class="row" style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="meanQ" type="text" placeholder="Search actions or behaviours" aria-label="Search actions" style="flex:1">
+        <button class="btn" id="meanGo">Search</button>
+      </div>
+      <div class="muted" id="meanMsg" style="font-size:12.5px;margin-bottom:6px"></div>
+      <div id="meanList"></div>
+    </section>
+
+    <section aria-labelledby="runsTitle">
+      <h2 id="runsTitle">Runs</h2>
+      <p class="lede">Agent runs teams have started. Live events land on each at its next round.</p>
+      <table><thead><tr><th>Team</th><th>Status</th><th>Year</th><th></th></tr></thead><tbody id="runs"></tbody></table>
+    </section>
+  </div>
+</main>
+
+<script>
+(function(){
+'use strict';
+var state = { library: [], chosen: null, data: null };
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+function token(){ try { return localStorage.getItem('meridian-admin-token') || ''; } catch (e) { return ''; } }
+function setToken(v){ try { localStorage.setItem('meridian-admin-token', v); } catch (e) {} paintToken(); }
+function paintToken(){ $('tokStatus').textContent = token() ? 'token set' : 'no token'; $('token').value = token(); }
+
+async function post(path, body){
+  var r = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-token': token() },
+                              body: JSON.stringify(body || {}) });
+  var j = await r.json().catch(function(){ return {}; });
+  if (r.status === 403) throw new Error('The organiser token is missing or wrong. It is printed when the server starts.');
+  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+
+async function load(){
+  var r = await fetch('/api/admin/director', { cache: 'no-store' });
+  state.data = await r.json();
+  if (!state.library.length) { state.library = state.data.library; paintLibrary(); }
+  paintEvents(); paintRuns(); paintWeather();
+}
+
+function paintLibrary(){
+  $('lib').innerHTML = state.library.map(function(e){
+    return '<button class="card' + (state.chosen === e.id ? ' on' : '') + '" data-ev="' + e.id + '">' +
+      '<b>' + esc(e.label) + '</b><span>' + esc(e.category) + ' · ' + e.duration + ' round' + (e.duration > 1 ? 's' : '') + '</span></button>';
+  }).join('');
+  document.querySelectorAll('[data-ev]').forEach(function(b){
+    b.onclick = function(){ state.chosen = b.dataset.ev; paintLibrary();
+      var e = state.library.find(function(x){ return x.id === state.chosen; });
+      $('perceived').hidden = false; $('perceived').textContent = e.perceived; $('fire').disabled = false; };
+  });
+  var opts = '<option value="0">Next round of each run</option>';
+  for (var r = 2; r <= 12; r++) opts += '<option value="' + r + '">Round ' + r + ' (' + (2048 + r * 2) + ')</option>';
+  $('when').innerHTML = opts;
+}
+
+function teamsList(){
+  var t = $('teams').value.split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+  return t.length ? t : null;
+}
+
+function paintEvents(){
+  var evs = (state.data.events || []).slice().reverse();
+  $('events').innerHTML = evs.length ? evs.map(function(e){
+    var when = e.start === 0 ? 'next round of each run' : 'rounds ' + e.start + (e.end > e.start ? '–' + e.end : '');
+    return '<div class="ev' + (e.cancelled ? ' cancelled' : '') + '"><div><div class="t">' + esc(e.label) +
+      ' <span class="pill">' + esc(e.source) + '</span></div><div class="m">severity ' + e.severity + ' · ' + when +
+      ' · ' + (e.teams === 'all' ? 'all teams' : esc(e.teams.join(', '))) + '</div></div>' +
+      (e.cancelled ? '<span class="muted">cancelled</span>' : '<button class="btn sm" data-cancel="' + e.id + '">Cancel</button>') + '</div>';
+  }).join('') : '<div class="muted">Nothing has happened yet.</div>';
+  document.querySelectorAll('[data-cancel]').forEach(function(b){
+    b.onclick = async function(){ try { await post('/api/admin/events/cancel', { id: b.dataset.cancel }); load(); } catch (e) { alert(e.message); } };
+  });
+}
+
+function paintRuns(){
+  var runs = state.data.runs || [];
+  $('runs').innerHTML = runs.length ? runs.slice().reverse().map(function(r){
+    return '<tr><td>' + esc(r.team) + '</td><td><span class="pill ' + esc(r.status) + '">' + esc(r.status) + '</span></td>' +
+      '<td>' + (r.year || '–') + '</td><td><a href="/runs/' + encodeURIComponent(r.id) + '">evidence</a></td></tr>';
+  }).join('') : '<tr><td colspan="4" class="muted">No runs yet.</td></tr>';
+}
+
+function paintWeather(){
+  if (document.activeElement === $('wRate')) return;
+  var w = state.data.weather || {};
+  $('wOn').checked = !!w.enabled; $('wRate').value = w.rate == null ? 0.15 : w.rate;
+  $('wRateOut').textContent = Math.round($('wRate').value * 100) + '%';
+}
+
+$('token').addEventListener('change', function(e){ setToken(e.target.value.trim()); loadMeanings(); });
+
+/* ---- what actions mean ---- */
+async function loadMeanings(){
+  var q = $('meanQ').value.trim();
+  var r = await fetch('/api/admin/interpretations?q=' + encodeURIComponent(q), { headers: { 'x-admin-token': token() }, cache: 'no-store' });
+  if (r.status === 403) { $('meanMsg').textContent = 'Enter the organiser token above to review interpretations.'; $('meanList').innerHTML = ''; return; }
+  var j = await r.json();
+  $('meanMsg').textContent = j.total ? (j.total + ' interpreted action' + (j.total === 1 ? '' : 's') + (j.total > 300 ? ', showing the first 300' : '')) :
+    'Nothing interpreted yet. Actions appear here after the first agent run with a model.';
+  $('meanList').innerHTML = j.items.map(function(x, i){
+    var it = x.interpretation;
+    var fx = (it.effects || []).map(function(e){ return e.channel + (e.sector ? ' ' + e.sector.replace(/_/g, ' ') : '') + ' ' + e.amount; }).join(', ') || 'no effect';
+    return '<div class="mean" style="border-left-color:' + (x.overridden ? 'var(--rust)' : 'var(--line2)') + '">' +
+      '<div><b>' + esc(x.key) + '</b> <span class="pill">' + esc(x.owner === 'starter' ? 'starter dictionary' : x.owner) + '</span> ' + (x.overridden ? '<span class="pill">corrected</span>' : '') + '</div>' +
+      '<div class="muted" style="font-size:12.5px">' + esc(it.label) + ': ' + esc(fx) + ' · ' + it.hours_per_week + ' h/wk' +
+        (it.requires && it.requires.job ? ' · needs a job' : '') + (it.requires && it.requires.min_savings_months ? ' · needs ' + it.requires.min_savings_months + ' months savings' : '') + '</div>' +
+      '<details style="margin-top:4px"><summary style="cursor:pointer;font-size:12.5px">Correct this</summary>' +
+        '<textarea data-mean="' + i + '" rows="8" style="width:100%;font-family:monospace;font-size:12px;margin-top:6px" aria-label="Interpretation for ' + esc(x.key) + '">' +
+          esc(JSON.stringify({ label: it.label, requires: it.requires, hours_per_week: it.hours_per_week, money_share: it.money_share, effects: it.effects, lasting: it.lasting }, null, 2)) + '</textarea>' +
+        '<div style="display:flex;gap:8px;margin-top:6px"><button class="btn" data-save="' + i + '">Save correction</button>' +
+          (x.overridden ? '<button class="btn" data-reset="' + i + '">Go back to the interpreter\'s</button>' : '') + '</div>' +
+      '</details></div>';
+  }).join('');
+  $('meanList').querySelectorAll('[data-save]').forEach(function(b){
+    b.onclick = async function(){
+      var i = +b.dataset.save, key = j.items[i].key, body;
+      try { body = JSON.parse($('meanList').querySelector('[data-mean="' + i + '"]').value); }
+      catch (e) { $('meanMsg').textContent = 'That is not valid JSON: ' + e.message; return; }
+      try { await post('/api/admin/interpretations', { key: key, interpretation: body }); $('meanMsg').textContent = 'Saved. "' + key + '" now means your version in every run.'; loadMeanings(); }
+      catch (e) { $('meanMsg').textContent = e.message; }
+    };
+  });
+  $('meanList').querySelectorAll('[data-reset]').forEach(function(b){
+    b.onclick = async function(){
+      var key = j.items[+b.dataset.reset].key;
+      try { await post('/api/admin/interpretations', { key: key, interpretation: null }); $('meanMsg').textContent = 'Removed your correction to "' + key + '".'; loadMeanings(); }
+      catch (e) { $('meanMsg').textContent = e.message; }
+    };
+  });
+}
+/* ---- hold the room ---- */
+async function loadHold(){
+  var j = await (await fetch('/api/admin/room', { cache: 'no-store' })).json();
+  $('holdBtn').textContent = j.paused ? 'Resume the room' : 'Pause the room';
+  $('holdBtn').dataset.paused = j.paused ? '1' : '';
+  $('holdMsg').textContent = j.paused ? 'Paused since ' + new Date(j.since).toLocaleTimeString() + '. ' + (j.reason || '') : (j.running.length ? j.running.length + ' run' + (j.running.length === 1 ? '' : 's') + ' going.' : 'No runs going.');
+  $('holdList').innerHTML = j.running.map(function(r){
+    return '<div class="mean" style="border-left-color:' + (r.waiting ? 'var(--rust)' : 'var(--line2)') + '"><b>' + esc(r.team) + '</b> in ' + (r.year || 2050) +
+      (r.waiting ? ' <span class="pill">waiting</span><div class="muted" style="font-size:12.5px">' + esc(r.waiting.reason) + (r.waiting.attempts ? ', asked ' + r.waiting.attempts + ' times' : '') + '</div>' : '') + '</div>';
+  }).join('');
+}
+$('holdBtn').onclick = async function(){
+  try { await post('/api/admin/room', { paused: !$('holdBtn').dataset.paused }); loadHold(); }
+  catch (e) { $('holdMsg').textContent = e.message; }
+};
+loadHold(); setInterval(loadHold, 4000);
+
+$('meanGo').onclick = loadMeanings;
+$('meanQ').addEventListener('keydown', function(e){ if (e.key === 'Enter') loadMeanings(); });
+loadMeanings();
+$('sev').addEventListener('input', function(){ $('sevOut').textContent = Number($('sev').value).toFixed(1); });
+$('wRate').addEventListener('input', function(){ $('wRateOut').textContent = Math.round($('wRate').value * 100) + '%'; });
+
+$('fire').onclick = async function(){
+  if (!state.chosen) return;
+  $('fireMsg').textContent = 'Firing…';
+  try {
+    var j = await post('/api/admin/events', { event: state.chosen, severity: Number($('sev').value),
+      duration: $('dur').value ? Number($('dur').value) : undefined, round: Number($('when').value), teams: teamsList() });
+    $('fireMsg').textContent = 'Fired: ' + j.event.label + ', severity ' + j.event.severity + '.';
+    load();
+  } catch (e) { $('fireMsg').textContent = e.message; }
+};
+
+$('fireCustom').onclick = async function(){
+  var ev;
+  try { ev = JSON.parse($('custom').value); } catch (e) { $('customMsg').textContent = 'That is not valid JSON: ' + e.message; return; }
+  $('customMsg').textContent = 'Firing…';
+  try {
+    var j = await post('/api/admin/events', { custom: ev, severity: Number($('sev').value), round: Number($('when').value), teams: teamsList() });
+    $('customMsg').textContent = 'Fired: ' + j.event.label + '.';
+    load();
+  } catch (e) { $('customMsg').textContent = e.message; }
+};
+
+$('draft').onclick = async function(){
+  var brief = $('brief').value.trim();
+  if (!brief) { $('customMsg').textContent = 'Describe the event first.'; return; }
+  $('customMsg').textContent = 'Drafting…'; $('draft').disabled = true;
+  try {
+    var j = await post('/api/admin/draft', { brief: brief });
+    $('custom').value = JSON.stringify(j.draft, null, 2);
+    $('customMsg').textContent = 'Drafted. Review it before firing.';
+  } catch (e) { $('customMsg').textContent = e.message; }
+  $('draft').disabled = false;
+};
+
+$('wSave').onclick = async function(){
+  try {
+    var j = await post('/api/admin/weather', { enabled: $('wOn').checked, rate: Number($('wRate').value) });
+    $('wMsg').textContent = j.weather.enabled ? 'On, ' + Math.round(j.weather.rate * 100) + '% a round.' : 'Off.';
+  } catch (e) { $('wMsg').textContent = e.message; }
+};
+
+function clock(body) {
+  return fetch('/api/clock', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json(); }).then(paintClock);
+}
+function paintClock() {
+  return fetch('/api/state', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (st) {
+    var c = st.clock || {};
+    var left = c.remainingMs == null ? null : Math.round(c.remainingMs / 1000);
+    $('clkMsg').textContent = 'Round ' + st.round + ' (' + (2048 + st.round * 2) + ') · ' +
+      (c.running ? 'running, ' + (left == null ? '' : Math.floor(left / 60) + 'm ' + (left % 60) + 's to the next round') : 'stopped') +
+      ' · ' + Math.round((c.lengthMs || 0) / 60000) + ' minutes a round';
+    if (document.activeElement !== $('clkRound')) $('clkRound').value = st.round;
+  }).catch(function () {});
+}
+$('clkSet').onclick = function () { clock({ action: 'length', minutes: Number($('clkMin').value) || 120 }); };
+$('clkStart').onclick = function () { clock({ action: 'start' }); };
+$('clkPause').onclick = function () { clock({ action: 'pause' }); };
+$('clkRestart').onclick = function () { clock({ action: 'restart' }); };
+$('clkDemo').onclick = function () { clock({ action: 'length', seconds: 30 }).then(function () { clock({ action: 'start' }); }); };
+$('clkGo').onclick = function () {
+  fetch('/api/round', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ round: Number($('clkRound').value) || 1 }) }).then(paintClock);
+};
+setInterval(paintClock, 2000);
+paintClock();
+
+paintToken();
+load().catch(function(e){ $('events').innerHTML = '<div class="note bad">Could not reach the server: ' + esc(e.message) + '</div>'; });
+setInterval(function(){ load().catch(function(){}); }, 4000);
+})();
+</script>
+</body>
+</html>

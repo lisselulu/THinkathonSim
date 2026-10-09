@@ -1,0 +1,2495 @@
+<title>Meridian Policy Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Instrument+Serif&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDE8DC; --panel:#F7F3EB; --panel2:#FCFAF4; --ink:#3B423E;
+    --rust:#A8624C; --muted:#868C86; --muted2:#585E59; --line:#D6D0C2;
+    --good:#7FA476; --mid:#C9A45E; --bad:#AE6450;
+    --ubi:#A8624C; --infra:#7FA3AC; --resv:#88A87E;
+    --shadow:6px 6px 0 rgba(22,21,15,0.12);
+  }
+  *{box-sizing:border-box}
+  :where(button,[href],input,textarea):focus-visible{outline:3px solid var(--rust);outline-offset:2px}
+  h1,h2,h3,.card .cf,.callout .t{text-wrap:balance}
+  .mono,.n,.cv,.scoreval,.allocnum,.sq,table.sg th.rn{font-variant-numeric:tabular-nums}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px}
+  h1,h2,h3{margin:0;font-weight:400}
+  .serif{font-family:"Instrument Serif",Georgia,serif}
+  .mono{font-family:"Space Mono",ui-monospace,monospace}
+  .lbl{font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---- header ---- */
+  header{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:20px;
+    padding:0 26px;min-height:78px;background:var(--ink);color:var(--panel);flex-wrap:wrap}
+  header .title{font-family:"Instrument Serif",Georgia,serif;font-size:31px;line-height:1}
+  header .sub{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:#9BA29B;margin-top:3px}
+  .presets{display:flex;gap:7px;flex-wrap:wrap}
+  .presets button{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:8px 11px;cursor:pointer;border:2px solid #4A4636;background:transparent;color:#9BA29B;
+    font-family:inherit}
+  .presets button:hover{border-color:var(--panel);color:var(--panel)}
+  .presets button.on{background:var(--panel);color:var(--ink);border-color:var(--panel)}
+  .scorebox{margin-left:auto;display:flex;align-items:center;gap:16px}
+  .scoreval{font-family:"Space Mono",monospace;font-size:38px;font-weight:700;line-height:1}
+  .gatechips{display:flex;gap:5px;flex-wrap:wrap;max-width:330px}
+  .gatechip{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:4px 7px;background:#A85B49;color:#FAF6EE;border:1px solid #C4796A}
+  .gateok{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7FA476}
+
+  /* ---- layout ---- */
+  .wrap{display:grid;grid-template-columns:352px minmax(0,1fr);gap:20px;padding:20px 26px 60px}
+  @media(max-width:1180px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:3px solid var(--ink);box-shadow:var(--shadow);padding:16px 17px}
+  .panel + .panel{margin-top:18px}
+  .panel h3{font-size:12px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;
+    padding-bottom:9px;margin-bottom:13px;border-bottom:2px solid var(--ink)}
+
+  /* ---- controls ---- */
+  .row{margin-bottom:13px}
+  .rowhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px}
+  .rowhead .n{font-family:"Space Mono",monospace;font-size:13px;font-weight:700}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;
+    background:var(--line);border:2px solid var(--ink);outline:none;margin:0;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:19px;
+    background:var(--panel2);border:2px solid var(--ink);cursor:pointer;margin-top:-1px}
+  input[type=range]::-moz-range-thumb{width:15px;height:19px;background:var(--panel2);
+    border:2px solid var(--ink);border-radius:0;cursor:pointer}
+  input[type=range]:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+  .seg{display:flex;gap:5px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:44px;font-family:inherit;font-size:11px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;padding:8px 6px;cursor:pointer;
+    border:2px solid var(--ink);background:var(--panel2);color:var(--muted)}
+  .seg button.on{background:var(--ink);color:var(--panel)}
+
+  /* allocation mixing desk */
+  .alloc{display:flex;gap:12px;align-items:flex-end;height:132px;margin-bottom:6px}
+  .alloccol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+  .allocbar{position:relative;flex:1;width:100%;background:var(--line);border:2px solid var(--ink);
+    cursor:ns-resize;overflow:hidden}
+  .allocfill{position:absolute;left:0;right:0;bottom:0}
+  .allocnum{font-family:"Space Mono",monospace;font-size:13px;font-weight:700}
+
+  /* sectors */
+  .secgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px}
+  @media(max-width:520px){.secgrid{grid-template-columns:1fr}}
+
+  /* ---- charts ---- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:18px}
+  .card{background:var(--panel);border:3px solid var(--ink);box-shadow:var(--shadow);padding:14px 15px 11px}
+  .card .ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:2px}
+  .card .cv{font-family:"Space Mono",monospace;font-size:25px;font-weight:700;line-height:1.15}
+  .card .cd{font-size:11px;font-weight:700;letter-spacing:.03em}
+  .card svg{display:block;width:100%;height:auto;margin:6px 0 4px}
+  .card .cf{font-size:11px;color:var(--muted2);line-height:1.45;min-height:2.9em}
+
+  .callout{background:var(--ink);color:var(--panel);border:3px solid var(--ink);
+    box-shadow:var(--shadow);padding:15px 18px;margin-bottom:18px}
+  .callout .k{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+    color:#C9A45E;margin-bottom:6px}
+  .callout .t{font-family:"Instrument Serif",Georgia,serif;font-size:22px;line-height:1.3}
+  .callout .t em{font-style:normal;color:#E3A88F}
+
+  /* round inspector */
+  .scrub{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .pips{display:flex;gap:4px;flex:1;min-width:200px}
+  .pip{flex:1;height:26px;border:2px solid var(--ink);background:var(--panel2);cursor:pointer;
+    font-family:"Space Mono",monospace;font-size:10px;font-weight:700;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;padding:0}
+  .pip.on{background:var(--ink);color:var(--panel)}
+  .btn.play{font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.07em;
+    text-transform:uppercase;padding:8px 13px;cursor:pointer;border:2px solid var(--ink);
+    background:var(--rust);color:#FAF6EE;flex:0 0 auto}
+  .btn.play:hover{background:var(--ink)}
+  .speed{font-family:inherit;font-size:11px;font-weight:700;padding:7px 6px;
+    border:2px solid var(--ink);background:var(--panel2);color:var(--ink);flex:0 0 auto}
+  .clock{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto;min-width:96px}
+  .clock .yr{font-size:24px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .clock .lbl{font-size:10px;margin-top:2px}
+  .pip.past{background:var(--line)}
+  .secrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:8px}
+  .sectile{border:2px solid var(--ink);background:var(--panel2);padding:8px 9px}
+  .sectile .sn{font-size:11px;font-weight:800;letter-spacing:.04em;line-height:1.25;
+    display:flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border:2px solid var(--ink);flex:0 0 auto}
+  .sectile .sq{font-family:"Space Mono",monospace;font-size:19px;font-weight:700;margin-top:3px}
+  .sectile .sm{font-size:10px;color:var(--muted2);letter-spacing:.02em;margin-top:1px}
+
+  /* shock grid */
+  .shockgrid{overflow-x:auto}
+  table.sg{border-collapse:collapse;font-size:11px;width:100%;min-width:520px}
+  table.sg th{font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    padding:3px 4px;text-align:left;font-size:10px}
+  table.sg th.rn{text-align:center;font-family:"Space Mono",monospace;font-size:11px}
+  table.sg td{padding:2px}
+  .scell{width:100%;height:22px;border:2px solid var(--line);background:var(--panel2);cursor:pointer;
+    padding:0;display:block}
+  .scell.on{background:var(--rust);border-color:var(--ink)}
+  .scell:hover{border-color:var(--ink)}
+
+  /* ---- city view ---- */
+  .cityfit{position:relative;width:100%;overflow:hidden;border:2px solid var(--ink);
+    background:linear-gradient(170deg,#E7E1D2 0%,#EFEADD 55%,#E4DED0 100%);margin-bottom:12px}
+  .cityfit .city-scene{transform-origin:0 0}
+  .city-group{position:absolute;left:0;top:0;width:0;height:0;cursor:pointer}
+  .city-puff{position:absolute;width:34px;height:34px;border-radius:50%;background:#EDE3D0;
+    pointer-events:none;animation:puff 4.2s linear infinite;opacity:0}
+  @keyframes puff{0%{transform:translateY(0) scale(.6);opacity:.5}
+                  100%{transform:translateY(-72px) scale(1.6);opacity:0}}
+  .city-label{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:center;
+    gap:8px;padding:4px 11px;border-radius:999px;background:var(--panel);border:2px solid transparent;
+    box-shadow:0 2px 8px rgba(59,66,62,.10);cursor:pointer;font-family:inherit;white-space:nowrap}
+  .city-label.on{border-color:var(--ink);background:var(--panel2)}
+  .city-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .city-name{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--ink)}
+  .city-q{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .city-plaza{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;
+    align-items:center;gap:1px;padding:8px 16px;background:var(--panel);border:2px solid var(--ink);
+    box-shadow:4px 4px 0 rgba(22,21,15,.14);z-index:55;white-space:nowrap}
+  .city-plaza-v{font-family:"Space Mono",monospace;font-size:21px;font-weight:700;
+    font-variant-numeric:tabular-nums}
+  .city-plaza-u{font-size:11px;font-weight:700;color:var(--muted2);margin-left:2px}
+  .citylegend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .citylegend .li{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+    letter-spacing:.04em;color:var(--muted2)}
+  .selcard{border:3px solid var(--ink);background:var(--panel2);padding:12px 14px;margin-bottom:12px;
+    display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+  .selcard .sh{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted)}
+  .selcard .st{font-family:"Instrument Serif",Georgia,serif;font-size:24px;line-height:1.1}
+  .selstat{min-width:86px}
+  .selstat .k{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .selstat .v{font-family:"Space Mono",monospace;font-size:17px;font-weight:700;
+    font-variant-numeric:tabular-nums}
+  .selclose{margin-left:auto;font-family:inherit;font-size:16px;font-weight:800;line-height:1;
+    border:2px solid var(--ink);background:var(--panel);cursor:pointer;padding:4px 9px;color:var(--ink)}
+
+  .vitals{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+  .vital{border:2px solid var(--ink);background:var(--panel2);padding:8px 9px}
+  .vital .vv{font-family:"Space Mono",monospace;font-size:17px;font-weight:700;
+    font-variant-numeric:tabular-nums;line-height:1.1}
+  .vital .vk{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--muted);margin-top:3px}
+  .feedgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.feedgrid{grid-template-columns:1fr}}
+  ul.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  ul.feed li{font-size:12px;line-height:1.45;padding-left:15px;position:relative;color:var(--ink)}
+  ul.feed li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;
+    background:var(--rust)}
+  ul.feed li.shock::before{background:var(--bad)}
+  .hh{display:flex;flex-direction:column;gap:7px}
+  .hhrow{display:flex;align-items:center;gap:9px;font-size:12px}
+  .hhrow .nm{font-weight:700;min-width:118px}
+  .hhrow .ag{color:var(--muted2);font-size:11px;min-width:30px}
+  .hhbar{flex:1;height:9px;background:var(--line);border:1px solid var(--ink);position:relative}
+  .hhbar i{position:absolute;left:0;top:0;bottom:0;display:block}
+  .hhrow .wb{font-family:"Space Mono",monospace;font-weight:700;font-size:12px;min-width:24px;
+    text-align:right;font-variant-numeric:tabular-nums}
+
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .btn{font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:9px 13px;cursor:pointer;border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+  .btn:hover{background:var(--ink);color:var(--panel)}
+  .btn.pri{background:var(--rust);border-color:var(--rust);color:#FAF6EE}
+  .btn.pri:hover{background:var(--ink);border-color:var(--ink)}
+  textarea{width:100%;height:150px;font-family:"Space Mono",monospace;font-size:10px;
+    border:2px solid var(--ink);background:var(--panel2);color:var(--ink);padding:8px;resize:vertical}
+  .hint{font-size:11px;color:var(--muted2);line-height:1.5;margin-top:8px}
+</style>
+
+<header>
+  <div>
+    <div class="title">Meridian policy lab</div>
+    <div class="sub">layer 1 engine · live 12-round projection</div>
+  </div>
+  <div class="presets" id="presets"></div>
+  <div class="scorebox">
+    <div style="text-align:right">
+      <div class="lbl" style="color:#9BA29B">societal resilience index</div>
+      <div class="gatechips" id="gates"></div>
+    </div>
+    <div class="scoreval" id="score">–</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ================= LEFT: LEVERS ================= -->
+  <div>
+    <div class="panel">
+      <h3>Fiscal allocation</h3>
+      <div class="alloc" id="alloc"></div>
+      <div class="hint">Cash and services compete for the same pot. Drag a column;
+        the other two rebalance.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Policy levers</h3>
+      <div id="policy"></div>
+      <div class="row">
+        <div class="lbl" style="margin-bottom:5px">UBI design</div>
+        <div class="seg" id="ubidesign"></div>
+      </div>
+      <div class="row">
+        <div class="lbl" style="margin-bottom:5px">Working week</div>
+        <div class="seg" id="week"></div>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <div class="lbl" style="margin-bottom:5px">Care job guarantee</div>
+        <div class="seg" id="guarantee"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>AI adoption target · per sector</h3>
+      <div class="secgrid" id="autotargets"></div>
+      <div class="hint">Automate past 80% and the door closes behind you:
+        re-employing humans there costs rounds of retraining.</div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: PROJECTION ================= -->
+  <div>
+    <div class="callout" id="callout"></div>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="panel" style="margin-top:18px">
+      <h3>The city</h3>
+      <div class="scrub">
+        <button class="btn play" id="btnPlay">▶ Play</button>
+        <select id="playSpeed" class="speed" aria-label="seconds per round">
+          <option value="2200">slow</option>
+          <option value="1200" selected>normal</option>
+          <option value="600">fast</option>
+        </select>
+        <div class="pips" id="pips"></div>
+        <div class="clock"><span class="yr mono" id="yearlbl">2050</span>
+          <span class="lbl" id="roundlbl">round 1 of 12</span></div>
+      </div>
+      <div class="citylegend">
+        <span class="li"><span class="dot" style="background:var(--good)"></span>healthy 65+</span>
+        <span class="li"><span class="dot" style="background:var(--mid)"></span>strained 40-64</span>
+        <span class="li"><span class="dot" style="background:var(--bad)"></span>failing below 40</span>
+        <span class="li" style="color:var(--muted)">height carries capacity &middot; click a building</span>
+      </div>
+      <div class="cityfit" id="cityfit"><div id="city"></div></div>
+      <div id="selcard"></div>
+      <div class="secrow" id="secrow"></div>
+      <div class="hint" id="roundnote"></div>
+      <div class="lbl" style="margin:16px 0 7px">Meanwhile, with nobody doing anything</div>
+      <div class="vitals" id="vitals"></div>
+      <div class="feedgrid">
+        <div>
+          <div class="lbl" style="margin:14px 0 7px">Round bulletin</div>
+          <ul class="feed" id="news"></ul>
+        </div>
+        <div>
+          <div class="lbl" style="margin:14px 0 7px">Households</div>
+          <div class="hh" id="households"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Shock schedule</h3>
+      <div class="shockgrid"><table class="sg" id="shocktable"></table></div>
+      <div class="hint">Click a cell to land a shock in that round. Endogenous shocks —
+        unrest, fiscal crisis, service cascade — fire on their own when your own state
+        triggers them, and are not shown here.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Export</h3>
+      <div class="btnrow">
+        <button class="btn pri" id="btnCopy">Copy world-states.json</button>
+        <button class="btn" id="btnExport">Download file</button>
+        <button class="btn" id="btnToggleJson">Show JSON</button>
+      </div>
+      <div class="hint">Writes all twelve rounds in the published schema, so the
+        world-state monitor can render an engine-generated run instead of the
+        hand-authored demo states.</div>
+      <div id="jsonwrap" hidden style="margin-top:10px"><textarea id="jsonout" readonly spellcheck="false"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   THE MERIDIAN SIMULATION — LAYER 1 ENGINE
+   ---------------------------------------------------------------------
+   world state + lever settings  ->  next world state
+
+   Deterministic. There is no randomness anywhere in this file. Shocks are
+   drawn by the facilitator from a sealed deck and passed IN as arguments.
+
+   READ THIS FILE. You are meant to. Reason about it, argue with the
+   constants, plan against it. You may not modify it during the run.
+
+   THE ONE THING TO UNDERSTAND
+   ---------------------------
+   Nothing in here has an opinion about whether automation is good. The
+   engine only does bookkeeping, and the bookkeeping forms a ring:
+
+       automation removes headcount
+         -> headcount is a wage bill
+            -> wages are household income
+               -> household income becomes consumption
+                  -> consumption is the demand sectors sell into
+                     -> sales are the profit you tax
+                        -> tax funds the UBI that replaced the wages
+
+   Margins, profit, GDP, quality and cohesion are all DERIVED from that
+   ring. The demand cliff is not written down anywhere as a rule. It is
+   what happens when you go round the ring enough times.
+
+   The single most important line in this file is marked THE CLIFF.
+   ===================================================================== */
+
+(function (root) {
+'use strict';
+
+/* ---------------------------------------------------------------------
+   0. HELPERS
+   --------------------------------------------------------------------- */
+const clamp = (v, lo, hi) => (v < lo ? lo : (v > hi ? hi : v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const round2 = v => Math.round(v * 100) / 100;
+const deepClone = o => JSON.parse(JSON.stringify(o));
+
+/* ---------------------------------------------------------------------
+   1. EXOGENOUS DEMOGRAPHY
+   ---------------------------------------------------------------------
+   Population is not a lever. Singapore 2050-2074 ages and shrinks
+   whatever you do. Anchored to the published baseline, interpolated
+   between anchors.
+
+   This is the ground the whole simulation stands on: demand for care and
+   healthcare climbs every round while the working-age base that could
+   staff it falls every round.
+   --------------------------------------------------------------------- */
+const DEMOGRAPHY_ANCHORS = [
+  { round: 1,  total: 5940000, age_0_19: 950000, age_20_64: 3325000, age_65_plus: 1665000 },
+  { round: 5,  total: 5830000, age_0_19: 900000, age_20_64: 3150000, age_65_plus: 1780000 },
+  { round: 6,  total: 5780000, age_0_19: 880000, age_20_64: 3090000, age_65_plus: 1810000 },
+  { round: 10, total: 5650000, age_0_19: 790000, age_20_64: 2910000, age_65_plus: 1950000 },
+  { round: 12, total: 5520000, age_0_19: 810000, age_20_64: 2760000, age_65_plus: 1950000 }
+];
+
+function demography(rnd) {
+  const a = DEMOGRAPHY_ANCHORS;
+  if (rnd <= a[0].round) return Object.assign({}, a[0]);
+  if (rnd >= a[a.length - 1].round) return Object.assign({}, a[a.length - 1]);
+  for (let i = 0; i < a.length - 1; i++) {
+    if (rnd >= a[i].round && rnd <= a[i + 1].round) {
+      const t = (rnd - a[i].round) / (a[i + 1].round - a[i].round);
+      return {
+        round: rnd,
+        total:       Math.round(lerp(a[i].total,       a[i + 1].total,       t)),
+        age_0_19:    Math.round(lerp(a[i].age_0_19,    a[i + 1].age_0_19,    t)),
+        age_20_64:   Math.round(lerp(a[i].age_20_64,   a[i + 1].age_20_64,   t)),
+        age_65_plus: Math.round(lerp(a[i].age_65_plus, a[i + 1].age_65_plus, t))
+      };
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------
+   2. SECTOR CONFIGURATION
+   ---------------------------------------------------------------------
+   base_output_bn  annual output at round 1, SGD bn (the ten sum to 782)
+   base_headcount  round-1 employment
+   avg_wage        SGD/year per worker, 2050 terms
+   automation_r1   round-1 automation
+   productivity    output gain per unit of automation. High where output
+                   scales with machines (finance, retail, transport). Low
+                   where the service IS the human contact (care).
+   human_touch     how badly quality suffers once automation passes
+                   `comfort`. Care is 1.0. Finance is ~0.
+   comfort         the automation level beyond which human_touch bites
+   compute_int     compute + energy drawn per unit of automated output.
+                   THIS IS THE BILL ATTACHED TO EVERY POINT OF AUTOMATION.
+   demand_driver   what this sector's demand scales with
+   essential       counts toward "worst essential service" and the
+                   quality-below-40 fail gate
+   --------------------------------------------------------------------- */
+const SECTORS = {
+  healthcare: {
+    name: 'Healthcare', base_output_bn: 62, base_headcount: 200000,
+    avg_wage: 88000, automation_r1: 0.22, productivity: 0.45, human_touch: 0.70,
+    comfort: 0.58, compute_int: 0.06, demand_driver: 'elderly', essential: true
+  },
+  transport: {
+    name: 'Transport', base_output_bn: 71, base_headcount: 250000,
+    avg_wage: 62000, automation_r1: 0.45, productivity: 0.85, human_touch: 0.10,
+    comfort: 0.92, compute_int: 0.09, demand_driver: 'population', essential: true
+  },
+  housing_utilities: {
+    name: 'Housing & Utilities', base_output_bn: 85, base_headcount: 190000,
+    avg_wage: 72000, automation_r1: 0.30, productivity: 0.70, human_touch: 0.20,
+    comfort: 0.82, compute_int: 0.07, demand_driver: 'population', essential: true
+  },
+  food_agri: {
+    name: 'Food & Agri', base_output_bn: 34, base_headcount: 110000,
+    avg_wage: 54000, automation_r1: 0.35, productivity: 0.60, human_touch: 0.20,
+    comfort: 0.85, compute_int: 0.06, demand_driver: 'population', essential: true
+  },
+  finance: {
+    name: 'Finance', base_output_bn: 168, base_headcount: 300000,
+    avg_wage: 145000, automation_r1: 0.55, productivity: 0.95, human_touch: 0.05,
+    comfort: 0.95, compute_int: 0.10, demand_driver: 'consumption', essential: false
+  },
+  education: {
+    name: 'Education', base_output_bn: 46, base_headcount: 165000,
+    avg_wage: 82000, automation_r1: 0.20, productivity: 0.40, human_touch: 0.90,
+    comfort: 0.42, compute_int: 0.05, demand_driver: 'youth', essential: true
+  },
+  retail_commerce: {
+    name: 'Retail & Commerce', base_output_bn: 122, base_headcount: 460000,
+    avg_wage: 48000, automation_r1: 0.50, productivity: 0.80, human_touch: 0.15,
+    comfort: 0.90, compute_int: 0.08, demand_driver: 'consumption', essential: true
+  },
+  care_services: {
+    name: 'Care Services', base_output_bn: 38, base_headcount: 220000,
+    avg_wage: 52000, automation_r1: 0.12, productivity: 0.25, human_touch: 1.00,
+    comfort: 0.30, compute_int: 0.04, demand_driver: 'elderly', essential: true
+  },
+  public_safety: {
+    name: 'Public Safety', base_output_bn: 29, base_headcount: 140000,
+    avg_wage: 76000, automation_r1: 0.28, productivity: 0.55, human_touch: 0.50,
+    comfort: 0.66, compute_int: 0.06, demand_driver: 'population', essential: true
+  },
+  compute_energy: {
+    name: 'Compute & Energy', base_output_bn: 127, base_headcount: 90000,
+    avg_wage: 135000, automation_r1: 0.60, productivity: 1.80, human_touch: 0.00,
+    comfort: 0.98, compute_int: 0.05, demand_driver: 'compute', essential: true
+  }
+};
+const ORDER = Object.keys(SECTORS);
+const ESSENTIAL = ORDER.filter(k => SECTORS[k].essential);
+
+/* ---------------------------------------------------------------------
+   3. BEHAVIOURAL AND FISCAL CONSTANTS
+   ---------------------------------------------------------------------
+   Every number here is a modelling choice, exposed so you can argue with
+   it. None of them are secret. If you think MPC_UBI should not exceed
+   MPC_WAGE, say so in your pitch and show what changes.
+   --------------------------------------------------------------------- */
+const P = {
+  /* automation dynamics */
+  AUTOMATION_STEP_UP:   0.14,  // most a sector can automate in one round
+  AUTOMATION_STEP_DOWN: 0.05,  // falls back slowly: machines are bought, not rented
+  IRREVERSIBLE_ABOVE:   0.80,  // past this, re-employing humans is penalised (spec 5)
+  IRREVERSIBLE_DRAG:    0.55,  // ...cutting the down-step by this share
+
+  /* labour */
+  WEEK_SPREAD: 0.55,           // shorter week spreads work over more heads
+  WEEK_OUTPUT: 0.30,           // ...and cuts output, but less than proportionally
+  GUARANTEE_WAGE_DEFAULT: 3200,// SGD/month for a guaranteed care job
+  GUARANTEE_INTAKE: 0.055,     // share of the unemployed taken on each round
+
+  /* household income -> consumption */
+  MPC_WAGE:    0.72,  // marginal propensity to consume out of wages
+  MPC_UBI:     0.94,  // ...out of UBI: transfers go to people who spend them
+  MPC_CAPITAL: 0.28,  // ...out of capital income: mostly saved
+  CONSUMPTION_INERTIA: 0.45,   // households smooth spending between rounds
+
+  /* tax bases */
+  LABOUR_TAX_RATE: 0.20,       // personal income tax on the wage bill
+  CONSUMPTION_TAX: 0.08,       // GST
+  OTHER_TAX_GDP:   0.042,      // land, vehicle, duties - scales with GDP
+  CAPITAL_RETURN_RATE: 0.1867, // return on automated capital (calibrated below)
+  DIVIDEND_PROFIT_SHARE: 0.5,  // owning machines also claims operating profit
+
+  /* investment: what firms do with the profit you did NOT take.
+     This is the other half of the corporate tax trade-off. Tax hard and
+     you collect more this round and have less to collect from later. */
+  DEPRECIATION: 0.14,          // capital stock lost per round without reinvestment
+  BASE_INVEST_RATE: 0.17,      // round-1 retained profit / GDP
+  INVEST_TAX_ELASTICITY: 1.30, // reinvestment lost per point of tax above 19%
+  INVEST_LEVY_ELASTICITY: 0.85,// ...and per point of compute levy above 5%
+  LEVY_ADOPTION_BRAKE: 1.60,   // compute levy slows how fast you CAN automate
+
+  /* spending */
+  UBI_ADMIN_EFFICIENCY: { flat: 0.97, means_tested: 0.90, age_weighted: 0.95 },
+  MEANS_TEST_COVERAGE: 0.55,   // share of the population that qualifies
+  AGE_WEIGHT_SENIOR: 1.6,      // 65+ receive 1.6 shares under age-weighting
+
+  /* prices */
+  BASE_INFLATION: 0.021,
+  IMPORT_SHARE: 0.55,          // of the consumption basket. SG imports nearly all food
+  COMPUTE_SCARCITY_PASSTHROUGH: 0.09,
+
+  /* quality */
+  QUALITY_INERTIA: 0.38,       // share of the gap to target closed per round
+  Q_BASE: 64,
+  Q_CAPACITY: 42,
+  Q_INFRA: 26,
+  Q_HUMAN: 135,
+  Q_STAFF: 20,
+  Q_GUARANTEE: 10,
+
+  /* reskilling */
+  RESKILL_LAG: 3,              // rounds before it pays off (spec 5)
+  RESKILL_POTENCY: 2.6e6,      // people moved high->low exposure per $bn
+  EXPOSURE_SENSITIVITY: 1.2,   // share of the workforce newly exposed per
+                               // point of economy-wide automation growth
+
+  /* social */
+  COHESION_INERTIA: 0.45,
+  LEGITIMACY_INERTIA: 0.40,
+  GINI_INERTIA: 0.50
+};
+
+/* ---------------------------------------------------------------------
+   4. SHOCK DECK
+   ---------------------------------------------------------------------
+   The engine never draws. Shocks are handed in. Each is a set of
+   multipliers and offsets applied for the round it is active.
+   --------------------------------------------------------------------- */
+const SHOCKS = {
+  pandemic: {
+    label: 'Respiratory pandemic',
+    demand: { healthcare: 1.45, care_services: 1.30, retail_commerce: 0.82, transport: 0.72 },
+    quality: { healthcare: -22, care_services: -14 },
+    cohesion: -6, output_mult: 0.93
+  },
+  food_import_disruption: {
+    label: 'Food import disruption',
+    demand: { food_agri: 1.05 },
+    capacity_mult: { food_agri: 0.55 },
+    quality: { food_agri: -20 },
+    import_price: 0.22, cohesion: -5
+  },
+  energy_price_spike: {
+    label: 'Energy price spike',
+    capacity_mult: { compute_energy: 0.80 },
+    quality: { compute_energy: -12, transport: -6 },
+    compute_price: 0.45, import_price: 0.08, cohesion: -3
+  },
+  chip_export_controls: {
+    label: 'Chip export controls',
+    capacity_mult: { compute_energy: 0.72 },
+    automation_ceiling: -0.10,
+    compute_price: 0.60, quality: { compute_energy: -10 }, cohesion: -2
+  },
+  cyber_attack: {
+    label: 'Infrastructure cyber attack',
+    quality: { finance: -18, housing_utilities: -14, public_safety: -10 },
+    capacity_mult: { finance: 0.85, housing_utilities: 0.88 },
+    cohesion: -4, legitimacy: -5
+  },
+  /* endogenous - fired by your own state, not by chance (spec 6) */
+  civil_unrest: {
+    label: 'Civil unrest',
+    quality: { public_safety: -14, retail_commerce: -10 },
+    output_mult: 0.94, cohesion: -8, legitimacy: -8
+  },
+  fiscal_crisis: {
+    label: 'Fiscal crisis',
+    borrowing_penalty: 0.35, legitimacy: -10, cohesion: -4
+  },
+  service_failure_cascade: {
+    label: 'Service failure cascade',
+    quality: { healthcare: -8, care_services: -10, education: -8, retail_commerce: -8 },
+    cohesion: -7, legitimacy: -6
+  }
+};
+
+/* ---------------------------------------------------------------------
+   5. DEFAULT LEVERS — the round-1 published settings
+   --------------------------------------------------------------------- */
+const DEFAULT_LEVERS = {
+  automation_target: {
+    healthcare: 0.22, transport: 0.45, housing_utilities: 0.30, food_agri: 0.35,
+    finance: 0.55, education: 0.20, retail_commerce: 0.50, care_services: 0.12,
+    public_safety: 0.28, compute_energy: 0.60
+  },
+  corporate_tax_rate: 0.19,
+  compute_levy: 0.05,
+  allocation: { ubi: 0.45, infrastructure: 0.40, reserves: 0.15 },
+  ubi_design: 'flat',            // flat | means_tested | age_weighted
+  reskilling_spend_pct: 0.08,
+  public_ownership_pct: 0.05,
+  working_week_days: 5,          // 5 | 4 | 3
+  care_job_guarantee: false,
+  care_guarantee_wage: P.GUARANTEE_WAGE_DEFAULT
+};
+
+/* ---------------------------------------------------------------------
+   6. SELF-CALIBRATION
+   ---------------------------------------------------------------------
+   Rather than carrying magic numbers, the engine solves each sector's
+   non-wage cost share so that round 1 reproduces the published baseline
+   margins exactly. Change a wage or an output above and the calibration
+   follows automatically.
+   --------------------------------------------------------------------- */
+const R1_MARGINS = {
+  healthcare: 0.09, transport: 0.16, housing_utilities: 0.12, food_agri: 0.07,
+  finance: 0.24, education: -0.04, retail_commerce: 0.11, care_services: -0.09,
+  public_safety: -0.02, compute_energy: 0.19
+};
+
+const COST_SHARE = {};
+ORDER.forEach(k => {
+  const c = SECTORS[k];
+  const out = c.base_output_bn;
+  const wages = c.base_headcount * c.avg_wage / 1e9;
+  const comp = c.compute_int * c.automation_r1 * out;
+  // out - wages - compute - cost_share*out = margin*out   =>  solve cost_share
+  COST_SHARE[k] = (out - wages - comp - R1_MARGINS[k] * out) / out;
+});
+
+/* Round-1 aggregates, derived once, used as the index bases. */
+const CAL = (function () {
+  const wageBill = ORDER.reduce((a, k) => a + SECTORS[k].base_headcount * SECTORS[k].avg_wage / 1e9, 0);
+  const grossProfit = ORDER.reduce((a, k) => a + SECTORS[k].base_output_bn * R1_MARGINS[k], 0);
+  const autoCapital = ORDER.reduce((a, k) => a + SECTORS[k].automation_r1 * SECTORS[k].base_output_bn, 0);
+  const capitalReturn = P.CAPITAL_RETURN_RATE * autoCapital;
+  const corporateProfit = grossProfit + capitalReturn;
+  const ubiTotal = 680 * 12 * 5940000 / 1e9;             // the published round-1 UBI
+  const dividend = 0.05 * (capitalReturn + P.DIVIDEND_PROFIT_SHARE * grossProfit);
+  const capitalToHouseholds = (corporateProfit - dividend) * 0.35;
+  const spend = P.MPC_WAGE * wageBill + P.MPC_UBI * ubiTotal + P.MPC_CAPITAL * capitalToHouseholds;
+  const gdp = ORDER.reduce((a, k) => a + SECTORS[k].base_output_bn, 0);
+  return {
+    WAGE_BILL: wageBill, GROSS_PROFIT: grossProfit, CAPITAL_RETURN: capitalReturn,
+    CORPORATE_PROFIT: corporateProfit, UBI_TOTAL: ubiTotal, SPEND: spend, GDP: gdp,
+    UBI_MONTHLY: 680,
+    INFRA: 118 * 0.92 * 0.40,   // round-1 infrastructure spend, the maintenance yardstick
+    AUTO_WEIGHTED: autoCapital / gdp
+  };
+})();
+
+/* ---------------------------------------------------------------------
+   7. THE STEP FUNCTION
+   ---------------------------------------------------------------------
+       step(state, levers, activeShocks) -> next state
+   Pure. Same inputs, same outputs, on every machine, every time.
+   --------------------------------------------------------------------- */
+function step(state, levers, activeShocks, exogenous) {
+  /* `exogenous` is what reached this society from OUTSIDE it: goods and
+     credits settled by the trade layer at the end of last round. Optional,
+     and defaults to nothing, so a society that trades with nobody behaves
+     exactly as it did before trade existed.
+
+       { reserves_bn, capacity: {sector: mult}, headcount: {sector: n},
+         cohesion_bonus, legitimacy_bonus }
+
+     Imports raise a sector's capacity without the society having built it.
+     Exports lower it. Neither touches a lever: trade is not a tenth lever,
+     it is a change in the ground the levers act on. */
+  const exo = exogenous || {};
+  const exoCap = exo.capacity || {};
+  const exoHead = exo.headcount || {};
+  const L = Object.assign({}, DEFAULT_LEVERS, levers || {});
+  L.allocation = Object.assign({}, DEFAULT_LEVERS.allocation, (levers || {}).allocation);
+  L.automation_target = Object.assign({}, DEFAULT_LEVERS.automation_target, (levers || {}).automation_target);
+
+  const names = (activeShocks || []).filter(s => SHOCKS[s]);
+  const S = names.map(s => SHOCKS[s]);
+  const shockSum = (field, key) => S.reduce((a, s) => a + ((s[field] && s[field][key]) || 0), 0);
+  const shockMult = (field, key) => S.reduce((a, s) => a * ((s[field] && s[field][key]) || 1), 1);
+  const shockScalar = f => S.reduce((a, s) => a + (s[f] || 0), 0);
+  const shockScalarMult = f => S.reduce((a, s) => a * (s[f] || 1), 1);
+
+  const prev = state;
+  const nextRound = Math.min(12, prev.meta.round + 1);
+  const demo = demography(nextRound);
+
+  /* --- 7.1 prices -----------------------------------------------------
+     Import inflation is the reason a nominal UBI lies to you. A society
+     can raise the dollar figure every round and still make its people
+     poorer. Only real_ubi_index is scored. */
+  const computePrice = (prev._computePrice || 1) * (1 + shockScalar('compute_price') * 0.6 + 0.01);
+  const importPush = shockScalar('import_price');
+  const priceIndex = (prev._priceIndex || 1) *
+    (1 + P.BASE_INFLATION + P.IMPORT_SHARE * importPush +
+     P.COMPUTE_SCARCITY_PASSTHROUGH * (computePrice - 1) * 0.5);
+
+  /* --- 7.2 working week ----------------------------------------------- */
+  const weekDays = L.working_week_days;
+  const weekSpread = Math.pow(5 / weekDays, P.WEEK_SPREAD); // >1 when the week is shorter
+  const weekOutput = Math.pow(weekDays / 5, P.WEEK_OUTPUT); // <1 when the week is shorter
+
+  /* --- 7.3 demand drivers ---------------------------------------------
+     `consumption` is where last round's household spending re-enters the
+     economy. THIS IS THE RETURNING ARROW IN THE CIRCULAR FLOW. */
+  const d1 = DEMOGRAPHY_ANCHORS[0];
+  const drivers = {
+    population: demo.total / d1.total,
+    elderly: demo.age_65_plus / d1.age_65_plus,
+    youth: demo.age_0_19 / d1.age_0_19,
+    consumption: prev.indicators.consumption_index / 100,
+    compute: 1
+  };
+
+  /* --- 7.4 automation moves toward the lever, never jumps to it -------- */
+  const ceiling = 1 + shockScalar('automation_ceiling');
+  // The compute levy taxes automation directly, and so slows how fast a
+  // society can adopt it even when the lever says "go".
+  const levyBrake = clamp(1 - P.LEVY_ADOPTION_BRAKE * (L.compute_levy - 0.05), 0.25, 1.4);
+  const automation = {};
+  ORDER.forEach(k => {
+    const cur = prev.sectors[k].automation;
+    const tgt = clamp(L.automation_target[k], 0, ceiling);
+    let stepMax;
+    if (tgt > cur) {
+      stepMax = P.AUTOMATION_STEP_UP * levyBrake;
+    } else {
+      stepMax = P.AUTOMATION_STEP_DOWN;
+      // Irreversibility: some doors close behind you.
+      if (cur > P.IRREVERSIBLE_ABOVE) stepMax *= (1 - P.IRREVERSIBLE_DRAG);
+      // Reskilling spend buys back some of that lost optionality.
+      stepMax *= (1 + 3.0 * L.reskilling_spend_pct);
+    }
+    automation[k] = clamp(cur + clamp(tgt - cur, -stepMax, stepMax), 0, 0.98);
+  });
+
+  // Compute & Energy demand is driven by how automated everything else is.
+  // Automation is not free, and this is where the bill is rendered.
+  const autoWeighted = ORDER.reduce((a, k) => a + automation[k] * SECTORS[k].base_output_bn, 0) / CAL.GDP;
+  drivers.compute = Math.pow(autoWeighted / CAL.AUTO_WEIGHTED, 1.05) * drivers.population;
+
+  /* --- 7.5 the real economy, sector by sector -------------------------- */
+  const sectors = {};
+  let wageBill = 0, employedTotal = 0, grossProfit = 0, gdp = 0, publicSubsidy = 0;
+
+  // Infrastructure money voted LAST round builds THIS round's capacity.
+  const infraRatio = (prev._infraSpend_bn || CAL.INFRA) / CAL.INFRA;
+  // The capital stock firms did or did not reinvest in, last round.
+  const capitalIndex = prev._capitalIndex == null ? 1 : prev._capitalIndex;
+
+  ORDER.forEach(k => {
+    const c = SECTORS[k], p = prev.sectors[k];
+
+    // What the population is asking this sector for.
+    const demand = c.base_output_bn * drivers[c.demand_driver] * (shockMult('demand', k) || 1);
+
+    // What the sector could produce if every buyer turned up.
+    const prodGain = 1 + c.productivity * (automation[k] - c.automation_r1);
+    let capacityAbs = c.base_output_bn * prodGain * weekOutput * capitalIndex *
+                      (shockMult('capacity_mult', k) || 1) * shockScalarMult('output_mult') *
+                      (exoCap[k] || 1);   // imported or exported capacity
+
+    // The people needed to run it at that level.
+    const labourRequired = c.base_headcount * (1 - automation[k]) / (1 - c.automation_r1) *
+                           (capacityAbs / c.base_output_bn) * weekSpread;
+    let headcount = Math.max(0, Math.round(labourRequired));
+
+    // Care job guarantee: the state hires into care, deliberately at a loss.
+    if (L.care_job_guarantee && k === 'care_services') {
+      const unemployed = Math.max(0, prev.population.by_age.age_20_64 - prev.population.employed_total);
+      const hired = Math.round(unemployed * P.GUARANTEE_INTAKE);
+      headcount += hired;
+      // Care is the one sector where more hands genuinely means more care
+      // delivered - it is the least automatable thing in the economy.
+      capacityAbs *= (1 + 0.55 * hired / Math.max(1, labourRequired));
+    }
+
+    /* Skilled labour lent by another society. It staffs the sector and it
+       draws the same wage as anyone else - borrowed hands are not free. */
+    if (exoHead[k]) headcount = Math.max(0, headcount + Math.round(exoHead[k]));
+
+    /* ================== THE CLIFF ==================
+       Output is SOLD, not merely made. You cannot sell into demand that
+       is not there. Every automation decision eventually arrives back
+       here as a smaller `demand`, and this one `min` is what turns a
+       productivity boom into a depression. */
+    const output = Math.min(capacityAbs, demand);
+    /* =============================================== */
+
+    const capacity = capacityAbs / demand;
+    const wages = headcount * c.avg_wage / 1e9;
+    const computeCost = c.compute_int * automation[k] * output * computePrice;
+    const otherCost = COST_SHARE[k] * output;
+    const profit = output - wages - computeCost - otherCost;
+
+    /* Quality is a target the sector drifts toward, never jumps to.
+       Services are sticky: they take rounds to break and rounds to fix. */
+    const capTerm = P.Q_CAPACITY * clamp(capacity - 1, -0.55, 0.35);
+    const infraTerm = P.Q_INFRA * clamp(infraRatio - 1, -0.9, 0.9);
+    const overAuto = Math.max(0, automation[k] - c.comfort);
+    const humanTerm = -P.Q_HUMAN * c.human_touch * overAuto;
+    const staffTerm = P.Q_STAFF * clamp(headcount / Math.max(1, labourRequired) - 1, -0.5, 0.6);
+    const guarTerm = (L.care_job_guarantee && (k === 'care_services' || k === 'healthcare')) ? P.Q_GUARANTEE : 0;
+
+    const target = clamp(P.Q_BASE + capTerm + infraTerm + humanTerm + staffTerm + guarTerm, 0, 100);
+    const quality = clamp(Math.round(
+      p.quality + (target - p.quality) * P.QUALITY_INERTIA + shockSum('quality', k)), 0, 100);
+
+    sectors[k] = {
+      automation: round2(automation[k]),
+      headcount: headcount,
+      capacity: round2(capacity),
+      quality: quality,
+      margin: round2(output > 0 ? profit / output : 0),
+      note: p.note
+    };
+
+    wageBill += wages;
+    employedTotal += headcount;
+    grossProfit += profit;
+    gdp += output;
+
+    /* An essential service that loses money does not close. The state
+       covers the loss. That bill lands on the same budget the UBI comes
+       out of, and it grows exactly when the tax base is shrinking. */
+    if (c.essential && profit < 0) publicSubsidy += -profit;
+  });
+
+  /* --- 7.6 capital, profit and the revenue base ------------------------ */
+  const autoCapital = ORDER.reduce(
+    (a, k) => a + automation[k] * (gdp * SECTORS[k].base_output_bn / CAL.GDP), 0);
+  const capitalReturn = P.CAPITAL_RETURN_RATE * autoCapital;
+  const corporateProfit = grossProfit + capitalReturn;
+
+  /* Public ownership: a claim on the machines themselves. This is the one
+     revenue stream that does not depend on taxing a shrinking profit base,
+     which is why it is the sovereign-wealth answer to the loop. */
+  const publicDividend = L.public_ownership_pct *
+    (capitalReturn + P.DIVIDEND_PROFIT_SHARE * Math.max(0, grossProfit));
+  const taxableProfit = Math.max(0, corporateProfit - publicDividend);
+
+  const computeOutput = gdp * SECTORS.compute_energy.base_output_bn / CAL.GDP;
+
+  const taxRevenue =
+    L.corporate_tax_rate * taxableProfit +
+    L.compute_levy * computeOutput * (automation.compute_energy / SECTORS.compute_energy.automation_r1) +
+    P.LABOUR_TAX_RATE * wageBill +                              // collapses as wages vanish
+    P.CONSUMPTION_TAX * (prev._consumptionSpend_bn || CAL.SPEND) + // collapses as demand vanishes
+    P.OTHER_TAX_GDP * gdp;
+
+  /* --- 7.7 the budget ---------------------------------------------------
+     Obligations come off the top. Only what survives them is yours to
+     split. This is why a society can hold its allocation lever perfectly
+     still and still watch its UBI fall: the numerator shrank. */
+  const income = taxRevenue + publicDividend;
+
+  // The care job guarantee is a deliberate public loss.
+  let guaranteeCost = 0;
+  if (L.care_job_guarantee) {
+    const cs = SECTORS.care_services;
+    const organic = cs.base_headcount * (1 - automation.care_services) / (1 - cs.automation_r1);
+    const extra = Math.max(0, sectors.care_services.headcount - organic);
+    guaranteeCost = extra * (L.care_guarantee_wage || P.GUARANTEE_WAGE_DEFAULT) * 12 / 1e9;
+  }
+
+  const reskillSpend = income * L.reskilling_spend_pct;
+  const obligations = reskillSpend + publicSubsidy + guaranteeCost;
+  const spendable = income - obligations;
+
+  const a = L.allocation;
+  const allocSum = (a.ubi + a.infrastructure + a.reserves) || 1;
+  // When obligations exceed income, the shortfall is financed - the UBI
+  // and infrastructure still have to be paid, and reserves absorb it.
+  const ubiPot = Math.max(0, spendable) * a.ubi / allocSum;
+  const infraBn = Math.max(0, spendable) * a.infrastructure / allocSum;
+  const reserveAdd = spendable >= 0
+    ? spendable * a.reserves / allocSum
+    : spendable; // the whole shortfall lands on reserves
+
+  /* --- 7.8 UBI ----------------------------------------------------------- */
+  const eff = P.UBI_ADMIN_EFFICIENCY[L.ubi_design] || 0.97;
+  let shares;
+  if (L.ubi_design === 'means_tested') shares = demo.total * P.MEANS_TEST_COVERAGE;
+  else if (L.ubi_design === 'age_weighted') shares = (demo.total - demo.age_65_plus) + demo.age_65_plus * P.AGE_WEIGHT_SENIOR;
+  else shares = demo.total;
+
+  const ubiTotalPaid = ubiPot * eff;
+  // The per-SHARE payment. Under age-weighting a senior receives 1.6 of
+  // these; under means-testing only the qualifying 55% receive one.
+  const ubiBaseShare = Math.round((ubiTotalPaid * 1e9) / (shares * 12));
+  // The headline figure is the MEAN payment per resident, so that three
+  // very different UBI designs can be compared on one axis without the
+  // design itself flattering or penalising the number.
+  const ubiMonthly = Math.round((ubiTotalPaid * 1e9) / (demo.total * 12));
+  const realUbiIndex = Math.round((ubiMonthly / priceIndex) / CAL.UBI_MONTHLY * 100);
+
+  /* --- 7.9 reserves ------------------------------------------------------ */
+  // Credits settled by the trade layer land here, before the shock penalty.
+  let reserves = prev.fiscal.reserves_bn + reserveAdd + (exo.reserves_bn || 0);
+  if (reserves < 0) reserves -= Math.abs(reserves) * shockScalar('borrowing_penalty');
+
+  /* --- 7.9b reinvestment: what firms do with the profit you left them ----
+     The other half of the corporate tax trade-off (spec 5). Take more now
+     and there is less capital stock to tax later. The compute levy bites
+     the same way. Nothing here is a penalty for "greed" - it is simply
+     that machines wear out and somebody has to pay to replace them. */
+  const retained = Math.max(0, corporateProfit * (1 - L.corporate_tax_rate) - publicDividend * 0.5);
+  const investRate = retained / Math.max(1, gdp);
+  const taxDrag = clamp(1 - P.INVEST_TAX_ELASTICITY * (L.corporate_tax_rate - 0.19), 0.15, 1.15);
+  const levyDrag = clamp(1 - P.INVEST_LEVY_ELASTICITY * (L.compute_levy - 0.05), 0.30, 1.15);
+  // A firm cannot build capacity faster than the economy can absorb it,
+  // however much profit it is sitting on. Ratio caps at 1.
+  const privateReinvest = clamp(investRate / P.BASE_INVEST_RATE, 0, 1) * taxDrag * levyDrag;
+  // Machines the PUBLIC owns are maintained out of the infrastructure
+  // vote, not out of retained private profit. This is the mechanism
+  // behind the spec's claim that public ownership answers the loop: it
+  // decouples keeping the capital stock alive from how hard you tax.
+  const publicReinvest = clamp(infraRatio, 0, 1.4);
+  const own = clamp(L.public_ownership_pct, 0, 1);
+  // A quarter of the capital stock is public whoever owns the firms -
+  // grid, roads, port, data centres. Starve infrastructure to fund cash
+  // payouts and the economy that funds the payouts physically shrinks.
+  const reinvestment = 0.75 * ((1 - own) * privateReinvest + own * publicReinvest) +
+                       0.25 * publicReinvest;
+  const nextCapitalIndex = clamp(
+    capitalIndex * (1 - P.DEPRECIATION + P.DEPRECIATION * reinvestment), 0.30, 1.9);
+
+  /* --- 7.10 HOUSEHOLD INCOME -> CONSUMPTION ------------------------------
+     The ring closes here. Wages fell because of automation. UBI rises to
+     replace them. But UBI is funded by taxing profit, and profit needs
+     somebody to sell to. If the transfer does not fully replace the lost
+     wage income - and it rarely does, because only part of the profit is
+     taxed and only part of the tax becomes UBI - consumption falls, and
+     next round every sector's `demand` is lower.
+
+     Go round this ring twelve times and you have the Thinkathon. */
+  const capitalToHouseholds = Math.max(0, corporateProfit - publicDividend) * 0.35;
+  const nominalHouseholdIncome = wageBill + ubiTotalPaid + capitalToHouseholds;
+
+  const desiredSpendReal = (P.MPC_WAGE * wageBill +
+                            P.MPC_UBI * ubiTotalPaid +
+                            P.MPC_CAPITAL * capitalToHouseholds) / priceIndex;
+
+  const consumptionIndex = Math.round(lerp(
+    desiredSpendReal / CAL.SPEND * 100,
+    prev.indicators.consumption_index,
+    P.CONSUMPTION_INERTIA));
+
+  /* --- 7.11 reskilling shifts people between exposure bands -------------
+     Pays off three rounds late, which is why it feels like a waste when
+     you fund it and like a miracle when you did. */
+  const reskillHistory = (prev._reskillHistory || []).concat([reskillSpend]);
+  const matured = reskillHistory.length > P.RESKILL_LAG
+    ? reskillHistory[reskillHistory.length - 1 - P.RESKILL_LAG] : 0;
+  const moved = Math.round(matured * P.RESKILL_POTENCY / 1000) * 1000;
+
+  const pe = prev.population.by_exposure;
+  const scale = demo.age_20_64 / prev.population.by_age.age_20_64;
+  let hi = Math.round(pe.high * scale), md = Math.round(pe.medium * scale);
+  let lo = Math.max(0, demo.age_20_64 - hi - md);
+
+  // Reskilling moves people DOWN the exposure ladder: high -> medium -> low.
+  const shiftHi = Math.min(hi, Math.round(moved * 0.6));
+  const shiftMd = Math.min(md, Math.round(moved * 0.4));
+  hi -= shiftHi;
+  md = md - shiftMd + shiftHi;
+  lo += shiftMd;
+
+  /* ...and automation pushes them back UP it. A job that was safe from
+     the machines last round is not necessarily safe from them this one.
+     Without this the ladder is a one-way ratchet and every worker in
+     Meridian ends up classified "low exposure" in an economy that has
+     automated ninety per cent of everything. */
+  const prevAutoWeighted = ORDER.reduce(
+    (a, k) => a + prev.sectors[k].automation * SECTORS[k].base_output_bn, 0) / CAL.GDP;
+  const exposed = Math.round(
+    Math.max(0, autoWeighted - prevAutoWeighted) * demo.age_20_64 * P.EXPOSURE_SENSITIVITY);
+  const upLo = Math.min(lo, Math.round(exposed * 0.6));
+  const upMd = Math.min(md, Math.round(exposed * 0.4));
+  lo -= upLo;
+  md = md + upLo - upMd;
+  hi += upMd;
+  lo = Math.max(0, demo.age_20_64 - hi - md);
+
+  /* --- 7.12 social indicators -------------------------------------------- */
+  const employmentRate = employedTotal / demo.age_20_64;
+  const worstEssential = Math.min.apply(null, ESSENTIAL.map(k => sectors[k].quality));
+
+  /* EFFECTIVE purchasing power. Spec 4: "A household on $3,000 a month
+     where the hospital sits at quality 42 is poorer than a household on
+     $2,000 where the hospital sits at 84. Cash is worth only what it can
+     buy." When the services a household depends on are failing, it must
+     buy privately what the state no longer provides, and the same dollar
+     goes less far. This, not the nominal figure, is what is scored. */
+  const serviceAccess = clamp(0.30 + 0.70 * clamp((worstEssential - 20) / 55, 0, 1), 0.30, 1.0);
+  const effectiveUbiIndex = Math.round(realUbiIndex * serviceAccess);
+
+  const capitalShare = corporateProfit / Math.max(1, gdp);
+  const transferShare = ubiTotalPaid / Math.max(1, nominalHouseholdIncome);
+  const giniTarget = clamp(
+    0.355 + 0.42 * capitalShare - 0.30 * transferShare -
+    0.14 * L.public_ownership_pct - 0.05 * (employmentRate - 0.30), 0.15, 0.70);
+  const gini = round2(lerp(giniTarget, prev.indicators.gini, P.GINI_INERTIA));
+
+  const cohesionTarget = clamp(
+    18 +
+    30 * clamp(employmentRate / 0.70, 0, 1) +
+    24 * clamp((worstEssential - 30) / 50, 0, 1) +
+    16 * clamp(realUbiIndex / 160, 0, 1) +
+    30 * (0.45 - gini) +
+    (L.care_job_guarantee ? 4 : 0) +
+    (weekDays <= 4 ? 3 : 0), 0, 100);
+  const cohesion = clamp(Math.round(
+    prev.indicators.cohesion + (cohesionTarget - prev.indicators.cohesion) * P.COHESION_INERTIA +
+    shockScalar('cohesion') + (exo.cohesion_bonus || 0)), 0, 100);
+
+  const legitimacyTarget = clamp(
+    14 +
+    32 * clamp((worstEssential - 25) / 55, 0, 1) +
+    24 * clamp(realUbiIndex / 170, 0, 1.05) +
+    24 * clamp(cohesion / 85, 0, 1) +
+    (reserves > 0 ? 6 : -16), 0, 100);
+  const legitimacy = clamp(Math.round(
+    prev.indicators.legitimacy + (legitimacyTarget - prev.indicators.legitimacy) * P.LEGITIMACY_INERTIA +
+    shockScalar('legitimacy') + (exo.legitimacy_bonus || 0)), 0, 100);
+
+  /* --- 7.13 endogenous shocks arm themselves for NEXT round -------------- */
+  const endogenous = [];
+  if (cohesion < 35) endogenous.push('civil_unrest');
+  if (reserves < 0 && prev.fiscal.reserves_bn < 0) endogenous.push('fiscal_crisis');
+  if (worstEssential < 40) endogenous.push('service_failure_cascade');
+
+  /* --- 7.14 assemble ------------------------------------------------------ */
+  return {
+    meta: {
+      state_label: prev.meta.state_label,
+      society_name: prev.meta.society_name,
+      round: nextRound,
+      year: 2048 + nextRound * 2,
+      narrative: prev.meta.narrative
+    },
+    population: {
+      total: demo.total,
+      by_age: { age_0_19: demo.age_0_19, age_20_64: demo.age_20_64, age_65_plus: demo.age_65_plus },
+      by_exposure: { high: hi, medium: md, low: lo },
+      employed_total: employedTotal
+    },
+    sectors: sectors,
+    fiscal: {
+      gdp_bn: round2(gdp),
+      corporate_profit_bn: round2(corporateProfit),
+      tax_revenue_bn: round2(taxRevenue),
+      public_dividend_bn: round2(publicDividend),
+      reserves_bn: round2(reserves),
+      allocation: { ubi: a.ubi, infrastructure: a.infrastructure, reserves: a.reserves }
+    },
+    indicators: {
+      ubi_monthly_sgd: ubiMonthly,
+      ubi_base_share_sgd: ubiBaseShare,
+      real_ubi_index: realUbiIndex,
+      effective_ubi_index: effectiveUbiIndex,
+      employment_rate: round2(employmentRate),
+      gini: gini,
+      cohesion: cohesion,
+      legitimacy: legitimacy,
+      consumption_index: consumptionIndex
+    },
+    levers: deepClone(L),
+    trade: prev.trade || { reputation: 50, active_contracts: [] },
+    shocks: names.slice(),
+    personas: prev.personas || [],
+    news: [],
+    score: { total: 0, gates_failed: [] },
+
+    /* engine carry-forward. Prefixed _, not part of the published schema. */
+    _priceIndex: priceIndex,
+    _computePrice: computePrice,
+    _capitalIndex: nextCapitalIndex,
+    _infraSpend_bn: infraBn,
+    _consumptionSpend_bn: desiredSpendReal * priceIndex,
+    _reskillHistory: reskillHistory,
+    _endogenousNext: endogenous,
+    _wageBill_bn: round2(wageBill),
+    _ubiTotalPaid_bn: round2(ubiTotalPaid),
+    _guaranteeCost_bn: round2(guaranteeCost),
+    _publicSubsidy_bn: round2(publicSubsidy),
+    _obligations_bn: round2(obligations),
+    _spendable_bn: round2(spendable),
+    _worstEssential: worstEssential
+  };
+}
+
+
+/* ---------------------------------------------------------------------
+   7b. HOUSEHOLD RESPONSE
+   ---------------------------------------------------------------------
+   The forty households respond to conditions, identically in every
+   society - that is what makes cross-team comparison mean anything. This
+   is the deterministic part. A household voice agent may render Mdm Tan's
+   round in first person however it likes, but it may not change this
+   number, and the number is what the auditor sees.
+
+   Each household leans on different parts of the state depending on where
+   it sits in the life course.
+   --------------------------------------------------------------------- */
+function personaDeps(age) {
+  if (age >= 65) return ['care_services', 'healthcare'];
+  if (age < 25) return ['education', 'retail_commerce'];
+  return ['healthcare', 'retail_commerce'];
+}
+
+function updatePersonas(personas, state, prev) {
+  const ind = state.indicators;
+  const purchasing = ind.effective_ubi_index != null ? ind.effective_ubi_index : ind.real_ubi_index;
+  return (personas || []).map(p => {
+    const age = p.age + 2;                       // each round is two years
+    const deps = personaDeps(age);
+    const services = deps.reduce((a, k) => a + (state.sectors[k] ? state.sectors[k].quality : 60), 0) / deps.length;
+
+    // Working-age households also carry the labour market; retirees do not.
+    const workWeight = (age >= 65 || age < 20) ? 0 : 1;
+    const target = clamp(
+      14 +
+      34 * clamp(services / 85, 0, 1.05) +
+      30 * clamp(purchasing / 150, 0, 1.05) +
+      18 * workWeight * clamp(ind.employment_rate / 0.6, 0, 1) +
+      (workWeight ? 0 : 14) +
+      10 * clamp((0.45 - ind.gini) / 0.2, 0, 1), 0, 100);
+
+    // Wellbeing is sticky: lives do not turn around in a single round.
+    const wellbeing = clamp(Math.round(p.wellbeing + (target - p.wellbeing) * 0.42), 0, 100);
+    return Object.assign({}, p, { age: age, wellbeing: wellbeing });
+  });
+}
+
+/* ---------------------------------------------------------------------
+   7c. BULLETIN
+   ---------------------------------------------------------------------
+   Deterministic facts, not narration. The news bureau agent dresses these
+   up; it does not get to invent them, and it does not get to leave one
+   out. Every society reporting the same round from the same state reports
+   the same facts.
+   --------------------------------------------------------------------- */
+function bulletin(state, prev) {
+  const out = [];
+  const ind = state.indicators, pind = prev.indicators;
+  const money = v => '$' + Math.round(v).toLocaleString('en-SG');
+
+  (state.shocks || []).forEach(k => {
+    if (SHOCKS[k]) out.push(SHOCKS[k].label + ' declared. Emergency measures in force.');
+  });
+
+  const dU = ind.ubi_monthly_sgd - pind.ubi_monthly_sgd;
+  if (Math.abs(dU) >= 20) {
+    out.push('Universal payment ' + (dU > 0 ? 'raised to ' : 'cut to ') + money(ind.ubi_monthly_sgd) +
+      ' a month' + (ind.real_ubi_index < pind.real_ubi_index && dU > 0
+        ? ', though prices rose faster and purchasing power fell.' : '.'));
+  }
+
+  ORDER.forEach(k => {
+    const q = state.sectors[k].quality, pq = prev.sectors[k].quality;
+    if (q < 40 && pq >= 40) out.push(SECTORS[k].name + ' falls below the critical service threshold.');
+    else if (q >= 40 && pq < 40) out.push(SECTORS[k].name + ' recovers above the critical threshold.');
+    else if (q >= 65 && pq < 65) out.push(SECTORS[k].name + ' returns to a healthy service level.');
+  });
+
+  const dE = (ind.employment_rate - pind.employment_rate) * 100;
+  if (Math.abs(dE) >= 3) {
+    out.push('Employment ' + (dE > 0 ? 'rises' : 'falls') + ' ' + Math.abs(dE).toFixed(0) +
+      ' points to ' + Math.round(ind.employment_rate * 100) + '% of working age.');
+  }
+
+  if (state.fiscal.reserves_bn < 0 && prev.fiscal.reserves_bn >= 0) {
+    out.push('Reserves exhausted. The budget is now financed by borrowing.');
+  }
+  if (ind.cohesion < 35 && pind.cohesion >= 35) {
+    out.push('Cohesion falls below the unrest threshold.');
+  }
+  if (ind.consumption_index < 80 && pind.consumption_index >= 80) {
+    out.push('Household spending falls below 80% of its 2050 level; firms report thinning order books.');
+  }
+
+  if (!out.length) {
+    out.push('No change of record. Universal payment holds at ' + money(ind.ubi_monthly_sgd) +
+      ', worst essential service at ' + state._worstEssential + '.');
+  }
+  return out.slice(0, 4);
+}
+
+/* ---------------------------------------------------------------------
+   8. TRAJECTORY
+   ---------------------------------------------------------------------
+   Run levers forward from round 1. `leversFor` may be a plain object
+   (hold these levers for all twelve rounds - this is what the live lab
+   does while you drag) or a function of round (replay a real game where
+   the team changed their mind every round).
+   --------------------------------------------------------------------- */
+function seed(baseState) {
+  const s = deepClone(baseState);
+  s._priceIndex = 1;
+  s._computePrice = 1;
+  s._capitalIndex = 1;
+  s._infraSpend_bn = CAL.INFRA;
+  s._consumptionSpend_bn = CAL.SPEND;
+  s._reskillHistory = [118 * 0.08];
+  s._endogenousNext = [];
+  s._worstEssential = Math.min.apply(null, ESSENTIAL.map(k => s.sectors[k].quality));
+  if (s.indicators.effective_ubi_index == null) {
+    const acc = clamp(0.30 + 0.70 * clamp((s._worstEssential - 20) / 55, 0, 1), 0.30, 1.0);
+    s.indicators.effective_ubi_index = Math.round(s.indicators.real_ubi_index * acc);
+  }
+  if (s.indicators.ubi_base_share_sgd == null) s.indicators.ubi_base_share_sgd = s.indicators.ubi_monthly_sgd;
+  return s;
+}
+
+function runTrajectory(baseState, leversFor, shockSchedule, rounds) {
+  rounds = rounds || 12;
+  const getLevers = typeof leversFor === 'function' ? leversFor : () => leversFor;
+  const sched = shockSchedule || {};
+  const out = [seed(baseState)];
+
+  for (let r = 1; r < rounds; r++) {
+    const prev = out[out.length - 1];
+    const drawn = (sched[r + 1] || []).slice();
+    // Endogenous shocks armed last round fire now.
+    (prev._endogenousNext || []).forEach(e => { if (drawn.indexOf(e) < 0) drawn.push(e); });
+    const next = step(prev, getLevers(r + 1), drawn.filter(x => SHOCKS[x]));
+    next.personas = updatePersonas(prev.personas, next, prev);
+    next.news = bulletin(next, prev);
+    out.push(next);
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------------
+   9. SCORING — the Societal Resilience Index
+   ---------------------------------------------------------------------
+   Scored across the WHOLE trajectory, not the final round. You cannot fix
+   round 9 in round 12. Two design choices do most of the work:
+
+     - UBI is scored on purchasing power indexed to round 1, never on the
+       dollar figure. Import inflation can raise a nominal UBI while the
+       people receiving it get poorer.
+     - Services are scored on your WORST sector, never the average, so you
+       cannot sacrifice healthcare to fund transport.
+   --------------------------------------------------------------------- */
+function score(traj, constitution) {
+  const n = traj.length;
+  /* Scored on EFFECTIVE purchasing power, never the dollar figure and
+     never even the inflation-adjusted figure: a large cheque in a society
+     whose hospitals have failed does not buy a large life. */
+  const realUbi = traj.map(s => s.indicators.effective_ubi_index != null
+    ? s.indicators.effective_ubi_index : s.indicators.real_ubi_index);
+  const meanReal = realUbi.reduce((x, y) => x + y, 0) / n;
+  // Round 1 is 100 by definition, so it is excluded: everyone would
+  // otherwise be handed the minimum-UBI marks for free.
+  const minReal = Math.min.apply(null, realUbi.slice(1));
+
+  const worstEver = Math.min.apply(null,
+    traj.map(s => Math.min.apply(null, ESSENTIAL.map(k => s.sectors[k].quality))));
+
+  const last = traj[n - 1];
+  const meanCohesion = traj.reduce((x, s) => x + s.indicators.cohesion, 0) / n;
+  const meanGini = traj.reduce((x, s) => x + s.indicators.gini, 0) / n;
+
+  /* Constitutional fidelity: how far the levers drifted from the founding
+     settings the team sealed in week one, before they knew what was
+     coming. Drift is not automatically a sin - at judging you are asked
+     whether you can justify it - but it is measured. */
+  let fidelity = 1;
+  if (constitution && constitution.levers) {
+    const c = constitution.levers, f = last.levers;
+    let drift = 0, terms = 0;
+    ['corporate_tax_rate', 'compute_levy', 'reskilling_spend_pct', 'public_ownership_pct'].forEach(k => {
+      if (c[k] != null) { drift += Math.abs(f[k] - c[k]); terms++; }
+    });
+    if (c.allocation && c.allocation.ubi != null) { drift += Math.abs(f.allocation.ubi - c.allocation.ubi); terms++; }
+    if (c.care_job_guarantee != null && c.care_job_guarantee !== f.care_job_guarantee) { drift += 0.25; terms++; }
+    if (c.working_week_days != null) { drift += Math.abs(f.working_week_days - c.working_week_days) * 0.12; terms++; }
+    fidelity = terms ? clamp(1 - (drift / terms) * 2.2, 0, 1) : 1;
+  }
+
+  const components = {
+    sustained_real_ubi: 25 * clamp(Math.sqrt(clamp(meanReal, 0, 260) / 260), 0, 1),
+    minimum_ubi: 15 * clamp(minReal / 130, 0, 1),
+    worst_service: 20 * clamp((worstEver - 25) / 58, 0, 1),
+    cohesion_equality: 15 * (0.6 * clamp(meanCohesion / 100, 0, 1) +
+                             0.4 * clamp((0.50 - meanGini) / 0.25, 0, 1)),
+    constitutional_fidelity: 15 * fidelity,
+    fiscal_sustainability: 10 * (0.6 * clamp(last.fiscal.reserves_bn / 90, 0, 1) +
+                                 0.4 * (traj.every(s => s.fiscal.reserves_bn >= 0) ? 1 : 0))
+  };
+  Object.keys(components).forEach(k => { components[k] = Math.round(components[k] * 10) / 10; });
+  let total = Object.keys(components).reduce((x, k) => x + components[k], 0);
+
+  /* Hard gates CAP the total. They do not merely subtract from it. */
+  const gates = [];
+  if (traj.some(s => s.fiscal.reserves_bn < 0)) gates.push('insolvency');
+  ESSENTIAL.forEach(k => {
+    for (let i = 1; i < n; i++) {
+      if (traj[i].sectors[k].quality < 40 && traj[i - 1].sectors[k].quality < 40) {
+        gates.push('service_critical_' + k);
+        break;
+      }
+    }
+  });
+  if (last.indicators.legitimacy < 25) gates.push('legitimacy_collapse');
+  if (gates.length) total = Math.min(total, 45 - 6 * (gates.length - 1));
+
+  return {
+    total: Math.max(0, Math.round(total)),
+    gates_failed: gates,
+    components: components,
+    diagnostics: {
+      mean_real_ubi: Math.round(meanReal),
+      min_real_ubi: minReal,
+      worst_essential_ever: worstEver,
+      mean_cohesion: Math.round(meanCohesion),
+      mean_gini: round2(meanGini),
+      final_reserves_bn: last.fiscal.reserves_bn,
+      final_ubi_monthly: last.indicators.ubi_monthly_sgd
+    }
+  };
+}
+
+
+/* ---------------------------------------------------------------------
+   10. VITALS — the people behind the curve
+   ---------------------------------------------------------------------
+   A population line falling from 5.94 to 5.52 million is not a line. It
+   is roughly twenty-eight thousand babies a year and rather more funerals,
+   and a society that only ever sees the line has been taught the wrong
+   thing.
+
+   Nothing here is invented. Both numbers are already implied by the age
+   bands the engine carries; this reads them back out. Deaths come from the
+   over-65 band at a mortality rate calibrated to give Singapore's real
+   birth rate as the residual; births are then whatever must have happened
+   for the total to land where it did.
+
+   None of it is scored. It is true, and it is for the news bureau.
+   --------------------------------------------------------------------- */
+const MORTALITY_65_PLUS = 0.025;   // per year, over-65 band
+
+function vitals(prev, next) {
+  const years = 2;
+  const p0 = prev.population, p1 = next.population;
+
+  const deaths = Math.round(p0.by_age.age_65_plus * MORTALITY_65_PLUS * years);
+  // Total change is births minus deaths, so births fall out of it.
+  const births = Math.max(0, Math.round((p1.total - p0.total) + deaths));
+
+  // Flows between the bands: who turned 65, who left school for the
+  // labour market that may not have a job for them.
+  const turned65 = Math.max(0, Math.round((p1.by_age.age_65_plus - p0.by_age.age_65_plus) + deaths));
+  const leftSchool = Math.max(0, Math.round(births - (p1.by_age.age_0_19 - p0.by_age.age_0_19)));
+
+  const jobsLost = Math.max(0, p0.employed_total - p1.employed_total);
+  const jobsMade = Math.max(0, p1.employed_total - p0.employed_total);
+
+  return {
+    years: years,
+    births: births, deaths: deaths,
+    births_per_year: Math.round(births / years),
+    deaths_per_year: Math.round(deaths / years),
+    turned_65: turned65,
+    left_school: leftSchool,
+    jobs_lost: jobsLost, jobs_created: jobsMade,
+    net_population: p1.total - p0.total
+  };
+}
+
+/* ---------------------------------------------------------------------
+   11. INTERPOLATION — the years between the checkpoints
+   ---------------------------------------------------------------------
+   The engine settles the world every two years, but the world does not
+   wait for it. A round's state is not a photograph of one instant, it is
+   where the society had got to by then — so reading the path between two
+   checkpoints is legitimate, and it is the difference between watching a
+   society live and clicking through twelve slides.
+
+   `t` runs 0 to 1 across the round. Continuous quantities move; counts
+   round; anything a government chose rather than the world produced —
+   levers, the ubi design, the shock list — holds until the round turns.
+   --------------------------------------------------------------------- */
+function interpolate(a, b, t) {
+  t = clamp(t, 0, 1);
+  if (t <= 0) return deepClone(a);
+  if (t >= 1) return deepClone(b);
+  const L = (x, y) => x + (y - x) * t;
+  const Li = (x, y) => Math.round(L(x, y));
+  const out = deepClone(a);
+
+  out.meta.round = a.meta.round;
+  out.meta.year = a.meta.year;
+  out.meta.year_exact = Math.round((a.meta.year + t * 2) * 10) / 10;
+  out.meta.progress = Math.round(t * 100) / 100;
+
+  const pa = a.population, pb = b.population;
+  out.population.total = Li(pa.total, pb.total);
+  ['age_0_19', 'age_20_64', 'age_65_plus'].forEach(k => {
+    out.population.by_age[k] = Li(pa.by_age[k], pb.by_age[k]);
+  });
+  ['high', 'medium', 'low'].forEach(k => {
+    out.population.by_exposure[k] = Li(pa.by_exposure[k], pb.by_exposure[k]);
+  });
+  out.population.employed_total = Li(pa.employed_total, pb.employed_total);
+
+  ORDER.forEach(k => {
+    const sa = a.sectors[k], sb = b.sectors[k], so = out.sectors[k];
+    so.automation = round2(L(sa.automation, sb.automation));
+    so.capacity = round2(L(sa.capacity, sb.capacity));
+    so.margin = round2(L(sa.margin, sb.margin));
+    so.headcount = Li(sa.headcount, sb.headcount);
+    // Quality is what colours the city, so let it move smoothly too.
+    so.quality = Li(sa.quality, sb.quality);
+  });
+
+  ['gdp_bn', 'corporate_profit_bn', 'tax_revenue_bn', 'public_dividend_bn', 'reserves_bn']
+    .forEach(k => {
+      if (a.fiscal[k] != null && b.fiscal[k] != null) out.fiscal[k] = round2(L(a.fiscal[k], b.fiscal[k]));
+    });
+
+  const ia = a.indicators, ib = b.indicators, io_ = out.indicators;
+  io_.ubi_monthly_sgd = Li(ia.ubi_monthly_sgd, ib.ubi_monthly_sgd);
+  if (ia.ubi_base_share_sgd != null) io_.ubi_base_share_sgd = Li(ia.ubi_base_share_sgd, ib.ubi_base_share_sgd);
+  io_.real_ubi_index = Li(ia.real_ubi_index, ib.real_ubi_index);
+  if (ia.effective_ubi_index != null) io_.effective_ubi_index = Li(ia.effective_ubi_index, ib.effective_ubi_index);
+  io_.employment_rate = Math.round(L(ia.employment_rate, ib.employment_rate) * 1000) / 1000;
+  io_.gini = round2(L(ia.gini, ib.gini));
+  io_.cohesion = Li(ia.cohesion, ib.cohesion);
+  io_.legitimacy = Li(ia.legitimacy, ib.legitimacy);
+  io_.consumption_index = Li(ia.consumption_index, ib.consumption_index);
+
+  // Households age continuously; their wellbeing drifts with the world.
+  if (Array.isArray(a.personas) && Array.isArray(b.personas)) {
+    out.personas = a.personas.map((pa2, i) => {
+      const pb2 = b.personas[i] || pa2;
+      const q = deepClone(pa2);
+      q.age = Math.floor(L(pa2.age, pb2.age));
+      q.wellbeing = Li(pa2.wellbeing, pb2.wellbeing);
+      return q;
+    });
+  }
+
+  // A shock is declared, not eased into; the same goes for the bulletin.
+  out.shocks = (t >= 0.5 ? b : a).shocks;
+  out.news = (t >= 0.5 ? b : a).news;
+  return out;
+}
+
+/* --------------------------------------------------------------------- */
+root.MeridianEngine = {
+  step: step,
+  seed: seed,
+  updatePersonas: updatePersonas,
+  bulletin: bulletin,
+  runTrajectory: runTrajectory,
+  score: score,
+  demography: demography,
+  vitals: vitals,
+  interpolate: interpolate,
+  MORTALITY_65_PLUS: MORTALITY_65_PLUS,
+  SECTORS: SECTORS,
+  ORDER: ORDER,
+  ESSENTIAL: ESSENTIAL,
+  SHOCKS: SHOCKS,
+  DEFAULT_LEVERS: DEFAULT_LEVERS,
+  PARAMS: P,
+  COST_SHARE: COST_SHARE,
+  CAL: CAL,
+  version: '1.0.0'
+};
+
+})(typeof window !== 'undefined' ? window : globalThis);
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = (typeof window !== 'undefined' ? window : globalThis).MeridianEngine;
+}
+
+</script>
+<script>
+/* =====================================================================
+   MERIDIAN CITY VIEW
+   ---------------------------------------------------------------------
+   Ten buildings on an isometric plate, coloured by service quality and
+   sized by capacity. Ported from the original world-state monitor so the
+   two renders stay recognisably the same city, but driven directly from
+   an engine world-state object instead of a hand-authored JSON file.
+
+   The projection is a CSS matrix trick: every face is a plain div with a
+   2D transform that lands it on one of the three isometric planes. No
+   canvas, no WebGL, no library.
+
+       proj(i, j, k) -> screen point
+       i, j = position on the ground grid, k = height in storeys
+
+   render(state, host, opts) redraws the whole plate. It is cheap enough
+   to call on every lever drag.
+   ===================================================================== */
+
+(function (root) {
+'use strict';
+
+/* --- projection constants, unchanged from the original monitor ------- */
+var HW = 58, HH = 26, UZ = 66, S = 100, OX = 640, OY = 215;
+var SP = 3.1, FX = 1.7, FY = 1.7;
+var SCENE_W = 1400, SCENE_H = 780;
+
+/* --- what each sector looks like as a building ----------------------- */
+var META = {
+  healthcare:        { name: 'Healthcare',          h: 1.50, roof: 'dome' },
+  transport:         { name: 'Transport',           h: 0.95, roof: 'mast' },
+  housing_utilities: { name: 'Housing & Utilities', h: 2.35, roof: 'tank' },
+  food_agri:         { name: 'Food & Agri',         h: 1.05, roof: 'silo' },
+  finance:           { name: 'Finance',             h: 2.70, roof: 'tower', fx: 1.5, fy: 1.5 },
+  education:         { name: 'Education',           h: 1.20, roof: 'vents' },
+  retail_commerce:   { name: 'Retail & Commerce',   h: 1.10, roof: 'solar' },
+  care_services:     { name: 'Care Services',       h: 1.45, roof: 'vents', fx: 1.8, fy: 1.8 },
+  public_safety:     { name: 'Public Safety',       h: 1.20, roof: 'mast' },
+  compute_energy:    { name: 'Compute & Energy',    h: 1.90, roof: 'solar' }
+};
+var ORDER = ['healthcare','transport','housing_utilities','food_agri','finance',
+             'education','retail_commerce','care_services','public_safety','compute_energy'];
+var SLOTS = [[0,0],[1,0],[2,0],[3,0],[0,1],[3,1],[0,2],[1,2],[2,2],[3,2]];
+
+var BANDS = {
+  healthy:  { top:'#E4EDDC', right:'#B9CFB2', left:'#9CB795', win:'rgba(255,255,255,0.66)', chip:'#7FA476', label:'healthy'  },
+  strained: { top:'#F2E7C9', right:'#DFC79B', left:'#C7AA75', win:'rgba(255,255,255,0.52)', chip:'#C9A45E', label:'strained' },
+  failing:  { top:'#E0C0B4', right:'#C08D80', left:'#A26E62', win:'rgba(86,62,54,0.55)',    chip:'#AE6450', label:'failing'  }
+};
+
+/* --- primitives ------------------------------------------------------- */
+function proj(i, j, k){ return [(i - j) * HW + OX, (i + j) * HH - k * UZ + OY]; }
+
+function q(P, a, b, c, d, w, h, extra, kids){
+  return '<div style="position:absolute;left:0;top:0;width:' + w + 'px;height:' + h +
+    'px;transform-origin:0 0;transform:matrix(' + a + ',' + b + ',' + c + ',' + d + ',' +
+    P[0] + ',' + P[1] + ');box-sizing:border-box;' + (extra || '') + '">' + (kids || '') + '</div>';
+}
+function top(i, j, k, fx, fy, extra, kids){
+  return q(proj(i,j,k), HW/S, HH/S, -HW/S, HH/S, fx*S, fy*S, extra, kids);
+}
+function right(i, j, k, fy, h, extra, kids){
+  return q(proj(i,j,k), -HW/S, HH/S, 0, UZ/S, fy*S, h*S, extra, kids);
+}
+function left(i, j, k, fx, h, extra, kids){
+  return q(proj(i,j,k), HW/S, HH/S, 0, UZ/S, fx*S, h*S, extra, kids);
+}
+
+/* A box is three faces. Painted right, left, top so the top lands on top. */
+function box(i, j, k0, fx, fy, h, c, kidsR, kidsL, kidsT){
+  return right(i+fx, j, k0+h, fy, h,
+      'background:' + c.right + ';border-radius:3px 3px 1px 1px;' +
+      'background-image:linear-gradient(to bottom,rgba(255,255,255,0.16),rgba(0,0,0,0.05));', kidsR) +
+    left(i, j+fy, k0+h, fx, h,
+      'background:' + c.left + ';border-radius:3px 3px 1px 1px;' +
+      'background-image:linear-gradient(to bottom,rgba(255,255,255,0.10),rgba(0,0,0,0.08));', kidsL) +
+    top(i, j, k0+h, fx, fy, 'background:' + c.top + ';border-radius:6px;', kidsT);
+}
+
+/* Lit windows read as a working building. Dark and cracked ones read as a
+   failing one, which is the whole point of the view. */
+function windows(w, h, bandKey, fail){
+  var cols = Math.max(2, Math.round(w/55)), rows = Math.max(1, Math.floor(h/62));
+  var ww = 26, wh = 30, out = '';
+  var gapX = (w - cols*ww)/(cols+1), gapY = (h - rows*wh)/(rows+1);
+  for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++){
+    var dead = fail ? ((r*3 + c*5) % 3 !== 1) : (bandKey === 'strained' && (r+c) % 4 === 0);
+    out += '<div style="position:absolute;left:' + (gapX + c*(ww+gapX)) + 'px;top:' +
+      (gapY + r*(wh+gapY)) + 'px;width:' + ww + 'px;height:' + wh + 'px;box-sizing:border-box;background:' +
+      (dead ? (fail ? 'rgba(70,56,48,0.55)' : 'rgba(120,116,104,0.35)') : BANDS[bandKey].win) +
+      ';border-radius:2px;' +
+      (dead && fail ? 'background-image:linear-gradient(45deg,transparent 46%,rgba(60,48,42,0.55) 46% 54%,transparent 54%);' : '') +
+      '"></div>';
+  }
+  if (fail){
+    out += '<div style="position:absolute;left:8%;top:-4px;width:3px;height:74%;background:rgba(74,60,54,0.38);transform:rotate(9deg)"></div>';
+    out += '<div style="position:absolute;left:62%;top:18%;width:2px;height:58%;background:rgba(74,60,54,0.3);transform:rotate(-13deg)"></div>';
+    out += '<div style="position:absolute;left:0;right:0;bottom:6px;height:16px;opacity:.72;' +
+      'background-image:repeating-linear-gradient(115deg,rgba(176,112,92,.9) 0 12px,rgba(201,172,114,.9) 12px 24px)"></div>';
+  }
+  return out;
+}
+
+/* Roofs are how you tell a hospital from a data centre at a glance. */
+function roof(type, i, j, h, fx, fy, c, fail){
+  var cx = i + fx/2, cy = j + fy/2, out = '';
+  var dark = { top:c.top, right:c.right, left:c.left };
+  if (type === 'dome'){
+    out += box(cx-0.45, cy-0.45, h, 0.9, 0.9, 0.18, dark);
+    out += top(cx-0.42, cy-0.42, h+0.18, 0.84, 0.84,
+      'background:' + (fail ? '#C0AA9E' : '#F2EEE4') + ';border-radius:50%;box-shadow:inset 0 -6px 12px rgba(59,66,62,.10);');
+    out += top(cx-0.12, cy-0.12, h+0.22, 0.24, 0.24,
+      'background:' + (fail ? '#B0705C' : '#B98A72') + ';border-radius:50%;');
+  } else if (type === 'mast'){
+    out += box(cx-0.06, cy-0.06, h, 0.12, 0.12, fail ? 0.5 : 1.0, { top:'#C3C7BE', right:'#AAB0A6', left:'#949B92' });
+    out += top(cx-0.18, cy-0.18, h + (fail ? 0.5 : 1.0), 0.36, 0.36,
+      'background:' + (fail ? '#8E3A23' : '#7FA3AC') + ';border-radius:50%;');
+  } else if (type === 'tank'){
+    out += box(cx-0.3, cy-0.3, h, 0.6, 0.6, 0.35, dark);
+    out += top(cx-0.3, cy-0.3, h+0.35, 0.6, 0.6,
+      'background:' + (fail ? '#6E2818' : '#DCE7E6') + ';border-radius:50%;');
+  } else if (type === 'silo'){
+    out += box(i+0.25, j+0.3, h, 0.42, 0.42, 0.75, dark);
+    out += top(i+0.25, j+0.3, h+0.75, 0.42, 0.42, 'background:' + (fail ? '#6E2818' : '#F1ECE0') + ';border-radius:50%;');
+    out += box(i+fx-0.7, j+fy-0.72, h, 0.42, 0.42, 0.55, dark);
+    out += top(i+fx-0.7, j+fy-0.72, h+0.55, 0.42, 0.42, 'background:' + (fail ? '#6E2818' : '#F1ECE0') + ';border-radius:50%;');
+  } else if (type === 'tower'){
+    out += box(cx-0.35, cy-0.35, h, 0.7, 0.7, 0.7, dark);
+    out += box(cx-0.08, cy-0.08, h+0.7, 0.16, 0.16, fail ? 0.2 : 0.55, { top:'#C3C7BE', right:'#AAB0A6', left:'#949B92' });
+  } else if (type === 'solar'){
+    for (var n = 0; n < 3; n++){
+      out += top(i + 0.22 + n*0.44, j + 0.25, h + 0.02, 0.3, fx - 0.5,
+        'background:' + (fail ? '#A9A296' : '#A8C0C2') + ';border-radius:2px;' +
+        'background-image:repeating-linear-gradient(90deg,rgba(59,66,62,.16) 0 2px,transparent 2px 12px);');
+    }
+    out += box(i+fx-0.55, j+fy-0.6, h, 0.4, 0.4, 0.3, dark);
+  } else { /* vents */
+    out += box(i+0.3, j+0.35, h, 0.4, 0.35, 0.28, dark);
+    out += box(i+fx-0.8, j+fy-0.7, h, 0.5, 0.35, 0.42, dark);
+    out += top(i+fx-0.8, j+fy-0.7, h+0.42, 0.5, 0.35, 'background:' + (fail ? '#6E2818' : '#DCE7E6') + ';');
+  }
+  return out;
+}
+
+function tree(i, j, tone){
+  return box(i, j, 0, 0.14, 0.14, 0.38, { top:'#B7A88F', right:'#A2917A', left:'#8D7C67' }) +
+    top(i-0.22, j-0.22, 0.42, 0.6, 0.6, 'background:' + tone + ';border-radius:50%;') +
+    top(i-0.14, j-0.14, 0.62, 0.44, 0.44, 'background:' + tone + ';border-radius:50%;filter:brightness(1.12);');
+}
+
+/* --- the plate: ground, parks, roads, reservoir ---------------------- */
+function ground(){
+  var out = box(-0.8, -0.8, -0.3, 12.5, 9.7, 0.3, { top:'#F0EBDD', right:'#E0DACB', left:'#D2CBB9' });
+  [[0.6,6.2,3.4,2.6],[8.6,0.2,3.0,2.2],[4.4,8.4,3.6,1.6],[-0.4,2.4,1.6,3.0],[10.6,5.6,1.8,3.4],[3.0,-0.5,2.6,1.4]]
+    .forEach(function(g){
+      out += top(g[0], g[1], 0.014, g[2], g[3], 'background:rgba(150,172,138,0.28);border-radius:48% 42% 50% 44%;');
+    });
+  for (var c = 0; c < 3; c++){
+    out += top(c*SP + 1.95, -0.8, 0.01, 0.86, 9.7,
+      'background:#EFEADC;border-radius:5px;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 30px,transparent 30px 58px);');
+  }
+  for (var r = 0; r < 2; r++){
+    out += top(-0.8, r*SP + 1.95, 0.012, 12.5, 0.86,
+      'background:#EFEADC;border-radius:5px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 30px,transparent 30px 58px);');
+  }
+  out += top(3.55, 3.35, 0.02, 2.7, 1.6, 'background:rgba(178,203,203,0.45);border-radius:50%;');
+  [[0.2,5.4],[1.1,8.6],[7.4,8.9],[11.4,2.1],[10.9,7.8],[4.0,-0.2]].forEach(function(t, n){
+    out += tree(t[0], t[1], n % 2 ? '#A9C29C' : '#93B189');
+  });
+  return out;
+}
+
+/* --------------------------------------------------------------------- */
+function bandOf(q){ return q >= 65 ? 'healthy' : (q >= 40 ? 'strained' : 'failing'); }
+
+/**
+ * render(state, host, opts)
+ *   state  a world-state object from the engine
+ *   host   the element to draw into
+ *   opts   { selected, onSelect, showSmoke }
+ */
+function render(state, host, opts){
+  opts = opts || {};
+  var html = '<div class="city-scene" style="position:absolute;left:0;top:0;width:' +
+    SCENE_W + 'px;height:' + SCENE_H + 'px;">';
+  html += ground();
+
+  var items = [], smoke = '';
+
+  ORDER.forEach(function(key, n){
+    var sec = state.sectors[key];
+    if (!sec) return;
+    var m = META[key] || { name:key, h:1.2, roof:'vents' };
+    var slot = SLOTS[n], i = slot[0]*SP, j = slot[1]*SP;
+    var fx = m.fx || FX, fy = m.fy || FY;
+    var bk = bandOf(sec.quality), c = BANDS[bk], fail = bk === 'failing';
+    // Height carries capacity: a sector that cannot meet demand looks squat.
+    var h = Math.max(0.5, m.h * (0.72 + (sec.capacity || 1) * 0.28));
+    var sel = opts.selected === key;
+
+    var g = '';
+    g += top(i-0.2, j-0.2, 0.03, fx+0.5, fy+0.5, 'background:rgba(88,94,86,0.20);border-radius:46%;filter:blur(9px);');
+
+    var wallExtra = fail
+      ? 'background-image:repeating-linear-gradient(45deg,rgba(90,72,64,.10) 0 8px,transparent 8px 22px);' : '';
+    var faces = right(i+fx, j, h, fy, h,
+        'background:' + c.right + ';border-radius:3px 3px 1px 1px;' + wallExtra, windows(fy*S, h*S, bk, fail)) +
+      left(i, j+fy, h, fx, h,
+        'background:' + c.left + ';border-radius:3px 3px 1px 1px;' + wallExtra, windows(fx*S, h*S, bk, fail)) +
+      top(i, j, h, fx, fy, 'background:' + c.top + ';border-radius:6px;' +
+        (fail ? 'background-image:repeating-linear-gradient(90deg,rgba(90,72,64,.10) 0 7px,transparent 7px 20px);' : ''));
+    g += faces;
+    g += top(i+0.1, j+0.1, h+0.008, fx-0.2, fy-0.2,
+      'background:' + c.chip + ';opacity:' + (sel ? 0.85 : 0.5) + ';border-radius:5px;');
+    g += roof(m.roof, i, j, h, fx, fy, c, fail);
+
+    if (fail){
+      g += top(i+fx+0.14, j+0.2, 0.03, 0.34, 0.34, 'background:rgba(176,112,92,0.5);border-radius:40%;');
+      g += top(i+0.4, j+fy+0.2, 0.03, 0.26, 0.26, 'background:rgba(140,132,118,0.45);border-radius:40%;');
+      if (opts.showSmoke !== false){
+        var P = proj(i + fx/2, j + fy/2, h + 0.35);
+        for (var p = 0; p < 3; p++){
+          smoke += '<div class="city-puff" style="left:' + (P[0]-17+p*9) + 'px;top:' + (P[1]-17) +
+            'px;animation-delay:' + (p*1.4) + 's"></div>';
+        }
+      }
+    }
+
+    var lp = proj(i + fx/2, j + fy/2, h + (fail ? 1.2 : 0.6) + (2 - slot[1]) * 0.16);
+    items.push({
+      depth: i + j, key: key,
+      body: '<div class="city-group" data-k="' + key + '" role="button" tabindex="0" aria-label="' +
+        m.name + ', quality ' + sec.quality + '">' + g + '</div>',
+      label: { key:key, name:m.name, q:sec.quality, chip:c.chip, fail:fail, x:lp[0], y:lp[1], sel:sel }
+    });
+  });
+
+  // Paint back-to-front so nearer buildings overlap further ones.
+  items.sort(function(a,b){ return a.depth - b.depth; });
+  items.forEach(function(it){ html += it.body; });
+  html += smoke;
+
+  /* Labels: pushed up until they stop colliding. Cheap greedy pass - the
+     plaza sits in the middle so it is reserved first. */
+  var placed = [{ cx: proj(4.95, 4.2, 1.0)[0], y: proj(4.95, 4.2, 1.0)[1], w: 230, h: 70 }];
+  var LH = 32, minTop = 26;
+  items.forEach(function(it, n){
+    var L = it.label;
+    var w = 104 + L.name.length * 9.4;
+    var y0 = Math.max(minTop + LH, L.y);
+    var free = function(cx, y){
+      return y >= minTop && !placed.some(function(p){
+        return Math.abs(p.cx - cx) < (p.w + w)/2 + 10 && Math.abs(p.y - y) < ((p.h || LH) + LH)/2 + 10;
+      });
+    };
+    var hit = null;
+    for (var dy = 0; dy >= -140 && !hit; dy -= 34){
+      [0, 0.34, -0.34, 0.66, -0.66].forEach(function(f){
+        if (!hit && free(L.x + f*w, y0 + dy)) hit = { x: L.x + f*w, y: y0 + dy };
+      });
+    }
+    if (!hit) hit = { x: L.x, y: y0 - 150 };
+    placed.push({ cx: hit.x, y: hit.y, w: w, h: LH });
+
+    html += '<button class="city-label' + (L.sel ? ' on' : '') + '" data-k="' + L.key +
+      '" style="left:' + hit.x + 'px;top:' + hit.y + 'px;z-index:' + (60 + n) + '">' +
+      '<span class="city-dot" style="background:' + L.chip + '"></span>' +
+      '<span class="city-name">' + L.name + '</span>' +
+      '<span class="city-q"' + (L.fail ? ' style="color:#A85B49"' : '') + '>' + L.q + '</span></button>';
+  });
+
+  /* The plaza tile carries the number the whole simulation is about. */
+  var pz = proj(4.95, 4.2, 1.0);
+  html += '<div class="city-plaza" style="left:' + pz[0] + 'px;top:' + pz[1] + 'px">' +
+    '<span class="lbl">universal payment</span>' +
+    '<span class="city-plaza-v">$' + Math.round(state.indicators.ubi_monthly_sgd).toLocaleString('en-SG') +
+    '<span class="city-plaza-u">/mo</span></span></div>';
+
+  html += '</div>';
+  host.innerHTML = html;
+
+  if (opts.onSelect){
+    host.querySelectorAll('[data-k]').forEach(function(el){
+      el.addEventListener('click', function(){ opts.onSelect(el.dataset.k); });
+      el.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); opts.onSelect(el.dataset.k); }
+      });
+    });
+  }
+}
+
+root.MeridianCity = {
+  render: render, SCENE_W: SCENE_W, SCENE_H: SCENE_H,
+  META: META, BANDS: BANDS, bandOf: bandOf
+};
+
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script id="baseline-json" type="application/json">{"meta":{"state_label":"Baseline","society_name":"Republic of Meridian","round":1,"year":2050,"narrative":"Mixed economy. Automation is real but partial. Most people still work. UBI is a modest supplement, not a livelihood."},"population":{"total":5940000,"by_age":{"age_0_19":950000,"age_20_64":3325000,"age_65_plus":1665000},"by_exposure":{"high":1330000,"medium":1165000,"low":830000},"employed_total":2125000},"sectors":{"healthcare":{"automation":0.22,"headcount":200000,"capacity":1.02,"quality":78,"margin":0.09,"note":"Diagnostics automated, care delivery still human. Waiting times stable."},"transport":{"automation":0.45,"headcount":250000,"capacity":1.08,"quality":81,"margin":0.16,"note":"Autonomous fleet at 45%. Driver redeployment programme running."},"housing_utilities":{"automation":0.3,"headcount":190000,"capacity":1.04,"quality":76,"margin":0.12,"note":"Grid management automated. Maintenance crews unchanged."},"food_agri":{"automation":0.35,"headcount":110000,"capacity":0.98,"quality":72,"margin":0.07,"note":"91% imported. Vertical farms cover 9% of calories."},"finance":{"automation":0.55,"headcount":300000,"capacity":1.12,"quality":80,"margin":0.24,"note":"Back-office fully automated. Advisory roles holding."},"education":{"automation":0.2,"headcount":165000,"capacity":1,"quality":79,"margin":-0.04,"note":"Tutoring augmented, teaching human. Reskilling intake rising."},"retail_commerce":{"automation":0.5,"headcount":460000,"capacity":1.06,"quality":74,"margin":0.11,"note":"Checkout and logistics automated. Largest displacement exposure."},"care_services":{"automation":0.12,"headcount":220000,"capacity":0.94,"quality":71,"margin":-0.09,"note":"Chronically understaffed. Ageing demand climbing 4% a round."},"public_safety":{"automation":0.28,"headcount":140000,"capacity":1.03,"quality":82,"margin":-0.02,"note":"Monitoring automated. Response teams human."},"compute_energy":{"automation":0.6,"headcount":90000,"capacity":1.15,"quality":77,"margin":0.19,"note":"Surplus capacity. Chip imports secure. Exportable."}},"fiscal":{"gdp_bn":782,"corporate_profit_bn":164,"tax_revenue_bn":118,"reserves_bn":42,"allocation":{"ubi":0.45,"infrastructure":0.4,"reserves":0.15}},"indicators":{"ubi_monthly_sgd":680,"real_ubi_index":100,"employment_rate":0.64,"gini":0.37,"cohesion":72,"legitimacy":78,"consumption_index":100},"levers":{"corporate_tax_rate":0.19,"compute_levy":0.05,"allocation":{"ubi":0.45,"infrastructure":0.4,"reserves":0.15},"ubi_design":"flat","reskilling_spend_pct":0.08,"public_ownership_pct":0.05,"working_week_days":5,"care_job_guarantee":false},"trade":{"reputation":50,"active_contracts":[]},"shocks":[],"personas":[{"id":"H07","name":"Mdm Tan Ah Choo","age":68,"household":"Lives alone, 2-room flat","status":"Retired cleaner. UBI plus small savings. Managing.","wellbeing":64},{"id":"H14","name":"Rahim bin Yusof","age":34,"household":"Married, two children","status":"Logistics coordinator. Employed, watching automation approach his role.","wellbeing":71},{"id":"H22","name":"Nurul Aisyah","age":22,"household":"Lives with parents","status":"Recent ITE graduate. Six months searching for entry-level work.","wellbeing":52},{"id":"H31","name":"Sister Grace Lim","age":45,"household":"Single, rental flat","status":"Nurse. Overworked but secure. Sector is short-staffed.","wellbeing":67}],"news":["Parliament approves first universal payment at $680 a month.","Retail sector automation crosses 50% for the first time.","Care services report third consecutive quarter of staffing shortfall."],"score":{"total":58,"gates_failed":[]}}</script>
+<script>
+(function(){
+'use strict';
+var E = window.MeridianEngine;
+var BASE = JSON.parse(document.getElementById('baseline-json').textContent);
+
+/* ------------------------------------------------------------------ */
+var PRESETS = {
+  baseline:  {label:'Baseline'},
+  boom:      {label:'The boom'},
+  resilient: {label:'Resilient'},
+  doom:      {label:'Doom loop'}
+};
+var PRESET_LEVERS = {
+  "baseline": {
+    "corporate_tax_rate": 0.19,
+    "compute_levy": 0.05,
+    "allocation": {
+      "ubi": 0.45,
+      "infrastructure": 0.4,
+      "reserves": 0.15
+    },
+    "ubi_design": "flat",
+    "reskilling_spend_pct": 0.08,
+    "public_ownership_pct": 0.05,
+    "working_week_days": 5,
+    "care_job_guarantee": false,
+    "automation_target": {
+      "healthcare": 0.22,
+      "transport": 0.45,
+      "housing_utilities": 0.3,
+      "food_agri": 0.35,
+      "finance": 0.55,
+      "education": 0.2,
+      "retail_commerce": 0.5,
+      "care_services": 0.12,
+      "public_safety": 0.28,
+      "compute_energy": 0.6
+    },
+    "care_guarantee_wage": 3200
+  },
+  "boom": {
+    "corporate_tax_rate": 0.34,
+    "compute_levy": 0.11,
+    "allocation": {
+      "ubi": 0.7,
+      "infrastructure": 0.22,
+      "reserves": 0.08
+    },
+    "ubi_design": "flat",
+    "reskilling_spend_pct": 0.04,
+    "public_ownership_pct": 0.09,
+    "working_week_days": 5,
+    "care_job_guarantee": false,
+    "automation_target": {
+      "healthcare": 0.71,
+      "transport": 0.92,
+      "housing_utilities": 0.78,
+      "food_agri": 0.85,
+      "finance": 0.94,
+      "education": 0.62,
+      "retail_commerce": 0.95,
+      "care_services": 0.38,
+      "public_safety": 0.66,
+      "compute_energy": 0.88
+    },
+    "care_guarantee_wage": 3200
+  },
+  "resilient": {
+    "corporate_tax_rate": 0.28,
+    "compute_levy": 0.16,
+    "allocation": {
+      "ubi": 0.48,
+      "infrastructure": 0.36,
+      "reserves": 0.16
+    },
+    "ubi_design": "age_weighted",
+    "reskilling_spend_pct": 0.12,
+    "public_ownership_pct": 0.35,
+    "working_week_days": 4,
+    "care_job_guarantee": true,
+    "automation_target": {
+      "healthcare": 0.55,
+      "transport": 0.89,
+      "housing_utilities": 0.74,
+      "food_agri": 0.72,
+      "finance": 0.93,
+      "education": 0.31,
+      "retail_commerce": 0.91,
+      "care_services": 0.2,
+      "public_safety": 0.52,
+      "compute_energy": 0.86
+    },
+    "care_guarantee_wage": 3200
+  },
+  "doom": {
+    "corporate_tax_rate": 0.41,
+    "compute_levy": 0.14,
+    "allocation": {
+      "ubi": 0.82,
+      "infrastructure": 0.14,
+      "reserves": 0.04
+    },
+    "ubi_design": "means_tested",
+    "reskilling_spend_pct": 0.02,
+    "public_ownership_pct": 0.09,
+    "working_week_days": 5,
+    "care_job_guarantee": false,
+    "automation_target": {
+      "healthcare": 0.79,
+      "transport": 0.94,
+      "housing_utilities": 0.81,
+      "food_agri": 0.87,
+      "finance": 0.96,
+      "education": 0.7,
+      "retail_commerce": 0.96,
+      "care_services": 0.44,
+      "public_safety": 0.72,
+      "compute_energy": 0.91
+    },
+    "care_guarantee_wage": 3200
+  }
+};
+
+var levers = JSON.parse(JSON.stringify(PRESET_LEVERS.baseline));
+var shockSched = {};
+var activePreset = 'baseline';
+var inspectRound = 12;
+var inspectT = 0;            // 0..1 through the round: the years BETWEEN checkpoints
+var selectedSector = null;
+
+/* The engine settles the world every two years. The world does not wait
+   for it, so what we show is the path between two checkpoints rather than
+   the checkpoints alone. This is what makes the society look alive when
+   nobody is touching anything: people are still being born, still dying,
+   still turning 65, and the numbers move because of it. */
+function curState(){
+  if (inspectT > 0 && inspectRound < traj.length) {
+    return E.interpolate(traj[inspectRound-1], traj[inspectRound], inspectT);
+  }
+  return traj[inspectRound-1];
+}
+var traj = [], sc = null;
+
+var BAND = function(q){ return q>=65 ? 'good' : (q>=40 ? 'mid' : 'bad'); };
+var CSSVAR = function(n){ return getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim(); };
+var money = function(v){ return '$' + Math.round(v).toLocaleString('en-SG'); };
+var pct = function(v){ return Math.round(v*100) + '%'; };
+
+/* ================= CHART ================= */
+function lineChart(series, opts){
+  opts = opts || {};
+  var W = 300, H = 104, PL = 4, PR = 4, PT = 8, PB = 14;
+  var all = [];
+  series.forEach(function(s){ all = all.concat(s.data); });
+  var lo = opts.min != null ? opts.min : Math.min.apply(null, all);
+  var hi = opts.max != null ? opts.max : Math.max.apply(null, all);
+  if (hi - lo < 1e-6){ hi = lo + 1; }
+  var pad = (hi - lo) * 0.14; lo -= pad; hi += pad;
+  if (opts.min != null) lo = opts.min;
+  var n = series[0].data.length;
+  var X = function(i){ return PL + i/(n-1) * (W-PL-PR); };
+  var Y = function(v){ return PT + (1 - (v-lo)/(hi-lo)) * (H-PT-PB); };
+
+  var svg = '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+(opts.aria||'')+'">';
+  // baseline reference at round-1 value
+  if (opts.ref != null && opts.ref >= lo && opts.ref <= hi){
+    svg += '<line x1="'+PL+'" y1="'+Y(opts.ref).toFixed(1)+'" x2="'+(W-PR)+'" y2="'+Y(opts.ref).toFixed(1)+
+           '" stroke="#D6CBB0" stroke-width="1.5" stroke-dasharray="4 4"/>';
+  }
+  series.forEach(function(s){
+    var pts = s.data.map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(' ');
+    svg += '<polyline points="'+pts+'" fill="none" stroke="'+s.color+'" stroke-width="'+(s.ghost?2:3.4)+
+           '" stroke-linejoin="round" stroke-linecap="round"'+(s.ghost?' stroke-dasharray="3 3" opacity="0.75"':'')+'/>';
+  });
+  // peak marker on the primary series
+  var main = series[series.length-1];
+  if (opts.markPeak){
+    var pi = main.data.indexOf(Math.max.apply(null, main.data));
+    if (pi > 0 && pi < n-1){
+      svg += '<line x1="'+X(pi).toFixed(1)+'" y1="'+PT+'" x2="'+X(pi).toFixed(1)+'" y2="'+(H-PB)+
+             '" stroke="'+CSSVAR('mid')+'" stroke-width="1.5" stroke-dasharray="2 3"/>';
+      svg += '<circle cx="'+X(pi).toFixed(1)+'" cy="'+Y(main.data[pi]).toFixed(1)+'" r="4" fill="'+
+             CSSVAR('mid')+'" stroke="'+CSSVAR('ink')+'" stroke-width="1.6"/>';
+    }
+  }
+  svg += '<circle cx="'+X(n-1).toFixed(1)+'" cy="'+Y(main.data[n-1]).toFixed(1)+'" r="4.6" fill="'+
+         main.color+'" stroke="'+CSSVAR('ink')+'" stroke-width="1.8"/>';
+  // round axis ticks
+  svg += '<text x="'+PL+'" y="'+(H-3)+'" font-size="9" fill="#9A9587" font-family="Space Mono, monospace">r1</text>';
+  svg += '<text x="'+(W-PR)+'" y="'+(H-3)+'" font-size="9" fill="#9A9587" text-anchor="end" font-family="Space Mono, monospace">r12</text>';
+  svg += '</svg>';
+  return svg;
+}
+
+/* ================= CARDS ================= */
+function cardDefs(){
+  var eff = traj.map(function(s){ return s.indicators.effective_ubi_index; });
+  var real = traj.map(function(s){ return s.indicators.real_ubi_index; });
+  var cons = traj.map(function(s){ return s.indicators.consumption_index; });
+  var emp = traj.map(function(s){ return s.indicators.employment_rate*100; });
+  var worst = traj.map(function(s){ return Math.min.apply(null, E.ESSENTIAL.map(function(k){ return s.sectors[k].quality; })); });
+  var resv = traj.map(function(s){ return s.fiscal.reserves_bn; });
+  var coh = traj.map(function(s){ return s.indicators.cohesion; });
+  var leg = traj.map(function(s){ return s.indicators.legitimacy; });
+  var gdp = traj.map(function(s){ return s.fiscal.gdp_bn; });
+  var last = function(a){ return a[a.length-1]; };
+  var peakAt = function(a){ return a.indexOf(Math.max.apply(null,a)) + 1; };
+  var delta = function(a){ var d = last(a)-a[0]; return (d>=0?'+':'') + Math.round(d); };
+  var ink = CSSVAR('ink'), rust = CSSVAR('rust');
+
+  return [
+    { key:'ubi', label:'UBI purchasing power', value:Math.round(last(eff)),
+      delta:delta(eff)+' vs round 1', col: last(eff)>=100?'good':(last(eff)>=70?'mid':'bad'),
+      svg: lineChart([
+        {data:real, color:'#C4A98C', ghost:true},
+        {data:eff,  color:rust}
+      ], {ref:100, markPeak:true, aria:'UBI purchasing power over twelve rounds'}),
+      foot:'Solid: what the UBI actually buys, after inflation and after the state of the services it must buy around. Dashed: inflation-adjusted cash alone. Peaks round ' + peakAt(eff) + '.' },
+
+    { key:'cons', label:'Consumption index', value:Math.round(last(cons)),
+      delta:delta(cons)+' vs round 1', col: last(cons)>=95?'good':(last(cons)>=75?'mid':'bad'),
+      svg: lineChart([{data:cons, color:'#7FA3AC'}], {ref:100, markPeak:true, aria:'Consumption index'}),
+      foot:'The loop-closing variable. Household spending becomes next round’s demand, which becomes the profit you tax to fund the UBI.' },
+
+    { key:'emp', label:'Employment rate', value:Math.round(last(emp))+'%',
+      delta:delta(emp)+' pts', col: last(emp)>=45?'good':(last(emp)>=25?'mid':'bad'),
+      svg: lineChart([{data:emp, color:'#8A8FA8'}], {min:0, aria:'Employment rate'}),
+      foot:'Share of working-age people in paid work. Every point lost is a wage bill removed from household income.' },
+
+    { key:'worst', label:'Worst essential service', value:Math.round(last(worst)),
+      delta:delta(worst)+' pts', col: BAND(last(worst)),
+      svg: lineChart([{data:worst, color:CSSVAR(BAND(last(worst)))}],
+        {min:0, max:100, ref:40, aria:'Worst essential service quality'}),
+      foot:'Scored on your worst sector, never the average. The dashed line at 40 is the fail gate: two consecutive rounds below it caps your total.' },
+
+    { key:'resv', label:'Sovereign reserves', value:'$'+Math.round(last(resv))+'bn',
+      delta:delta(resv)+'bn', col: last(resv)>=60?'good':(last(resv)>=0?'mid':'bad'),
+      svg: lineChart([{data:resv, color:CSSVAR('resv')}], {ref:0, aria:'Sovereign reserves'}),
+      foot:'The buffer that lets you survive a shock you were not told about. Below zero at any point is an insolvency gate.' },
+
+    { key:'coh', label:'Cohesion & legitimacy', value:Math.round(last(coh)),
+      delta:'legitimacy '+Math.round(last(leg)), col: last(coh)>=55?'good':(last(coh)>=35?'mid':'bad'),
+      svg: lineChart([
+        {data:leg, color:'#B0A48C', ghost:true},
+        {data:coh, color:'#8C7BA0'}
+      ], {min:0, max:100, ref:35, aria:'Cohesion and legitimacy'}),
+      foot:'Solid: cohesion, which triggers civil unrest below 35. Dashed: legitimacy, which forces a lever reset below 25.' },
+
+    { key:'gdp', label:'GDP', value:'$'+Math.round(last(gdp))+'bn',
+      delta:delta(gdp)+'bn', col: last(gdp)>=760?'good':(last(gdp)>=650?'mid':'bad'),
+      svg: lineChart([{data:gdp, color:'#9A9075'}], {markPeak:true, aria:'GDP'}),
+      foot:'Output actually sold, not output the machines could have made. Capacity you cannot sell into is not GDP.' }
+  ];
+}
+
+function renderCards(){
+  var html = cardDefs().map(function(c){
+    return '<div class="card">' +
+      '<div class="ch"><span class="lbl">'+c.label+'</span>' +
+      '<span class="cd" style="color:var(--'+c.col+')">'+c.delta+'</span></div>' +
+      '<div class="cv">'+c.value+'</div>' + c.svg +
+      '<div class="cf">'+c.foot+'</div></div>';
+  }).join('');
+  document.getElementById('cards').innerHTML = html;
+}
+
+/* ================= CALLOUT — the teaching moment ================= */
+function renderCallout(){
+  var eff = traj.map(function(s){ return s.indicators.effective_ubi_index; });
+  var peak = Math.max.apply(null, eff), pi = eff.indexOf(peak), fin = eff[eff.length-1];
+  var worst = traj.map(function(s){ return Math.min.apply(null, E.ESSENTIAL.map(function(k){ return s.sectors[k].quality; })); });
+  var k, t;
+
+  if (sc.gates_failed.length){
+    k = 'Hard gate breached';
+    t = 'Your total is capped regardless of the UBI. ' +
+        sc.gates_failed.map(function(g){
+          return g === 'insolvency' ? 'Reserves went negative.' :
+                 g === 'legitimacy_collapse' ? 'Legitimacy collapsed by round 12.' :
+                 '<em>' + (E.SECTORS[g.replace('service_critical_','')]||{name:g}).name +
+                 '</em> sat below quality 40 for two consecutive rounds.';
+        }).join(' ');
+  } else if (pi > 0 && pi < 11 && fin < peak * 0.88){
+    k = 'You are over the cliff';
+    t = 'Purchasing power peaks at <em>round ' + (pi+1) + '</em> and is <em>' +
+        Math.round((1 - fin/peak)*100) + '% lower</em> by round 12. ' +
+        'Automation removed the wages, the transfer replaced them for a while, and then the ' +
+        'demand that funded the transfer went with them.';
+  } else if (Math.min.apply(null,worst) < 45){
+    k = 'Services are the binding constraint';
+    t = 'Your worst essential service reaches <em>' + Math.min.apply(null,worst) +
+        '</em>. Cash is worth only what it can buy — every dollar of UBI is discounted ' +
+        'by the state of the services a household has to buy around.';
+  } else if (fin >= peak * 0.95 && fin >= 100){
+    k = 'Holding';
+    t = 'Purchasing power is <em>sustained</em> rather than spiked: round 12 sits within ' +
+        '5% of your peak, and no essential service fell below 45. This is what the index rewards.';
+  } else {
+    k = 'Running';
+    t = 'Round 12 purchasing power at <em>' + fin + '</em>, worst essential service at <em>' +
+        Math.min.apply(null,worst) + '</em>. Move a lever and watch all twelve rounds redraw.';
+  }
+  document.getElementById('callout').innerHTML = '<div class="k">'+k+'</div><div class="t">'+t+'</div>';
+}
+
+/* ================= ROUND INSPECTOR ================= */
+function fitCity(){
+  var host = document.getElementById('cityfit');
+  var k = Math.min(1, host.clientWidth / MeridianCity.SCENE_W);
+  host.style.height = (MeridianCity.SCENE_H * k) + 'px';
+  var scene = host.querySelector('.city-scene');
+  if (scene) scene.style.transform = 'scale(' + k + ')';
+}
+
+function renderSel(){
+  var host = document.getElementById('selcard');
+  if (!selectedSector){ host.innerHTML = ''; return; }
+  var s = curState(), x = s.sectors[selectedSector];
+  var b = MeridianCity.bandOf(x.quality);
+  var css = b === 'healthy' ? 'good' : (b === 'strained' ? 'mid' : 'bad');
+  var stat = function(k,v){ return '<div class="selstat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; };
+  host.innerHTML = '<div class="selcard">' +
+    '<div style="min-width:190px"><div class="sh">sector &middot; round '+s.meta.round+'</div>' +
+    '<div class="st">'+MeridianCity.META[selectedSector].name+'</div>' +
+    '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--'+css+')">'+b+'</div></div>' +
+    stat('quality', x.quality) +
+    stat('automation', Math.round(x.automation*100)+'%') +
+    stat('capacity', Math.round(x.capacity*100)+'%') +
+    stat('headcount', Math.round(x.headcount/1000)+'k') +
+    stat('margin', (x.margin>0?'+':'')+Math.round(x.margin*100)+'%') +
+    '<button class="selclose" id="selclose" aria-label="Close">\u00d7</button></div>';
+  document.getElementById('selclose').onclick = function(){ selectedSector = null; renderSel(); renderCity(); };
+}
+
+function renderCity(){
+  MeridianCity.render(curState(), document.getElementById('city'), {
+    selected: selectedSector,
+    onSelect: function(k){
+      selectedSector = (selectedSector === k) ? null : k;
+      renderSel(); renderCity();
+    }
+  });
+  fitCity();
+}
+
+/* PLAYBACK.
+   Twelve rounds is twenty-four years, and clicking through them one at a
+   time hides the thing you most want to see: the shape. Played back, the
+   city recolours, the households age, the bulletin arrives round by round
+   and a boom visibly turns into something else. */
+var playTimer = null;
+
+function playing(){ return playTimer !== null; }
+
+function stopPlay(){
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  var b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+function startPlay(){
+  stopPlay();
+  var perRound = +(document.getElementById('playSpeed') || {}).value || 1200;
+  // Starting from the end means replaying the whole run, not sitting still.
+  if (inspectRound >= 12 && inspectT === 0) { inspectRound = 1; inspectT = 0; }
+  renderRound();
+  var b = document.getElementById('btnPlay');
+  if (b) b.textContent = '❚❚ Pause';
+
+  /* Advance in tenths of a round rather than whole rounds, so the years
+     between checkpoints are shown too. The society is doing something in
+     2057 even though the engine only settles 2056 and 2058. */
+  var STEPS = 10, frame = perRound / STEPS;
+  playTimer = setInterval(function(){
+    inspectT += 1 / STEPS;
+    if (inspectT >= 1 - 1e-9) {
+      inspectT = 0;
+      if (inspectRound >= 12) { stopPlay(); renderRound(); return; }
+      inspectRound++;
+    }
+    renderRound();
+  }, frame);
+}
+
+function renderRound(){
+  var s = curState();
+  document.getElementById('pips').innerHTML = traj.map(function(t,i){
+    var cls = (i+1===inspectRound) ? ' on' : (i+1 < inspectRound ? ' past' : '');
+    return '<button class="pip'+cls+'" data-r="'+(i+1)+'">'+(i+1)+'</button>';
+  }).join('');
+  var exact = s.meta.year_exact != null ? s.meta.year_exact : s.meta.year;
+  document.getElementById('yearlbl').textContent = Math.floor(exact);
+  var rl = document.getElementById('roundlbl');
+  // Mid-round, show the running year — including 2051.0, which is a whole
+  // number and would otherwise fall back to the range and look like a jump.
+  if (rl) rl.textContent = 'round ' + s.meta.round + ' of 12 · ' +
+    (inspectT > 0 ? exact.toFixed(1) : s.meta.year + '–' + (s.meta.year + 2));
+  renderCity(); renderSel();
+  document.getElementById('secrow').innerHTML = E.ORDER.map(function(k){
+    var x = s.sectors[k], b = BAND(x.quality);
+    return '<div class="sectile" data-sec="'+k+'" style="cursor:pointer"><div class="sn"><span class="dot" style="background:var(--'+b+')"></span>'+
+      E.SECTORS[k].name+'</div><div class="sq" style="color:var(--'+b+')">'+x.quality+'</div>'+
+      '<div class="sm">auto '+pct(x.automation)+' · cap '+Math.round(x.capacity*100)+'% · '+
+      Math.round(x.headcount/1000)+'k jobs</div></div>';
+  }).join('');
+  /* The population line is not a line. It is people arriving and leaving,
+     and a society that only ever shows the line teaches the wrong thing. */
+  var vEl = document.getElementById('vitals');
+  if (vEl) {
+    if (inspectRound < traj.length) {
+      var v = E.vitals(traj[inspectRound-1], traj[inspectRound]);
+      var n0 = function(x){ return Math.round(x).toLocaleString('en-SG'); };
+      vEl.innerHTML = [
+        ['births a year', n0(v.births_per_year), 'good'],
+        ['deaths a year', n0(v.deaths_per_year), 'bad'],
+        ['turned 65', n0(v.turned_65), 'mid'],
+        ['left school', n0(v.left_school), 'mid'],
+        [v.jobs_lost ? 'jobs lost' : 'jobs created',
+         n0(v.jobs_lost || v.jobs_created), v.jobs_lost ? 'bad' : 'good'],
+        ['net population', (v.net_population>0?'+':'') + n0(v.net_population),
+         v.net_population>=0 ? 'good' : 'bad']
+      ].map(function(r){
+        return '<div class="vital"><div class="vv" style="color:var(--'+r[2]+')">'+r[1]+'</div>'+
+               '<div class="vk">'+r[0]+'</div></div>';
+      }).join('');
+    } else {
+      vEl.innerHTML = '<div class="empty">2074 — the run ends here.</div>';
+    }
+  }
+
+  document.getElementById('news').innerHTML = (s.news||[]).map(function(t){
+    var isShock = /declared\. Emergency/.test(t);
+    return '<li'+(isShock?' class="shock"':'')+'>'+t+'</li>';
+  }).join('') || '<li>Round 1 baseline. No prior round to compare.</li>';
+
+  document.getElementById('households').innerHTML = (s.personas||[]).map(function(p){
+    var w = p.wellbeing;
+    var col = w>=65 ? 'good' : (w>=40 ? 'mid' : 'bad');
+    return '<div class="hhrow"><span class="nm">'+p.name+'</span>'+
+      '<span class="ag">'+p.age+'</span>'+
+      '<span class="hhbar"><i style="width:'+w+'%;background:var(--'+col+')"></i></span>'+
+      '<span class="wb" style="color:var(--'+col+')">'+w+'</span></div>';
+  }).join('');
+
+  var sh = (s.shocks||[]).map(function(x){ return (E.SHOCKS[x]||{}).label || x; });
+  document.getElementById('roundnote').innerHTML =
+    'UBI ' + money(s.indicators.ubi_monthly_sgd) + '/mo mean · purchasing power ' +
+    s.indicators.real_ubi_index + ' · after service access ' + s.indicators.effective_ubi_index +
+    ' · employment ' + Math.round(s.indicators.employment_rate*100) + '% · reserves $' +
+    Math.round(s.fiscal.reserves_bn) + 'bn' +
+    (sh.length ? ' · <strong style="color:var(--bad)">' + sh.join(', ') + '</strong>' : '');
+}
+
+/* ================= LEVER UI ================= */
+function slider(label, value, min, max, step, fmt, onInput){
+  var row = document.createElement('div'); row.className = 'row';
+  row.innerHTML = '<div class="rowhead"><span class="lbl"></span><span class="n"></span></div>';
+  row.querySelector('.lbl').textContent = label;
+  var num = row.querySelector('.n'); num.textContent = fmt(value);
+  var inp = document.createElement('input');
+  inp.type='range'; inp.min=min; inp.max=max; inp.step=step; inp.value=value;
+  inp.setAttribute('aria-label', label);
+  inp.addEventListener('input', function(){
+    var v = parseFloat(inp.value); num.textContent = fmt(v); onInput(v); recompute();
+  });
+  row.appendChild(inp); row._input = inp; row._num = num; row._fmt = fmt;
+  return row;
+}
+
+var policyRows = [];
+function buildPolicy(){
+  var host = document.getElementById('policy'); host.innerHTML=''; policyRows=[];
+  var defs = [
+    ['corporate tax rate', 'corporate_tax_rate', 0, 0.45, 0.01, pct],
+    ['compute levy',       'compute_levy',       0, 0.30, 0.01, pct],
+    ['reskilling spend',   'reskilling_spend_pct',0,0.30, 0.01, pct],
+    ['public ownership',   'public_ownership_pct',0,0.50, 0.01, pct]
+  ];
+  defs.forEach(function(d){
+    var r = slider(d[0], levers[d[1]], d[2], d[3], d[4], d[5], function(v){ levers[d[1]] = v; });
+    r._key = d[1]; host.appendChild(r); policyRows.push(r);
+  });
+}
+
+var autoRows = [];
+function buildAuto(){
+  var host = document.getElementById('autotargets'); host.innerHTML=''; autoRows=[];
+  E.ORDER.forEach(function(k){
+    var r = slider(E.SECTORS[k].name, levers.automation_target[k], 0, 1, 0.01, pct,
+      function(v){ levers.automation_target[k] = v; });
+    r._key = k; host.appendChild(r); autoRows.push(r);
+  });
+}
+
+var allocKeys = ['ubi','infrastructure','reserves'];
+function buildAlloc(){
+  var host = document.getElementById('alloc'); host.innerHTML='';
+  allocKeys.forEach(function(k){
+    var col = document.createElement('div'); col.className='alloccol';
+    col.innerHTML = '<div class="allocnum"></div><div class="allocbar"><div class="allocfill"></div></div>'+
+                    '<div class="lbl" style="font-size:10px">'+(k==='infrastructure'?'infra':k)+'</div>';
+    var bar = col.querySelector('.allocbar');
+    var drag = function(ev){
+      var r = bar.getBoundingClientRect();
+      var t = 1 - (ev.clientY - r.top)/r.height;
+      setAlloc(k, Math.max(0, Math.min(1, t)));
+    };
+    bar.addEventListener('pointerdown', function(ev){
+      ev.preventDefault(); bar.setPointerCapture(ev.pointerId); drag(ev);
+      var mv = function(e){ drag(e); };
+      var up = function(){ bar.removeEventListener('pointermove',mv); bar.removeEventListener('pointerup',up); };
+      bar.addEventListener('pointermove',mv); bar.addEventListener('pointerup',up);
+    });
+    host.appendChild(col);
+  });
+}
+function setAlloc(key, v){
+  v = Math.round(v*100)/100;
+  var others = allocKeys.filter(function(o){ return o!==key; });
+  var sum = others.reduce(function(a,o){ return a + levers.allocation[o]; }, 0);
+  levers.allocation[key] = v;
+  var rest = 1 - v;
+  if (sum <= 0.0001){ others.forEach(function(o){ levers.allocation[o] = rest/2; }); }
+  else { others.forEach(function(o){ levers.allocation[o] = Math.round(levers.allocation[o]/sum*rest*100)/100; }); }
+  paintAlloc(); recompute();
+}
+function paintAlloc(){
+  var cols = document.querySelectorAll('#alloc .alloccol');
+  allocKeys.forEach(function(k,i){
+    var v = levers.allocation[k];
+    cols[i].querySelector('.allocnum').textContent = Math.round(v*100)+'%';
+    var f = cols[i].querySelector('.allocfill');
+    f.style.height = (v*100)+'%';
+    f.style.background = k==='ubi'?'var(--ubi)':(k==='infrastructure'?'var(--infra)':'var(--resv)');
+  });
+}
+
+function buildSegs(){
+  var mk = function(host, opts, get, set){
+    host.innerHTML = opts.map(function(o){
+      return '<button data-v="'+o.v+'"'+(get()===o.v?' class="on"':'')+'>'+o.l+'</button>';
+    }).join('');
+    host.onclick = function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      var v = b.dataset.v;
+      set(v === 'true' ? true : (v === 'false' ? false : (isNaN(+v) ? v : +v)));
+      mk(host, opts, get, set); recompute();
+    };
+  };
+  mk(document.getElementById('ubidesign'),
+     [{v:'flat',l:'flat'},{v:'means_tested',l:'means-tested'},{v:'age_weighted',l:'age-weighted'}],
+     function(){ return levers.ubi_design; }, function(v){ levers.ubi_design = v; });
+  mk(document.getElementById('week'),
+     [{v:3,l:'3 day'},{v:4,l:'4 day'},{v:5,l:'5 day'}],
+     function(){ return levers.working_week_days; }, function(v){ levers.working_week_days = v; });
+  mk(document.getElementById('guarantee'),
+     [{v:'false',l:'off'},{v:'true',l:'on'}],
+     function(){ return levers.care_job_guarantee; }, function(v){ levers.care_job_guarantee = v; });
+}
+
+function syncControls(){
+  policyRows.forEach(function(r){
+    r._input.value = levers[r._key]; r._num.textContent = r._fmt(levers[r._key]);
+  });
+  autoRows.forEach(function(r){
+    r._input.value = levers.automation_target[r._key];
+    r._num.textContent = r._fmt(levers.automation_target[r._key]);
+  });
+  paintAlloc(); buildSegs();
+}
+
+/* ================= SHOCK GRID ================= */
+var DRAWABLE = ['pandemic','food_import_disruption','energy_price_spike','chip_export_controls','cyber_attack'];
+function buildShocks(){
+  var t = document.getElementById('shocktable');
+  var head = '<tr><th></th>';
+  for (var r=2; r<=12; r++) head += '<th class="rn">'+r+'</th>';
+  head += '</tr>';
+  var rows = DRAWABLE.map(function(sk){
+    var tr = '<tr><th>'+E.SHOCKS[sk].label+'</th>';
+    for (var r=2; r<=12; r++){
+      var on = (shockSched[r]||[]).indexOf(sk) >= 0;
+      tr += '<td><button class="scell'+(on?' on':'')+'" data-s="'+sk+'" data-r="'+r+
+            '" aria-label="'+E.SHOCKS[sk].label+' at round '+r+'"></button></td>';
+    }
+    return tr + '</tr>';
+  }).join('');
+  t.innerHTML = head + rows;
+  t.onclick = function(e){
+    var b = e.target.closest('.scell'); if(!b) return;
+    var r = +b.dataset.r, s = b.dataset.s;
+    shockSched[r] = shockSched[r] || [];
+    var i = shockSched[r].indexOf(s);
+    if (i>=0) shockSched[r].splice(i,1); else shockSched[r].push(s);
+    b.classList.toggle('on');
+    recompute();
+  };
+}
+
+/* ================= PRESETS ================= */
+function buildPresets(){
+  document.getElementById('presets').innerHTML = Object.keys(PRESETS).map(function(k){
+    return '<button data-k="'+k+'"'+(k===activePreset?' class="on"':'')+'>'+PRESETS[k].label+'</button>';
+  }).join('');
+  document.getElementById('presets').onclick = function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    activePreset = b.dataset.k;
+    levers = JSON.parse(JSON.stringify(PRESET_LEVERS[activePreset]));
+    buildPresets(); syncControls(); recompute();
+  };
+}
+
+/* ================= EXPORT ================= */
+function exportJson(){
+  var out = { schema_version:'1.0', generated_by:'meridian-engine '+E.version,
+              generated_at:new Date().toISOString(), levers_used:levers,
+              shock_schedule:shockSched, states:{} };
+  traj.forEach(function(s,i){
+    var c = JSON.parse(JSON.stringify(s));
+    // Drop the engine's carry-forward: not part of the published schema.
+    Object.keys(c).forEach(function(k){ if (k.charAt(0)==='_') delete c[k]; });
+    c.meta.state_label = 'Round ' + (i+1);
+    // Score the run SO FAR, so each round carries a live index rather than
+    // a zero until the last one.
+    c.score = E.score(traj.slice(0, i+1));
+    out.states['round_' + String(i+1).padStart(2,'0')] = c;
+  });
+  return JSON.stringify(out, null, 2);
+}
+
+/* ================= MAIN ================= */
+function recompute(){
+  stopPlay();          // a lever moved: this is a different world now
+  traj = E.runTrajectory(BASE, levers, shockSched, 12);
+  sc = E.score(traj);
+  var el = document.getElementById('score');
+  el.textContent = sc.total;
+  el.style.color = sc.total>=70 ? '#9BC08F' : (sc.total>=45 ? '#DDBE7E' : '#D98873');
+  document.getElementById('gates').innerHTML = sc.gates_failed.length
+    ? sc.gates_failed.map(function(g){
+        return '<span class="gatechip">'+g.replace('service_critical_','').replace(/_/g,' ')+'</span>'; }).join('')
+    : '<span class="gateok">no gates breached</span>';
+  renderCallout(); renderCards(); renderRound();
+  var j = document.getElementById('jsonout');
+  if (!document.getElementById('jsonwrap').hidden) j.value = exportJson();
+}
+
+document.getElementById('pips').addEventListener('click', function(e){
+  var b = e.target.closest('.pip'); if(!b) return;
+  stopPlay();
+  inspectRound = +b.dataset.r; inspectT = 0; renderRound();
+});
+document.getElementById('btnPlay').addEventListener('click', function(){
+  playing() ? stopPlay() : startPlay();
+});
+document.getElementById('playSpeed').addEventListener('change', function(){
+  if (playing()) startPlay();          // pick up the new speed at once
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === ' ' && e.target === document.body) { e.preventDefault(); playing() ? stopPlay() : startPlay(); }
+});
+document.getElementById('secrow').addEventListener('click', function(e){
+  var t = e.target.closest('[data-sec]'); if(!t) return;
+  selectedSector = (selectedSector === t.dataset.sec) ? null : t.dataset.sec;
+  renderSel(); renderCity();
+});
+window.addEventListener('resize', fitCity);
+document.getElementById('btnToggleJson').onclick = function(){
+  var w = document.getElementById('jsonwrap');
+  w.hidden = !w.hidden;
+  this.textContent = w.hidden ? 'Show JSON' : 'Hide JSON';
+  if (!w.hidden) document.getElementById('jsonout').value = exportJson();
+};
+document.getElementById('btnCopy').onclick = function(){
+  var b = this;
+  navigator.clipboard.writeText(exportJson()).then(function(){
+    b.textContent = 'Copied'; setTimeout(function(){ b.textContent='Copy world-states.json'; }, 1400);
+  }, function(){ b.textContent = 'Copy failed'; setTimeout(function(){ b.textContent='Copy world-states.json'; },1400); });
+};
+document.getElementById('btnExport').onclick = function(){
+  var b = this;
+  try {
+    var blob = new Blob([exportJson()], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'world-states.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  } catch (err) {
+    b.textContent = 'Use Copy instead';
+    setTimeout(function(){ b.textContent = 'Download file'; }, 2200);
+  }
+};
+
+buildPresets(); buildAlloc(); buildPolicy(); buildAuto(); buildSegs(); buildShocks();
+syncControls(); recompute();
+})();
+</script>

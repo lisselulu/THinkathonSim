@@ -1,0 +1,13 @@
+# The Concordia sidecar.
+#
+# Only one real dependency: the server itself is stdlib (http.server,
+# urllib) on purpose, so that a laptop with a working Python and no
+# network can still start it and report honestly that it cannot decide.
+#
+#   pip install -r society/requirements.txt
+#
+# Concordia pulls a large tree (sentence-transformers, numpy, pandas and
+# friends). On a machine where that install fails, everything else in
+# this project still runs: the JS side falls back to the deterministic
+# chooser and records that it did.
+gdm-concordia>=2.0.0

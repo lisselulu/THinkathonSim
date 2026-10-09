@@ -1,0 +1,415 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian — the feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Instrument+Serif&family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#E7E2D6; --panel:#FBF8F1; --panel2:#F2EDE2; --sunk:#DED8C9;
+  --ink:#333834; --muted:#6E756E; --faint:#949A93; --line:#D2CCBE;
+  --rust:#A8624C; --good:#5E8A55; --mid:#A5813C; --bad:#A2523E;
+  --pro:#5E8A55; --anti:#A2523E; --col:#A8624C; --pol:#7C6A8A;
+  --eco:#5E828C; --conf:#949A93;
+}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:Archivo,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.55}
+.mono{font-family:"Space Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+header{height:60px;border-bottom:2px solid var(--ink);background:var(--panel);
+  display:flex;align-items:center;gap:18px;padding:0 18px;flex-wrap:nowrap;overflow-x:auto}
+.brand{font-family:"Instrument Serif",Georgia,serif;font-size:23px;line-height:1;white-space:nowrap}
+.brand small{display:block;font-family:"Space Mono",monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+.yrbox{display:flex;align-items:center;gap:7px}
+.yr{font-family:"Space Mono",monospace;font-size:21px;font-weight:700;min-width:62px;text-align:center}
+.hbtn{font-family:inherit;font-size:12px;font-weight:800;padding:5px 9px;cursor:pointer;
+  border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+.hbtn:hover{background:var(--sunk)}
+.hbtn.on{background:var(--ink);color:var(--panel)}
+.hbtn:disabled{opacity:.5;cursor:default}
+.voiced{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.06em;
+  color:var(--pol);border:1px solid var(--pol);padding:0 4px}
+.mood{display:flex;gap:16px;margin-left:auto;white-space:nowrap}
+.mv{text-align:right}
+.mv b{display:block;font-family:"Space Mono",monospace;font-size:17px;font-weight:700;line-height:1.1}
+.mv span{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+
+.wrap{display:grid;grid-template-columns:1fr 268px;height:calc(100% - 60px)}
+.stream{overflow-y:auto;padding:16px 18px 60px}
+.side{border-left:2px solid var(--ink);background:var(--panel);overflow-y:auto;padding:16px 14px 60px}
+
+.scrub{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:16px}
+.pip{font-family:"Space Mono",monospace;font-size:10px;font-weight:700;width:25px;height:23px;
+  border:1.5px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;padding:0}
+.pip.on{border-color:var(--ink);background:var(--ink);color:var(--panel)}
+.pip.past{color:var(--ink);border-color:var(--faint)}
+
+.post{background:var(--panel);border:1.5px solid var(--line);border-left-width:4px;
+  padding:11px 13px;margin-bottom:10px;max-width:660px}
+.post.pro{border-left-color:var(--pro)} .post.anti{border-left-color:var(--anti)}
+.post.col{border-left-color:var(--col)} .post.pol{border-left-color:var(--pol)}
+.post.eco{border-left-color:var(--eco)} .post.conf{border-left-color:var(--conf)}
+.ph{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+.pn{font-weight:800;font-size:13.5px}
+.pr{font-family:"Space Mono",monospace;font-size:10.5px;color:var(--faint)}
+.tag{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.05em;
+  padding:1px 6px;border:1px solid currentColor;margin-left:auto;white-space:nowrap}
+.tag.pro{color:var(--pro)} .tag.anti{color:var(--anti)} .tag.col{color:var(--col)}
+.tag.pol{color:var(--pol)} .tag.eco{color:var(--eco)} .tag.conf{color:var(--conf)}
+.pt{font-size:14.5px;line-height:1.5}
+.pm{margin-top:7px;padding-top:6px;border-top:1px dashed var(--line);
+  font-family:"Space Mono",monospace;font-size:9.5px;color:var(--faint);
+  display:flex;gap:13px;flex-wrap:wrap}
+.pm i{font-style:normal}
+.pm i b{color:var(--muted);font-weight:700}
+.kind{padding:0 5px;border:1px solid currentColor}
+.kind.surplus{color:var(--good)} .kind.deficit{color:var(--mid)}
+.pm i.asked{color:var(--rust)} .pm i.gone{opacity:.7}
+
+.quiet{max-width:660px;border:1.5px dashed var(--line);padding:14px;color:var(--muted);
+  font-size:13.5px;background:var(--panel2)}
+.quiet b{color:var(--ink)}
+
+h4{font-family:"Space Mono",monospace;font-size:9.5px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin:0 0 8px;padding-bottom:6px;
+  border-bottom:1px solid var(--line)}
+.sbox{margin-bottom:20px}
+.trow{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-bottom:6px}
+.trow b{font-family:"Space Mono",monospace;font-weight:700}
+.bar{height:5px;background:var(--sunk);margin-top:2px;margin-bottom:8px}
+.bar i{display:block;height:100%}
+.legend{font-size:11.5px;color:var(--muted);line-height:1.5}
+.legend div{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.sw{width:10px;height:10px;flex:0 0 auto;border:1px solid var(--ink)}
+.gov{margin-top:6px}
+.gov textarea{width:100%;font-family:inherit;font-size:12.5px;border:1.5px solid var(--ink);
+  background:var(--panel2);color:var(--ink);padding:7px;resize:vertical;min-height:56px}
+.gov button{margin-top:6px;font-family:inherit;font-size:12px;font-weight:800;padding:6px 11px;
+  border:2px solid var(--ink);background:var(--ink);color:var(--panel);cursor:pointer;width:100%}
+.govnote{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
+.proto{font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);
+  padding-top:10px;margin-top:6px}
+</style></head><body>
+
+<header>
+  <div class="brand">The feed<small id="whose">Meridian · society</small></div>
+  <div class="yrbox">
+    <button class="hbtn" id="back">◀</button>
+    <div><div class="yr mono" id="yr">2052</div></div>
+    <button class="hbtn" id="fwd">▶</button>
+  </div>
+  <button class="hbtn" id="agents" title="let the Concordia agents decide what people do">⚯ agents</button>
+  <button class="hbtn" id="voice" title="ask the model to write these posts">✎ voice</button>
+  <div class="mood">
+    <div class="mv"><b id="mUnrest">–</b><span>unrest</span></div>
+    <div class="mv"><b id="mFlour">–</b><span>flourishing</span></div>
+    <div class="mv"><b id="mCope">–</b><span>covering</span></div>
+    <div class="mv"><b id="mFur">–</b><span>furious</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stream">
+    <div class="scrub" id="scrub"></div>
+    <div id="posts"></div>
+  </div>
+  <div class="side">
+    <div class="sbox"><h4>What the country is doing</h4><div id="trend"></div></div>
+    <div class="sbox"><h4>Reading this feed</h4>
+      <div class="legend">
+        <div><span class="sw" style="background:var(--pro)"></span>prosocial</div>
+        <div><span class="sw" style="background:var(--col)"></span>collective</div>
+        <div><span class="sw" style="background:var(--eco)"></span>economic</div>
+        <div><span class="sw" style="background:var(--pol)"></span>political</div>
+        <div><span class="sw" style="background:var(--anti)"></span>antisocial</div>
+        <div><span class="sw" style="background:var(--conf)"></span>conforming</div>
+      </div>
+      <div class="proto"><b>surplus</b> and <b>deficit</b> mark the same act meaning
+      opposite things. A neighbourhood covering dialysis runs because the ward closed is
+      <b>deficit</b> — a symptom. The same people running a repair workshop because the
+      four-day week gave them a Thursday is <b>surplus</b> — a society with room to spare.</div>
+    </div>
+    <div class="sbox"><h4>Post as the government</h4>
+      <div class="gov">
+        <textarea id="govtext" placeholder="We hear the concerns about waiting times and are reviewing capacity."></textarea>
+        <button id="govsend">Post</button>
+        <div class="govnote">This changes nothing. No number moves, no citizen reads it, no
+        behaviour shifts. The only thing that has ever moved a number in Meridian is policy.</div>
+      </div>
+    </div>
+    <div class="sbox"><h4>Prototype</h4>
+      <div class="proto">Every post here is generated deterministically from the same
+      trajectory the dashboard shows — no model, no network. The wording is templated;
+      that is the only part a language model will ever write. Behaviour, intensity and
+      timing stay arithmetic, so the feed can never flatter or libel a government.</div>
+    </div>
+  </div>
+</div>
+
+<script>/*<!--INJECT:ENGINE-->*/</script>
+<script>/*<!--INJECT:CITIZENS-->*/</script>
+<script>/*<!--INJECT:FEED-->*/</script>
+<script>
+(function(){
+'use strict';
+var E=window.MeridianEngine, C=window.MeridianCitizens, F=window.MeridianFeed;
+var BASE=/*<!--INJECT:BASE-->*/null;
+var LEVERS=/*<!--INJECT:LEVERS-->*/null;
+
+/* WHOSE COUNTRY IS THIS?
+   The studio publishes its levers to localStorage on every change, and
+   this page shares its origin, so by default the feed watches the team's
+   ACTUAL society rather than a demo scenario. That is the difference
+   between a showcase and an instrument: a team changes a lever, reloads
+   the feed, and reads what their own citizens made of it.
+
+   Falls back to the built-in scenario when the studio has not been opened
+   in this browser, so the page is never blank. */
+var live=false, shocks={};
+try{
+  var stored=localStorage.getItem('mrd_levers');
+  if(stored){
+    var L2=JSON.parse(stored);
+    /* A SAVED LEVER SET CAN OUTLIVE THE SECTOR TABLE.
+       localStorage survives a redeploy, so a team that opened the studio
+       before the industries changed still has a lever set naming sectors
+       that no longer exist and missing ones that now do. Taking it at
+       face value gave a country governed half by the saved settlement and
+       half by defaults, with the header cheerfully claiming it was
+       watching your society.
+
+       So the shape is checked, not just the presence: every current
+       sector must be named. A stale set is discarded and the page falls
+       back to the demo scenario, which is visible in the header. */
+    var fresh = !!(L2 && L2.allocation && L2.automation_target) &&
+                E.ORDER.every(function(k){ return L2.automation_target[k] != null; });
+    if(fresh){ LEVERS=L2; live=true; }
+    else if(L2){ try{ localStorage.removeItem('mrd_levers'); }catch(e2){} }
+  }
+  var st=localStorage.getItem('mrd_shocks'); if(st) shocks=JSON.parse(st)||{};
+}catch(e){}
+
+var traj=E.runTrajectory(BASE, LEVERS, shocks, 12);
+var all=F.feedAll(traj);
+var round=2, govPosts={};
+
+/* AGENTS MODE.
+   The client-side `all` is the arithmetic baseline: it is computed here,
+   in the browser, with no server and no model, which is what makes this
+   page work on a projector with the wi-fi down.
+
+   Agents mode replaces a round WHOLESALE — posts, trending and mood —
+   with a round from a real closed-loop run on the server, decided by the
+   Concordia agents. That is a bigger substitution than `voice`, which
+   only ever swapped the words, so the two are deliberately separate
+   toggles and the header always says which country you are reading. */
+var agentsOn=false, agentRounds={}, agentBusy=false, agentNote='';
+function current(){
+  return (agentsOn && agentRounds[round]) ? agentRounds[round] : all[round-2];
+}
+
+var FAM={prosocial:'pro',antisocial:'anti',collective:'col',political:'pol',
+         economic:'eco',conforming:'conf'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function paint(){
+  var f=current();
+  var w=document.getElementById('whose');
+  if(w){
+    /* WHO DECIDED THIS, ALWAYS ON SCREEN.
+       A page that can show either arithmetic or agents and does not say
+       which is worse than a page that only shows one. */
+    var whoseCountry = live ? 'watching your society' : 'demo scenario';
+    var decided = agentsOn
+      ? (agentRounds[round] ? 'agents deciding' : 'asking the agents...')
+      : 'arithmetic deciding';
+    w.textContent = whoseCountry + ' · ' + decided + (agentNote ? ' · ' + agentNote : '');
+  }
+  document.getElementById('yr').textContent=f.year;
+  document.getElementById('mUnrest').textContent=f.mood.unrest;
+  var mu=document.getElementById('mUnrest');
+  if(mu){
+    /* In an agent run, unrest is mood PLUS what people actually did.
+       Showing both makes the difference legible instead of asserted. */
+    mu.title = (f.mood.sentiment_unrest!=null && f.mood.sentiment_unrest!==f.mood.unrest)
+      ? ('mood alone would be ' + f.mood.sentiment_unrest +
+         '; the rest is what people are doing about it')
+      : 'weighted mean sentiment, plus militancy';
+  }
+  document.getElementById('mFlour').textContent=f.mood.flourishing+'%';
+  document.getElementById('mCope').textContent=f.mood.coping+'%';
+  document.getElementById('mFur').textContent=f.mood.furious+'%';
+
+  document.getElementById('scrub').innerHTML=all.map(function(x){
+    var c=x.round===round?' on':(x.round<round?' past':'');
+    return '<button class="pip'+c+'" data-r="'+x.round+'">'+x.round+'</button>';}).join('');
+
+  var html='';
+  var gp=govPosts[round];
+  if(gp) html+='<div class="post pol"><div class="ph"><span class="pn">Government of Meridian</span>'+
+    '<span class="pr">verified</span><span class="tag pol">statement</span></div>'+
+    '<div class="pt">'+esc(gp)+'</div>'+
+    '<div class="pm"><i>no effect on any indicator</i></div></div>';
+
+  if(agentsOn&&!agentRounds[round]&&!agentBusy) fetchAgents(round);
+  if(voiceOn&&!voiced[round]&&!busy) fetchVoice(round);
+  if(!f.posts.length){
+    /* Silence is data, but silence with no caption is just an empty
+       page. What the country chose is known either way — it is in the
+       trending strip — so say it here too, because a reader looking at
+       a blank feed should not have to work out whether the run failed. */
+    var top=(f.trending&&f.trending[0])?f.trending[0]:null;
+    html+='<div class="quiet"><b>Nobody posted this round.</b> That is not the same as '+
+      'nothing being wrong — a quiet feed in a country under pressure means people have '+
+      'stopped expecting it to help. Check the dashboard before you relax.'+
+      (top?'<br><br>What they are doing instead: <b>'+esc(top.label)+'</b> ('+top.share+'% of the country).':'')+
+      '</div>';
+  }
+  var list=(voiceOn&&voiced[round])?voiced[round]:f.posts;
+  html+=list.map(function(p){
+    var fam=FAM[p.family]||'conf';
+    return '<div class="post '+fam+'">'+
+      '<div class="ph"><span class="pn">'+esc(p.name)+'</span>'+
+      '<span class="pr">'+esc(p.role)+'</span>'+
+      '<span class="tag '+fam+'">'+esc(p.label)+'</span></div>'+
+      '<div class="pt">'+esc(p.text)+'</div>'+
+      '<div class="pm">'+
+        '<i>pressure <b>'+p.pressure+'</b></i>'+
+        '<i>slack <b>'+p.slack+'</b></i>'+
+        '<i>'+esc(p.note||('worried about '+p.concern))+'</i>'+
+        '<i>speaks for <b>'+Math.round(p.weight*100)+'%</b></i>'+
+        (p.prosocial_kind?'<i class="kind '+p.prosocial_kind+'">'+p.prosocial_kind+'</i>':'')+
+        /* WHAT THEY ASKED FOR, WHEN THE WORLD SAID NO.
+           An agent deciding to emigrate at 74 on a chronic illness has
+           made a coherent choice it cannot act on. Hiding the refusal
+           would flatter the run; showing it is how a team finds out the
+           prompt needs work. */
+        (p.asked?'<i class="asked" title="'+esc(p.redirected||'')+'">wanted to '+esc(p.asked)+'</i>':'')+
+        (p.departed?'<i class="gone"><b>'+p.departed+'%</b> already left</i>':'')+
+        (p.voiced?'<i class="voiced">written by the model</i>':'')+
+      '</div></div>';
+  }).join('');
+  document.getElementById('posts').innerHTML=html;
+
+  document.getElementById('trend').innerHTML=f.trending.length?f.trending.map(function(t){
+    return '<div class="trow"><span>'+esc(t.label)+'</span><b>'+t.share+'%</b></div>'+
+      '<div class="bar"><i style="width:'+t.share+'%;background:var(--rust)"></i></div>';
+  }).join(''):'<div class="legend">Nothing is trending. Everyone is getting on with it.</div>';
+
+  document.querySelectorAll('[data-r]').forEach(function(b){
+    b.onclick=function(){ round=+b.dataset.r; paint(); document.querySelector('.stream').scrollTop=0; };
+  });
+}
+/* THE MODEL WRITES THE WORDS, AND ONLY THE WORDS.
+   Fetching a voiced round replaces post TEXT and nothing else — the
+   behaviours, intensities and mood on screen are the ones the arithmetic
+   already decided, and they do not move. If the model is down the
+   templated text stays and the page carries on. */
+var voiced={}, voiceOn=false, busy=false;
+function apply(f){ if(!f||!f.posts) return; voiced[f.round]=f.posts; paint(); }
+async function fetchVoice(r){
+  if(busy||voiced[r]) return;
+  busy=true; var b=document.getElementById('voice');
+  b.disabled=true; b.textContent='✎ writing…';
+  try{
+    var q=new URLSearchParams(location.search);
+    q.set('round',r); q.set('voice','1');
+    if(agentsOn) q.set('decider','concordia');
+    /* Voicing an agent round must voice THAT round, so the same levers
+       and decider go with the request; otherwise the words would come
+       from a different country than the decisions on screen. */
+    var res=await fetch('/api/feed?'+q.toString(), agentsOn?{
+      method:'POST', headers:{'content-type':'application/json'},
+      body:JSON.stringify({decider:'concordia',round:r,
+                           levers:live?LEVERS:null,shocks:shocks})
+    }:undefined);
+    var f=await res.json();
+    if(f.faults&&f.faults.length) console.warn('feed faults:',f.faults);
+    apply(f);
+  }catch(e){ console.warn('voice failed',e); }
+  busy=false; b.disabled=false; b.textContent='✎ voice';
+  b.className='hbtn'+(voiceOn?' on':'');
+}
+/* ASKING THE AGENTS.
+   POSTs the studio's live levers, so the twelve agents decide about the
+   TEAM'S country rather than a demo scenario. The first request runs the
+   whole twelve rounds server-side and is slow — 144 model calls on a
+   local 7B — so the button says so, and every later round is served from
+   the same cached run. Two rounds of one country, never two countries. */
+async function fetchAgents(r){
+  if(agentBusy||agentRounds[r]) return;
+  agentBusy=true;
+  var b=document.getElementById('agents');
+  b.disabled=true; b.textContent='⚟ asking…';
+  agentNote='this takes a minute the first time'; paint();
+  try{
+    var q=new URLSearchParams(location.search);
+    q.set('decider','concordia'); q.set('all','1');
+    var res=await fetch('/api/feed?'+q.toString(),{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({ decider:'concordia', all:true,
+                            levers: live?LEVERS:null, shocks: shocks })
+    });
+    var f=await res.json();
+    if(f.error) throw new Error(f.error);
+
+    /* HONEST FAILURE.
+       If the sidecar is not there the server says so and serves the
+       arithmetic run. Showing that under an "agents" label would be the
+       one thing this page must not do, so the toggle goes back off and
+       the reason goes on screen. */
+    if(f.decidedBy!=='concordia'){
+      agentsOn=false;
+      agentNote=(f.faults&&f.faults.length)?String(f.faults[0]):'agents unavailable';
+      console.warn('agents unavailable:',f.faults);
+    }else{
+      agentRounds=f.rounds||{};
+      agentNote='';
+    }
+  }catch(e){
+    agentsOn=false;
+    agentNote='agents unavailable: '+(e&&e.message?e.message:'request failed');
+    console.warn('agents failed',e);
+  }
+  agentBusy=false;
+  b.disabled=false; b.textContent='⚟ agents';
+  b.className='hbtn'+(agentsOn?' on':'');
+  paint();
+}
+
+document.getElementById('agents').onclick=function(){
+  agentsOn=!agentsOn; agentNote='';
+  this.className='hbtn'+(agentsOn?' on':'');
+  /* Voicing caches words against a round's posts. Those posts are about
+     to be different people doing different things, so the cache has to
+     go or the page would show one country's words over another's
+     decisions. */
+  voiced={};
+  if(agentsOn) fetchAgents(round); else paint();
+};
+
+document.getElementById('voice').onclick=function(){
+  voiceOn=!voiceOn; this.className='hbtn'+(voiceOn?' on':'');
+  if(voiceOn) fetchVoice(round); else paint();
+};
+document.getElementById('back').onclick=function(){ if(round>2){round--;paint();} };
+document.getElementById('fwd').onclick=function(){ if(round<12){round++;paint();} };
+document.getElementById('govsend').onclick=function(){
+  var t=document.getElementById('govtext').value.trim();
+  if(!t) return;
+  govPosts[round]=t; document.getElementById('govtext').value=''; paint();
+};
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='TEXTAREA') return;
+  if(e.key==='ArrowLeft'&&round>2){round--;paint();}
+  if(e.key==='ArrowRight'&&round<12){round++;paint();}
+});
+paint();
+})();
+</script>
+</body></html>

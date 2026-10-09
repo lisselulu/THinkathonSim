@@ -1,0 +1,3271 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian — the feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Instrument+Serif&family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#E7E2D6; --panel:#FBF8F1; --panel2:#F2EDE2; --sunk:#DED8C9;
+  --ink:#333834; --muted:#6E756E; --faint:#949A93; --line:#D2CCBE;
+  --rust:#A8624C; --good:#5E8A55; --mid:#A5813C; --bad:#A2523E;
+  --pro:#5E8A55; --anti:#A2523E; --col:#A8624C; --pol:#7C6A8A;
+  --eco:#5E828C; --conf:#949A93;
+}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:Archivo,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.55}
+.mono{font-family:"Space Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+header{height:60px;border-bottom:2px solid var(--ink);background:var(--panel);
+  display:flex;align-items:center;gap:18px;padding:0 18px;flex-wrap:nowrap;overflow-x:auto}
+.brand{font-family:"Instrument Serif",Georgia,serif;font-size:23px;line-height:1;white-space:nowrap}
+.brand small{display:block;font-family:"Space Mono",monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+.yrbox{display:flex;align-items:center;gap:7px}
+.yr{font-family:"Space Mono",monospace;font-size:21px;font-weight:700;min-width:62px;text-align:center}
+.hbtn{font-family:inherit;font-size:12px;font-weight:800;padding:5px 9px;cursor:pointer;
+  border:2px solid var(--ink);background:var(--panel2);color:var(--ink)}
+.hbtn:hover{background:var(--sunk)}
+.hbtn.on{background:var(--ink);color:var(--panel)}
+.hbtn:disabled{opacity:.5;cursor:default}
+.voiced{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.06em;
+  color:var(--pol);border:1px solid var(--pol);padding:0 4px}
+.mood{display:flex;gap:16px;margin-left:auto;white-space:nowrap}
+.mv{text-align:right}
+.mv b{display:block;font-family:"Space Mono",monospace;font-size:17px;font-weight:700;line-height:1.1}
+.mv span{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+
+.wrap{display:grid;grid-template-columns:1fr 268px;height:calc(100% - 60px)}
+.stream{overflow-y:auto;padding:16px 18px 60px}
+.side{border-left:2px solid var(--ink);background:var(--panel);overflow-y:auto;padding:16px 14px 60px}
+
+.scrub{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:16px}
+.pip{font-family:"Space Mono",monospace;font-size:10px;font-weight:700;width:25px;height:23px;
+  border:1.5px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;padding:0}
+.pip.on{border-color:var(--ink);background:var(--ink);color:var(--panel)}
+.pip.past{color:var(--ink);border-color:var(--faint)}
+
+.post{background:var(--panel);border:1.5px solid var(--line);border-left-width:4px;
+  padding:11px 13px;margin-bottom:10px;max-width:660px}
+.post.pro{border-left-color:var(--pro)} .post.anti{border-left-color:var(--anti)}
+.post.col{border-left-color:var(--col)} .post.pol{border-left-color:var(--pol)}
+.post.eco{border-left-color:var(--eco)} .post.conf{border-left-color:var(--conf)}
+.ph{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+.pn{font-weight:800;font-size:13.5px}
+.pr{font-family:"Space Mono",monospace;font-size:10.5px;color:var(--faint)}
+.tag{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.05em;
+  padding:1px 6px;border:1px solid currentColor;margin-left:auto;white-space:nowrap}
+.tag.pro{color:var(--pro)} .tag.anti{color:var(--anti)} .tag.col{color:var(--col)}
+.tag.pol{color:var(--pol)} .tag.eco{color:var(--eco)} .tag.conf{color:var(--conf)}
+.pt{font-size:14.5px;line-height:1.5}
+.pm{margin-top:7px;padding-top:6px;border-top:1px dashed var(--line);
+  font-family:"Space Mono",monospace;font-size:9.5px;color:var(--faint);
+  display:flex;gap:13px;flex-wrap:wrap}
+.pm i{font-style:normal}
+.pm i b{color:var(--muted);font-weight:700}
+.kind{padding:0 5px;border:1px solid currentColor}
+.kind.surplus{color:var(--good)} .kind.deficit{color:var(--mid)}
+.pm i.asked{color:var(--rust)} .pm i.gone{opacity:.7}
+
+.quiet{max-width:660px;border:1.5px dashed var(--line);padding:14px;color:var(--muted);
+  font-size:13.5px;background:var(--panel2)}
+.quiet b{color:var(--ink)}
+
+h4{font-family:"Space Mono",monospace;font-size:9.5px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin:0 0 8px;padding-bottom:6px;
+  border-bottom:1px solid var(--line)}
+.sbox{margin-bottom:20px}
+.trow{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-bottom:6px}
+.trow b{font-family:"Space Mono",monospace;font-weight:700}
+.bar{height:5px;background:var(--sunk);margin-top:2px;margin-bottom:8px}
+.bar i{display:block;height:100%}
+.legend{font-size:11.5px;color:var(--muted);line-height:1.5}
+.legend div{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.sw{width:10px;height:10px;flex:0 0 auto;border:1px solid var(--ink)}
+.gov{margin-top:6px}
+.gov textarea{width:100%;font-family:inherit;font-size:12.5px;border:1.5px solid var(--ink);
+  background:var(--panel2);color:var(--ink);padding:7px;resize:vertical;min-height:56px}
+.gov button{margin-top:6px;font-family:inherit;font-size:12px;font-weight:800;padding:6px 11px;
+  border:2px solid var(--ink);background:var(--ink);color:var(--panel);cursor:pointer;width:100%}
+.govnote{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
+.proto{font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);
+  padding-top:10px;margin-top:6px}
+</style></head><body>
+
+<header>
+  <div class="brand">The feed<small id="whose">Meridian · society</small></div>
+  <div class="yrbox">
+    <button class="hbtn" id="back">◀</button>
+    <div><div class="yr mono" id="yr">2052</div></div>
+    <button class="hbtn" id="fwd">▶</button>
+  </div>
+  <button class="hbtn" id="agents" title="let the Concordia agents decide what people do">⚯ agents</button>
+  <button class="hbtn" id="voice" title="ask the model to write these posts">✎ voice</button>
+  <div class="mood">
+    <div class="mv"><b id="mUnrest">–</b><span>unrest</span></div>
+    <div class="mv"><b id="mFlour">–</b><span>flourishing</span></div>
+    <div class="mv"><b id="mCope">–</b><span>covering</span></div>
+    <div class="mv"><b id="mFur">–</b><span>furious</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stream">
+    <div class="scrub" id="scrub"></div>
+    <div id="posts"></div>
+  </div>
+  <div class="side">
+    <div class="sbox"><h4>What the country is doing</h4><div id="trend"></div></div>
+    <div class="sbox"><h4>Reading this feed</h4>
+      <div class="legend">
+        <div><span class="sw" style="background:var(--pro)"></span>prosocial</div>
+        <div><span class="sw" style="background:var(--col)"></span>collective</div>
+        <div><span class="sw" style="background:var(--eco)"></span>economic</div>
+        <div><span class="sw" style="background:var(--pol)"></span>political</div>
+        <div><span class="sw" style="background:var(--anti)"></span>antisocial</div>
+        <div><span class="sw" style="background:var(--conf)"></span>conforming</div>
+      </div>
+      <div class="proto"><b>surplus</b> and <b>deficit</b> mark the same act meaning
+      opposite things. A neighbourhood covering dialysis runs because the ward closed is
+      <b>deficit</b> — a symptom. The same people running a repair workshop because the
+      four-day week gave them a Thursday is <b>surplus</b> — a society with room to spare.</div>
+    </div>
+    <div class="sbox"><h4>Post as the government</h4>
+      <div class="gov">
+        <textarea id="govtext" placeholder="We hear the concerns about waiting times and are reviewing capacity."></textarea>
+        <button id="govsend">Post</button>
+        <div class="govnote">This changes nothing. No number moves, no citizen reads it, no
+        behaviour shifts. The only thing that has ever moved a number in Meridian is policy.</div>
+      </div>
+    </div>
+    <div class="sbox"><h4>Prototype</h4>
+      <div class="proto">Every post here is generated deterministically from the same
+      trajectory the dashboard shows — no model, no network. The wording is templated;
+      that is the only part a language model will ever write. Behaviour, intensity and
+      timing stay arithmetic, so the feed can never flatter or libel a government.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+/* =====================================================================
+   WHAT EACH INDUSTRY IS FOR
+   ---------------------------------------------------------------------
+   Every sector is scored out of 100 by ONE formula:
+
+     target = Q_BASE + Q_CAPACITY·access + Q_INFRA·reliability
+                     - Q_HUMAN·human_touch·overAutomation
+                     + Q_STAFF·delivery + guarantee + friction
+
+   Four dimensions, the same four for everybody, in the same proportions
+   for everybody. Healthcare and Finance are judged identically apart
+   from two coefficients. A hospital and a bank are not good at the same
+   things and should not be measured as though they were.
+
+   THE FIX, AND THE TRAP IN IT
+   ---------------------------
+   Each sector gets a MISSION and a scorecard of weighted dimensions. The
+   obvious next step — letting each industry's agent decide what its own
+   KPIs are — is the trap, and it is worth naming because it looks like
+   more autonomy rather than less rigour. An agent that sets its own
+   targets can declare success on transactions processed while the
+   country starves, and no number anywhere would contradict it.
+
+   So: the scorecard is AUTHORED HERE and measured deterministically from
+   engine state. The agent's agency is in HOW it hits the targets, never
+   in what they are. That keeps the score falsifiable, which is the only
+   thing that makes it worth anything.
+
+   THE OLD FORMULA IS A SPECIAL CASE
+   ---------------------------------
+   It is the scorecard where every sector weights the same four
+   dimensions in the same proportions. Setting a sector's weights to
+   mirror the global coefficients reproduces its old behaviour, which is
+   what makes this safe to introduce gradually: `MISSION_WEIGHT` blends
+   between the two and is zero until the blend has been looked at.
+
+   WEIGHTS SUM TO 1 within a sector, so a scorecard is a statement about
+   PRIORITY rather than about intensity. A sector cannot be made better
+   simply by caring about more things.
+   ===================================================================== */
+
+'use strict';
+
+/* ---------------------------------------------------------------------
+   THE DIMENSIONS
+   ---------------------------------------------------------------------
+   Each is a signal roughly in [-1, +1], computed from what the engine
+   already has. `scale` converts a weight of 1.0 into a full-strength
+   effect on the 100-point scale, and is set so that a sector weighting
+   a dimension the way the old global formula implicitly did produces
+   approximately its old number.
+   --------------------------------------------------------------------- */
+const DIMENSIONS = {
+  access:       { scale: 120, blurb: 'is there enough of it for everyone asking' },
+  delivery:     { scale:  80, blurb: 'are there enough people to actually deliver it' },
+  humanity:     { scale: 400, blurb: 'is a person still doing the part that has to be a person' },
+  reliability:  { scale: 100, blurb: 'is the infrastructure underneath it maintained' },
+  affordability:{ scale:  60, blurb: 'can people pay for it without going without something else' },
+  equity:       { scale:  70, blurb: 'when it is rationed, who goes without' }
+};
+
+/* ---------------------------------------------------------------------
+   THE MISSIONS
+   ---------------------------------------------------------------------
+   The `mission` line is what the industry is FOR, in one sentence. It is
+   read by a human, and in due course by that industry's agent, which is
+   why it is written as an obligation rather than a description.
+   --------------------------------------------------------------------- */
+const MISSIONS = {
+  healthcare: {
+    mission: 'Everyone who needs care gets it in time, and nobody is ruined by needing it.',
+    /* Access dominates because a hospital that turns people away has
+       failed at the thing it is for, however good the care inside is. */
+    kpi: { access: 0.34, humanity: 0.24, delivery: 0.18, equity: 0.16, reliability: 0.08 }
+  },
+  care_services: {
+    mission: 'The people who cannot look after themselves are looked after, by someone who knows them.',
+    /* The one sector where the human IS the service. Automate it past
+       its comfort and there is nothing left worth measuring. */
+    kpi: { humanity: 0.40, delivery: 0.24, access: 0.20, equity: 0.16 }
+  },
+  education_research: {
+    mission: 'Every child becomes someone this economy still has a use for, and the country keeps learning things nobody knew.',
+    kpi: { humanity: 0.28, delivery: 0.26, access: 0.22, equity: 0.14, reliability: 0.10 }
+  },
+  transport_logistics: {
+    mission: 'People and goods get where they are going, on time, at a price that does not decide who travels.',
+    kpi: { access: 0.34, reliability: 0.28, affordability: 0.20, delivery: 0.10, equity: 0.08 }
+  },
+  energy_utilities: {
+    mission: 'The lights stay on, the water runs, and the bill does not choose between them.',
+    /* Reliability and affordability, not margin. A grid that is
+       profitable and intermittent has failed. */
+    kpi: { reliability: 0.34, access: 0.28, affordability: 0.28, delivery: 0.10 }
+  },
+  compute_telecom: {
+    mission: 'The network carries what the country asks of it, and asking more of it is not ruinous.',
+    kpi: { access: 0.38, reliability: 0.30, affordability: 0.22, delivery: 0.10 }
+  },
+  housing_construction: {
+    mission: 'Everyone has somewhere to live that they can afford and that is still standing in thirty years.',
+    kpi: { affordability: 0.32, access: 0.28, reliability: 0.22, equity: 0.18 }
+  },
+  food_agri: {
+    mission: 'Nobody goes hungry, and the city is not one shipping lane away from finding out it could.',
+    kpi: { access: 0.32, affordability: 0.28, reliability: 0.22, equity: 0.18 }
+  },
+  manufacturing: {
+    mission: 'The things this country needs can be made here, by an industry that is still here next decade.',
+    kpi: { access: 0.36, reliability: 0.26, delivery: 0.20, affordability: 0.18 }
+  },
+  finance: {
+    /* Scored on whether capital reaches the real economy, NOT on margin.
+       A banking sector can be enormously profitable while starving
+       everything it is supposed to fund. */
+    mission: 'Capital reaches the people and firms that can use it, and the system survives its own bad years.',
+    kpi: { reliability: 0.34, access: 0.30, equity: 0.22, delivery: 0.14 }
+  },
+  retail_commerce: {
+    mission: 'People can buy what they need near where they live, at a price they can meet.',
+    kpi: { affordability: 0.34, access: 0.30, delivery: 0.20, equity: 0.16 }
+  },
+  public_admin: {
+    mission: 'The state can still do what it decides to do, and a citizen can find out why.',
+    kpi: { delivery: 0.32, humanity: 0.26, reliability: 0.22, access: 0.20 }
+  },
+  public_safety: {
+    mission: 'People are safe, and feel safe, without being policed into it.',
+    kpi: { delivery: 0.30, humanity: 0.26, access: 0.24, equity: 0.20 }
+  }
+};
+
+/* ---------------------------------------------------------------------
+   VALIDATION
+   ---------------------------------------------------------------------
+   Weights that do not sum to 1 make a sector quietly easier or harder to
+   score than its neighbours, which is exactly the kind of thing nobody
+   notices until a team asks why their hospital is doing so well.
+   --------------------------------------------------------------------- */
+function validate(order) {
+  const problems = [];
+  (order || Object.keys(MISSIONS)).forEach(k => {
+    const m = MISSIONS[k];
+    if (!m) { problems.push(k + ' has no mission'); return; }
+    if (!m.mission || m.mission.length < 20) problems.push(k + ' has no mission statement');
+    const keys = Object.keys(m.kpi || {});
+    if (!keys.length) { problems.push(k + ' has no KPI weights'); return; }
+    keys.forEach(d => {
+      if (!DIMENSIONS[d]) problems.push(k + ' weights an unknown dimension "' + d + '"');
+    });
+    const sum = keys.reduce((a, d) => a + m.kpi[d], 0);
+    if (Math.abs(sum - 1) > 1e-9) {
+      problems.push(k + ' KPI weights sum to ' + sum.toFixed(4) + ', not 1');
+    }
+  });
+  Object.keys(MISSIONS).forEach(k => {
+    if (order && order.indexOf(k) < 0) problems.push('mission for "' + k + '", which is not a sector');
+  });
+  return problems;
+}
+
+/**
+ * Score one sector against its own mission.
+ *
+ * `signals` are the normalised dimension readings for this sector this
+ * round. Returns the 0-100 target plus the per-dimension breakdown, so a
+ * team can see WHICH part of the mission is failing rather than being
+ * handed one number.
+ */
+function scoreAgainstMission(key, signals, base) {
+  const m = MISSIONS[key];
+  const parts = {};
+  let total = base;
+  if (!m) return { target: total, parts: parts, mission: null };
+
+  Object.keys(m.kpi).forEach(d => {
+    const dim = DIMENSIONS[d];
+    if (!dim) return;
+    const raw = signals[d] == null ? 0 : signals[d];
+    const contribution = m.kpi[d] * dim.scale * raw;
+    parts[d] = { weight: m.kpi[d], signal: raw, points: contribution };
+    total += contribution;
+  });
+
+  return { target: total, parts: parts, mission: m.mission };
+}
+
+/** The weakest part of a sector's mission, for a report or a prompt. */
+function weakest(parts) {
+  const keys = Object.keys(parts || {});
+  if (!keys.length) return null;
+  const worst = keys.sort((a, b) => parts[a].points - parts[b].points)[0];
+  return { dimension: worst, points: parts[worst].points,
+           blurb: (DIMENSIONS[worst] || {}).blurb };
+}
+
+/* Dual export, the same shape market.js uses.
+   The browser builds inline this file ahead of the engine, and the
+   engine reads `window.MeridianMissions` when there is no `require`.
+   A bare `module.exports` here threw in the browser and left MISSIONS
+   null, which took every client-side page down at the first sector it
+   tried to score. */
+const API = { MISSIONS, DIMENSIONS, validate, scoreAgainstMission, weakest };
+if (typeof window !== 'undefined') window.MeridianMissions = API;
+if (typeof module !== 'undefined' && module.exports) module.exports = API;
+
+})();
+/* =====================================================================
+   THE MERIDIAN SIMULATION — LAYER 1 ENGINE
+   ---------------------------------------------------------------------
+   world state + lever settings  ->  next world state
+
+   Deterministic. There is no randomness anywhere in this file. Shocks are
+   drawn by the facilitator from a sealed deck and passed IN as arguments.
+
+   READ THIS FILE. You are meant to. Reason about it, argue with the
+   constants, plan against it. You may not modify it during the run.
+
+   THE ONE THING TO UNDERSTAND
+   ---------------------------
+   Nothing in here has an opinion about whether automation is good. The
+   engine only does bookkeeping, and the bookkeeping forms a ring:
+
+       automation removes headcount
+         -> headcount is a wage bill
+            -> wages are household income
+               -> household income becomes consumption
+                  -> consumption is the demand sectors sell into
+                     -> sales are the profit you tax
+                        -> tax funds the UBI that replaced the wages
+
+   Margins, profit, GDP, quality and cohesion are all DERIVED from that
+   ring. The demand cliff is not written down anywhere as a rule. It is
+   what happens when you go round the ring enough times.
+
+   The single most important line in this file is marked THE CLIFF.
+   ===================================================================== */
+
+(function (root) {
+'use strict';
+
+/* ---------------------------------------------------------------------
+   0. HELPERS
+   --------------------------------------------------------------------- */
+const clamp = (v, lo, hi) => (v < lo ? lo : (v > hi ? hi : v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const round2 = v => Math.round(v * 100) / 100;
+const deepClone = o => JSON.parse(JSON.stringify(o));
+
+/* ---------------------------------------------------------------------
+   1. EXOGENOUS DEMOGRAPHY
+   ---------------------------------------------------------------------
+   Population is not a lever. Singapore 2050-2074 ages and shrinks
+   whatever you do. Anchored to the published baseline, interpolated
+   between anchors.
+
+   This is the ground the whole simulation stands on: demand for care and
+   healthcare climbs every round while the working-age base that could
+   staff it falls every round.
+   --------------------------------------------------------------------- */
+const DEMOGRAPHY_ANCHORS = [
+  { round: 1,  total: 5940000, age_0_19: 950000, age_20_64: 3325000, age_65_plus: 1665000 },
+  { round: 5,  total: 5830000, age_0_19: 900000, age_20_64: 3150000, age_65_plus: 1780000 },
+  { round: 6,  total: 5780000, age_0_19: 880000, age_20_64: 3090000, age_65_plus: 1810000 },
+  { round: 10, total: 5650000, age_0_19: 790000, age_20_64: 2910000, age_65_plus: 1950000 },
+  { round: 12, total: 5520000, age_0_19: 810000, age_20_64: 2760000, age_65_plus: 1950000 }
+];
+
+/* Beyond the last anchor the published projection runs out and we are
+   on our own. Holding the final anchor flat -- which is what this did --
+   means a hundred-year run has a static population and the ageing
+   crisis simply stops deepening, quietly making long runs easier than
+   short ones.
+
+   Instead the final observed trend continues, damped toward zero over
+   about three decades, with floors. Damping rather than straight-line
+   extrapolation because a linear continuation eventually produces
+   negative children; a demographic transition decelerates as it
+   completes. This is EXTRAPOLATION, not projection, and anything past
+   round 12 should be read as "the trend, continued" rather than as a
+   forecast. */
+function demography(rnd) {
+  const a = DEMOGRAPHY_ANCHORS;
+  if (rnd <= a[0].round) return Object.assign({}, a[0]);
+
+  const last = a[a.length - 1], prev = a[a.length - 2];
+  if (rnd > last.round) {
+    const span = last.round - prev.round;
+    const beyond = rnd - last.round;
+    /* Each additional round contributes less than the one before, so the
+       cumulative move converges instead of running away. */
+    const HALF_LIFE = 15;               // rounds, ~30 years
+    const damped = HALF_LIFE * (1 - Math.pow(0.5, beyond / HALF_LIFE));
+    const step = k => (last[k] - prev[k]) / span * damped;
+    const out = {
+      round: rnd,
+      age_0_19:    Math.max(250000, Math.round(last.age_0_19 + step('age_0_19'))),
+      age_20_64:   Math.max(800000, Math.round(last.age_20_64 + step('age_20_64'))),
+      age_65_plus: Math.max(400000, Math.round(last.age_65_plus + step('age_65_plus')))
+    };
+    out.total = out.age_0_19 + out.age_20_64 + out.age_65_plus;
+    return out;
+  }
+  if (rnd === last.round) return Object.assign({}, last);
+  for (let i = 0; i < a.length - 1; i++) {
+    if (rnd >= a[i].round && rnd <= a[i + 1].round) {
+      const t = (rnd - a[i].round) / (a[i + 1].round - a[i].round);
+      return {
+        round: rnd,
+        total:       Math.round(lerp(a[i].total,       a[i + 1].total,       t)),
+        age_0_19:    Math.round(lerp(a[i].age_0_19,    a[i + 1].age_0_19,    t)),
+        age_20_64:   Math.round(lerp(a[i].age_20_64,   a[i + 1].age_20_64,   t)),
+        age_65_plus: Math.round(lerp(a[i].age_65_plus, a[i + 1].age_65_plus, t))
+      };
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------
+   2. SECTOR CONFIGURATION
+   ---------------------------------------------------------------------
+   base_output_bn  annual output at round 1, SGD bn (the ten sum to 782)
+   base_headcount  round-1 employment
+   avg_wage        SGD/year per worker, 2050 terms
+   automation_r1   round-1 automation
+   productivity    output gain per unit of automation. High where output
+                   scales with machines (finance, retail, transport). Low
+                   where the service IS the human contact (care).
+   human_touch     how badly quality suffers once automation passes
+                   `comfort`. Care is 1.0. Finance is ~0.
+   comfort         the automation level beyond which human_touch bites
+   compute_int     compute + energy drawn per unit of automated output.
+                   THIS IS THE BILL ATTACHED TO EVERY POINT OF AUTOMATION.
+   demand_driver   what this sector's demand scales with
+   essential       counts toward "worst essential service" and the
+                   quality-below-40 fail gate
+   --------------------------------------------------------------------- */
+const SECTORS = {
+  healthcare: {
+    name: 'Healthcare', base_output_bn: 58, base_headcount: 200000, avg_wage: 88000,
+    automation_r1: 0.22, productivity: 0.45, human_touch: 0.70,
+    comfort: 0.58, compute_int: 0.06, demand_driver: 'elderly', essential: true
+  },
+  care_services: {
+    name: 'Care Services', base_output_bn: 36, base_headcount: 210000, avg_wage: 52000,
+    automation_r1: 0.12, productivity: 0.25, human_touch: 1.00,
+    comfort: 0.30, compute_int: 0.04, demand_driver: 'elderly', essential: true
+  },
+  education_research: {
+    name: 'Education & Research', base_output_bn: 42, base_headcount: 170000, avg_wage: 82000,
+    automation_r1: 0.20, productivity: 0.40, human_touch: 0.90,
+    comfort: 0.42, compute_int: 0.07, demand_driver: 'youth', essential: true
+  },
+  transport_logistics: {
+    name: 'Transport & Logistics', base_output_bn: 60, base_headcount: 180000, avg_wage: 62000,
+    automation_r1: 0.45, productivity: 0.85, human_touch: 0.10,
+    comfort: 0.92, compute_int: 0.09, demand_driver: 'population', essential: true
+  },
+  energy_utilities: {
+    name: 'Energy & Utilities', base_output_bn: 48, base_headcount: 55000, avg_wage: 120000,
+    /* Productivity 1.70, not 1.20. The combined Compute & Energy sector
+       carried 1.80, and splitting it off at 1.20 quietly took the grid's
+       ability to scale with automation away: demand still rose with the
+       whole economy's automation while supply no longer could, so the
+       grid ran at 140-155% of capacity and dragged its own quality to 46.
+       A split has to carry the parent's elasticity across, not just its
+       output. */
+    automation_r1: 0.55, productivity: 1.70, human_touch: 0.00,
+    comfort: 0.98, compute_int: 0.03, demand_driver: 'compute', essential: true
+  },
+  compute_telecom: {
+    name: 'Compute & Telecom', base_output_bn: 79, base_headcount: 80000, avg_wage: 135000,
+    automation_r1: 0.60, productivity: 1.80, human_touch: 0.00,
+    comfort: 0.98, compute_int: 0.05, demand_driver: 'compute', essential: true
+  },
+  housing_construction: {
+    name: 'Housing & Construction', base_output_bn: 50, base_headcount: 150000, avg_wage: 68000,
+    automation_r1: 0.30, productivity: 0.70, human_touch: 0.20,
+    comfort: 0.82, compute_int: 0.05, demand_driver: 'population', essential: true
+  },
+  food_agri: {
+    name: 'Food & Agri', base_output_bn: 34, base_headcount: 100000, avg_wage: 54000,
+    automation_r1: 0.35, productivity: 0.60, human_touch: 0.20,
+    comfort: 0.85, compute_int: 0.06, demand_driver: 'population', essential: true
+  },
+  manufacturing: {
+    name: 'Manufacturing', base_output_bn: 130, base_headcount: 260000, avg_wage: 78000,
+    automation_r1: 0.50, productivity: 1.10, human_touch: 0.10,
+    comfort: 0.94, compute_int: 0.10, demand_driver: 'consumption', essential: false
+  },
+  finance: {
+    name: 'Finance', base_output_bn: 115, base_headcount: 200000, avg_wage: 145000,
+    automation_r1: 0.55, productivity: 0.95, human_touch: 0.05,
+    comfort: 0.95, compute_int: 0.10, demand_driver: 'consumption', essential: false
+  },
+  retail_commerce: {
+    name: 'Retail & Commerce', base_output_bn: 85, base_headcount: 320000, avg_wage: 48000,
+    automation_r1: 0.50, productivity: 0.80, human_touch: 0.15,
+    comfort: 0.90, compute_int: 0.08, demand_driver: 'consumption', essential: true
+  },
+  public_admin: {
+    name: 'Public Administration', base_output_bn: 25, base_headcount: 100000, avg_wage: 84000,
+    automation_r1: 0.25, productivity: 0.50, human_touch: 0.60,
+    comfort: 0.55, compute_int: 0.06, demand_driver: 'population', essential: true
+  },
+  public_safety: {
+    name: 'Public Safety', base_output_bn: 20, base_headcount: 100000, avg_wage: 76000,
+    automation_r1: 0.28, productivity: 0.55, human_touch: 0.50,
+    comfort: 0.66, compute_int: 0.06, demand_driver: 'population', essential: true
+  }
+};
+const ORDER = Object.keys(SECTORS);
+const ESSENTIAL = ORDER.filter(k => SECTORS[k].essential);
+
+/* ---------------------------------------------------------------------
+   3. BEHAVIOURAL AND FISCAL CONSTANTS
+   ---------------------------------------------------------------------
+   Every number here is a modelling choice, exposed so you can argue with
+   it. None of them are secret. If you think MPC_UBI should not exceed
+   MPC_WAGE, say so in your pitch and show what changes.
+   --------------------------------------------------------------------- */
+const P = {
+  /* automation dynamics */
+  AUTOMATION_STEP_UP:   0.14,  // most a sector can automate in one round
+  AUTOMATION_STEP_DOWN: 0.05,  // falls back slowly: machines are bought, not rented
+  IRREVERSIBLE_ABOVE:   0.80,  // past this, re-employing humans is penalised (spec 5)
+  IRREVERSIBLE_DRAG:    0.55,  // ...cutting the down-step by this share
+
+  /* labour */
+  WEEK_SPREAD: 0.55,           // shorter week spreads work over more heads
+  WEEK_OUTPUT: 0.30,           // ...and cuts output, but less than proportionally
+  GUARANTEE_WAGE_DEFAULT: 3200,// SGD/month for a guaranteed care job
+  GUARANTEE_INTAKE: 0.055,     // share of the unemployed taken on each round
+
+  /* household income -> consumption */
+  MPC_WAGE:    0.72,  // marginal propensity to consume out of wages
+  MPC_UBI:     0.94,  // ...out of UBI: transfers go to people who spend them
+  MPC_CAPITAL: 0.28,  // ...out of capital income: mostly saved
+  CONSUMPTION_INERTIA: 0.45,   // households smooth spending between rounds
+
+  /* tax bases */
+  LABOUR_TAX_RATE: 0.20,       // personal income tax on the wage bill
+  CONSUMPTION_TAX: 0.08,       // GST
+  OTHER_TAX_GDP:   0.042,      // land, vehicle, duties - scales with GDP
+  CAPITAL_RETURN_RATE: 0.1867, // return on automated capital (calibrated below)
+  DIVIDEND_PROFIT_SHARE: 0.5,  // owning machines also claims operating profit
+
+  /* investment: what firms do with the profit you did NOT take.
+     This is the other half of the corporate tax trade-off. Tax hard and
+     you collect more this round and have less to collect from later. */
+  DEPRECIATION: 0.14,          // capital stock lost per round without reinvestment
+  BASE_INVEST_RATE: 0.17,      // round-1 retained profit / GDP
+  INVEST_TAX_ELASTICITY: 1.30, // reinvestment lost per point of tax above 19%
+  INVEST_LEVY_ELASTICITY: 0.85,// ...and per point of compute levy above 5%
+  LEVY_ADOPTION_BRAKE: 1.60,   // compute levy slows how fast you CAN automate
+
+  /* spending */
+  UBI_ADMIN_EFFICIENCY: { flat: 0.97, means_tested: 0.90, age_weighted: 0.95 },
+  MEANS_TEST_COVERAGE: 0.55,   // share of the population that qualifies
+  AGE_WEIGHT_SENIOR: 1.6,      // 65+ receive 1.6 shares under age-weighting
+
+  /* prices */
+  BASE_INFLATION: 0.021,
+  IMPORT_SHARE: 0.55,          // of the consumption basket. SG imports nearly all food
+  COMPUTE_SCARCITY_PASSTHROUGH: 0.09,
+
+  /* SCARCITY PRICING (docs/EVIDENCE.md section 6).
+     Compute and energy demand is driven by how automated the economy
+     is. Until now that demand met a finite capacity and the only
+     consequence was RATIONING -- a quality shortfall -- with the price
+     drifting at a flat 1% a round regardless. A society could triple
+     its automation and the energy price would not notice.
+
+     Now the price responds to how tight the sector is:
+
+         tightness = demand / capacity        (last round's realised)
+         pressure  = (tightness - SLACK)      above the slack band only
+         price    *= 1 + ELASTICITY * pressure^CONVEXITY
+
+     CONVEXITY > 1 because scarcity bites nonlinearly: the last ten per
+     cent of spare capacity costs far more than the first. Below
+     SLACK_BAND nothing happens, because an economy running comfortably
+     under capacity has no reason to bid prices up.
+
+     The price already reaches households (via the price index, and so
+     effective_ubi_index) and already raises the cost of running
+     automated capacity (via computeCost). Both channels existed; this
+     is what makes them respond to the team's own automation policy
+     rather than only to shocks. */
+  SCARCITY_SLACK_BAND: 0.92,   // tightness below this is comfortable
+  SCARCITY_ELASTICITY: 0.55,   // price response per unit of pressure
+  SCARCITY_CONVEXITY: 1.6,     // >1: the last of the capacity is dear
+  SCARCITY_RELIEF: 0.25,       // how fast prices fall when slack returns
+  SCARCITY_PRICE_CEILING: 6.0, // a price index, not a cliff
+
+  /* PER-SECTOR CAPITAL (stage 3 foundations).
+     ------------------------------------------------------------------
+     `capitalIndex` is a single economy-wide scalar, so a sector running a
+     40% margin and one running -10% receive the IDENTICAL capital
+     multiplier next round. Nothing in the model rewards a sector for
+     being profitable, which is why growth cannot compound: there is no
+     positive feedback loop anywhere in the supply side.
+
+     `_sectorCapital` fixes that by accumulating each sector's own
+     retained earnings. It is COMPUTED from this round but applied to
+     capacity only in proportion to SECTOR_CAPITAL_WEIGHT, which is zero
+     here on purpose. At zero the term is exactly 1 and every existing run
+     is byte-identical; the weight is raised when non-linear growth lands,
+     and until then the figure is observable and testable without moving
+     a single result. */
+  SECTOR_CAPITAL_WEIGHT: 1,      // 0 = off. Raised when growth lands.
+  SECTOR_CAPITAL_DEPRECIATION: 0.14,
+  SECTOR_CAPITAL_FLOOR: 0.35,
+  SECTOR_CAPITAL_CEILING: 2.2,
+
+
+  /* quality */
+  QUALITY_INERTIA: 0.38,       // share of the gap to target closed per round
+  Q_BASE: 64,
+  Q_CAPACITY: 42,
+  Q_INFRA: 26,
+  Q_HUMAN: 135,
+  Q_STAFF: 20,
+  Q_GUARANTEE: 10,
+
+  /* MISSION-BASED QUALITY (stage 4).
+     ------------------------------------------------------------------
+     Quality is one formula for all thirteen sectors: the same four
+     dimensions in the same proportions, so a hospital and a bank are
+     judged identically apart from two coefficients. `sector_missions.js`
+     gives each industry its own scorecard instead.
+
+     Blended rather than swapped, and at weight 0 the blend is exactly
+     the old target, so this introduces the machinery without moving a
+     result. Raising it is a deliberate, separately reviewable act. */
+  MISSION_WEIGHT: 1,
+
+  /* ==================================================================
+     NON-LINEAR GROWTH (stage 5)
+     ==================================================================
+     Three mechanisms, each replacing a piece of a model in which
+     automation buys a fixed, immediate, one-off increase in capacity.
+     All three start at zero weight; a calibration pass raises them
+     together, because they interact and tuning them one at a time
+     would fit each to the absence of the others.
+
+     1. THE PRODUCTIVITY J-CURVE.
+        Automation does not pay on arrival. The complementary work —
+        reorganising, retraining, rewriting the process around the
+        machine — is real, expensive and unmeasured, so measured
+        productivity DIPS before it rises. `_autoExperience` lags
+        `automation`; the gap is automation the sector has bought and
+        not yet learned to use, and it costs output.
+        (Brynjolfsson, Rock & Syverson 2021; David 1990.)
+
+     2. THE LEARNING CURVE.
+        Unit cost falls with CUMULATIVE production, not with the level.
+        This is the mechanism that makes AI exponential rather than
+        merely large: every unit of compute consumed makes the next one
+        cheaper, so a society far along the curve gets more automation
+        per dollar than one starting out. (Wright's law.)
+
+     3. BASS DIFFUSION.
+        Adoption is an S-curve, not a ramp. `AUTOMATION_STEP_UP` applies
+        the same 0.14 whether a sector sits at 0.12 or 0.90, which is a
+        constant-rate line. The Bass form `(p + q·F)(1 − F)` is slow
+        while few have adopted, fastest in the middle, and saturates.
+        (Bass 1969; Rogers, Diffusion of Innovations.) */
+
+  J_CURVE_WEIGHT: 1,
+  J_ABSORB_RATE: 0.45,     // share of the unabsorbed gap learned per round
+  J_DIP: 0.35,             // output cost per unit of unabsorbed automation
+  /* The other half of the J, and the half that makes it a J rather than
+     a tax. Automation that has been ABSORBED pays more than the naive
+     linear gain, because the reorganisation it forced is itself
+     productive — that is the whole finding, not a caveat to it. Without
+     this the mechanism only ever costs output and a team would rightly
+     conclude that automating is never worth it. */
+  J_MATURE: 1.40,          // multiplier on the gain from absorbed automation
+
+  LEARNING_WEIGHT: 1,
+  LEARNING_EXPONENT: 0.15, // cost ~ cumulative^(-b). b=0.15 is ~10% per doubling
+  LEARNING_FLOOR: 0.45,    // experience never makes compute free
+
+  DIFFUSION_WEIGHT: 1,
+  BASS_P: 0.030,           // innovation: who moves with nobody to copy
+  BASS_Q: 0.380,           // imitation: how strongly the adopted pull the rest
+  BASS_SCALE: 1.30,        // so the PEAK rate matches the old constant step
+
+  /* reskilling */
+  RESKILL_LAG: 3,              // rounds before it pays off (spec 5)
+  RESKILL_POTENCY: 2.6e6,      // people moved high->low exposure per $bn
+  EXPOSURE_SENSITIVITY: 1.2,   // share of the workforce newly exposed per
+                               // point of economy-wide automation growth
+
+  /* social */
+  COHESION_INERTIA: 0.45,
+  LEGITIMACY_INERTIA: 0.40,
+  GINI_INERTIA: 0.50,
+
+  /* civic friction: what people withhold when they have had enough.
+     Below the threshold a society grumbles and works; above it, it stops
+     cooperating — absence, go-slows, boycotts, things not maintained. */
+  UNREST_THRESHOLD: 50,
+  UNREST_DRAG: 0.55,        // share of output lost at total unrest
+  UNREST_SERVICE_DRAG: 26   // quality points lost from care and health at the same
+};
+
+/* ---------------------------------------------------------------------
+   4. SHOCK DECK
+   ---------------------------------------------------------------------
+   The engine never draws. Shocks are handed in. Each is a set of
+   multipliers and offsets applied for the round it is active.
+   --------------------------------------------------------------------- */
+const SHOCKS = {
+  pandemic: {
+    label: 'Respiratory pandemic',
+    demand: { healthcare: 1.45, care_services: 1.30, retail_commerce: 0.82, transport_logistics: 0.72 },
+    quality: { healthcare: -22, care_services: -14 },
+    cohesion: -6, output_mult: 0.93
+  },
+  food_import_disruption: {
+    label: 'Food import disruption',
+    demand: { food_agri: 1.05 },
+    capacity_mult: { food_agri: 0.55 },
+    quality: { food_agri: -20 },
+    import_price: 0.22, cohesion: -5
+  },
+  energy_price_spike: {
+    label: 'Energy price spike',
+    capacity_mult: { energy_utilities: 0.80 },
+    quality: { energy_utilities: -12, transport_logistics: -6 },
+    compute_price: 0.45, import_price: 0.08, cohesion: -3
+  },
+  chip_export_controls: {
+    label: 'Chip export controls',
+    capacity_mult: { compute_telecom: 0.72 },
+    automation_ceiling: -0.10,
+    compute_price: 0.60, quality: { compute_telecom: -10 }, cohesion: -2
+  },
+  cyber_attack: {
+    label: 'Infrastructure cyber attack',
+    quality: { finance: -18, compute_telecom: -16, energy_utilities: -12, public_safety: -10 },
+    capacity_mult: { finance: 0.85, compute_telecom: 0.86, energy_utilities: 0.90 },
+    cohesion: -4, legitimacy: -5
+  },
+  /* endogenous - fired by your own state, not by chance (spec 6) */
+  civil_unrest: {
+    label: 'Civil unrest',
+    quality: { public_safety: -14, retail_commerce: -10 },
+    output_mult: 0.94, cohesion: -8, legitimacy: -8
+  },
+  fiscal_crisis: {
+    label: 'Fiscal crisis',
+    borrowing_penalty: 0.35, legitimacy: -10, cohesion: -4
+  },
+  service_failure_cascade: {
+    label: 'Service failure cascade',
+    quality: { healthcare: -8, care_services: -10, education_research: -8, retail_commerce: -8 },
+    cohesion: -7, legitimacy: -6
+  }
+};
+
+/* ---------------------------------------------------------------------
+   5. DEFAULT LEVERS — the round-1 published settings
+   --------------------------------------------------------------------- */
+const DEFAULT_LEVERS = {
+  automation_target: {
+    healthcare: 0.22, care_services: 0.12, education_research: 0.20,
+    transport_logistics: 0.45, energy_utilities: 0.55, compute_telecom: 0.60,
+    housing_construction: 0.30, food_agri: 0.35, manufacturing: 0.50,
+    finance: 0.55, retail_commerce: 0.50, public_admin: 0.25, public_safety: 0.28
+  },
+  corporate_tax_rate: 0.19,
+  compute_levy: 0.05,
+  allocation: { ubi: 0.45, infrastructure: 0.40, reserves: 0.15 },
+  ubi_design: 'flat',            // flat | means_tested | age_weighted
+  reskilling_spend_pct: 0.08,
+  public_ownership_pct: 0.05,
+  working_week_days: 5,          // 5 | 4 | 3
+  care_job_guarantee: false,
+  care_guarantee_wage: P.GUARANTEE_WAGE_DEFAULT
+};
+
+/* A sector missing from `automation_target` reaches `clamp(undefined, …)`
+   as NaN, and a NaN automation poisons capacity, headcount, compute
+   demand and every margin from round 2 onward without throwing. */
+(function assertDefaultLevers() {
+  const missing = ORDER.filter(k => typeof DEFAULT_LEVERS.automation_target[k] !== 'number');
+  if (missing.length) {
+    throw new Error('DEFAULT_LEVERS.automation_target is missing: ' + missing.join(', '));
+  }
+  const extra = Object.keys(DEFAULT_LEVERS.automation_target).filter(k => !SECTORS[k]);
+  if (extra.length) {
+    throw new Error('DEFAULT_LEVERS.automation_target names non-sectors: ' + extra.join(', '));
+  }
+})();
+
+/* ---------------------------------------------------------------------
+   6. SELF-CALIBRATION
+   ---------------------------------------------------------------------
+   Rather than carrying magic numbers, the engine solves each sector's
+   non-wage cost share so that round 1 reproduces the published baseline
+   margins exactly. Change a wage or an output above and the calibration
+   follows automatically.
+   --------------------------------------------------------------------- */
+const R1_MARGINS = {
+  healthcare: 0.09, care_services: -0.09, education_research: -0.04,
+  transport_logistics: 0.16, energy_utilities: 0.14, compute_telecom: 0.21,
+  housing_construction: 0.12, food_agri: 0.07, manufacturing: 0.19,
+  finance: 0.24, retail_commerce: 0.11, public_admin: -0.06, public_safety: -0.02
+};
+
+/* ---------------------------------------------------------------------
+   THE SECTOR TABLE MUST BE COMPLETE, AND IT MUST SAY SO AT LOAD TIME
+   ---------------------------------------------------------------------
+   Every check below guards a failure that is otherwise SILENT and
+   arrives as NaN somewhere unrelated, rounds later.
+
+   A sector with no `R1_MARGINS` entry makes `COST_SHARE[k]` NaN, which
+   makes `otherCost` NaN, which makes `profit` NaN, which makes GDP, the
+   tax take, the UBI and every indicator NaN — and nothing throws. The
+   run completes. It produces a trajectory. Every number in it is NaN
+   and the first place anyone notices is a blank chart.
+
+   These throw rather than warn for the same reason `assertBlind` does:
+   a guard that can be ignored is a guard that will be.
+   --------------------------------------------------------------------- */
+const DEMAND_DRIVERS = ['population', 'elderly', 'youth', 'consumption', 'compute'];
+const SECTOR_FIELDS = ['name', 'base_output_bn', 'base_headcount', 'avg_wage',
+                       'automation_r1', 'productivity', 'human_touch', 'comfort',
+                       'compute_int', 'demand_driver', 'essential'];
+
+(function assertSectorTable() {
+  const problems = [];
+
+  ORDER.forEach(k => {
+    const c = SECTORS[k];
+    SECTOR_FIELDS.forEach(f => {
+      if (c[f] === undefined || c[f] === null) problems.push(k + ' is missing `' + f + '`');
+    });
+    if (typeof R1_MARGINS[k] !== 'number') {
+      problems.push(k + ' has no R1_MARGINS entry (COST_SHARE would be NaN)');
+    }
+    if (DEMAND_DRIVERS.indexOf(c.demand_driver) < 0) {
+      problems.push(k + ' has demand_driver "' + c.demand_driver +
+        '", which is not one of: ' + DEMAND_DRIVERS.join(', ') + ' (demand would be NaN)');
+    }
+    if (!(c.base_output_bn > 0)) problems.push(k + ' has no positive base_output_bn');
+  });
+
+  // A margin for a sector that does not exist is a rename nobody finished.
+  Object.keys(R1_MARGINS).forEach(k => {
+    if (!SECTORS[k]) problems.push('R1_MARGINS names "' + k + '", which is not a sector');
+  });
+
+  if (problems.length) {
+    throw new Error('the sector table is inconsistent:\n  - ' + problems.join('\n  - '));
+  }
+})();
+
+const COST_SHARE = {};
+ORDER.forEach(k => {
+  const c = SECTORS[k];
+  const out = c.base_output_bn;
+  const wages = c.base_headcount * c.avg_wage / 1e9;
+  const comp = c.compute_int * c.automation_r1 * out;
+  // out - wages - compute - cost_share*out = margin*out   =>  solve cost_share
+  COST_SHARE[k] = (out - wages - comp - R1_MARGINS[k] * out) / out;
+  if (!isFinite(COST_SHARE[k])) {
+    throw new Error('COST_SHARE for ' + k + ' is not finite — round 1 cannot be reproduced');
+  }
+});
+
+/* Round-1 aggregates, derived once, used as the index bases. */
+const MISSIONS = (typeof require !== 'undefined')
+  ? require('./sector_missions.js')
+  : (typeof window !== 'undefined' ? window.MeridianMissions : null);
+
+const CAL = (function () {
+  const wageBill = ORDER.reduce((a, k) => a + SECTORS[k].base_headcount * SECTORS[k].avg_wage / 1e9, 0);
+  const grossProfit = ORDER.reduce((a, k) => a + SECTORS[k].base_output_bn * R1_MARGINS[k], 0);
+  const autoCapital = ORDER.reduce((a, k) => a + SECTORS[k].automation_r1 * SECTORS[k].base_output_bn, 0);
+  const capitalReturn = P.CAPITAL_RETURN_RATE * autoCapital;
+  const corporateProfit = grossProfit + capitalReturn;
+  const ubiTotal = 680 * 12 * 5940000 / 1e9;             // the published round-1 UBI
+  const dividend = 0.05 * (capitalReturn + P.DIVIDEND_PROFIT_SHARE * grossProfit);
+  const capitalToHouseholds = (corporateProfit - dividend) * 0.35;
+  const spend = P.MPC_WAGE * wageBill + P.MPC_UBI * ubiTotal + P.MPC_CAPITAL * capitalToHouseholds;
+  const gdp = ORDER.reduce((a, k) => a + SECTORS[k].base_output_bn, 0);
+  return {
+    WAGE_BILL: wageBill, GROSS_PROFIT: grossProfit, CAPITAL_RETURN: capitalReturn,
+    CORPORATE_PROFIT: corporateProfit, UBI_TOTAL: ubiTotal, SPEND: spend, GDP: gdp,
+    UBI_MONTHLY: 680,
+    INFRA: 118 * 0.92 * 0.40,   // round-1 infrastructure spend, the maintenance yardstick
+    AUTO_WEIGHTED: autoCapital / gdp
+  };
+})();
+
+/* ---------------------------------------------------------------------
+   7. THE STEP FUNCTION
+   ---------------------------------------------------------------------
+       step(state, levers, activeShocks) -> next state
+   Pure. Same inputs, same outputs, on every machine, every time.
+   --------------------------------------------------------------------- */
+function step(state, levers, activeShocks, exogenous) {
+  /* `exogenous` is what reached this society from OUTSIDE it: goods and
+     credits settled by the trade layer at the end of last round. Optional,
+     and defaults to nothing, so a society that trades with nobody behaves
+     exactly as it did before trade existed.
+
+       { reserves_bn, capacity: {sector: mult}, headcount: {sector: n},
+         cohesion_bonus, legitimacy_bonus, civic_unrest }
+
+     `civic_unrest` (0-100) is what the citizen agents made of last round.
+     It is computed OUTSIDE the engine and handed in for the same reason
+     trade is: a model's reading of a mood must not change what the same
+     levers produce, or cross-team comparison dies and a trace stops
+     replaying. Recorded in the trace, replayed from it, so the feedback
+     loop is real and the engine stays pure.
+
+     Imports raise a sector's capacity without the society having built it.
+     Exports lower it. Neither touches a lever: trade is not a tenth lever,
+     it is a change in the ground the levers act on. */
+  const exo = exogenous || {};
+  const exoCap = exo.capacity || {};
+  const exoHead = exo.headcount || {};
+  const L = Object.assign({}, DEFAULT_LEVERS, levers || {});
+  L.allocation = Object.assign({}, DEFAULT_LEVERS.allocation, (levers || {}).allocation);
+  L.automation_target = Object.assign({}, DEFAULT_LEVERS.automation_target, (levers || {}).automation_target);
+
+  const names = (activeShocks || []).filter(s => SHOCKS[s]);
+  const S = names.map(s => SHOCKS[s]);
+  const shockSum = (field, key) => S.reduce((a, s) => a + ((s[field] && s[field][key]) || 0), 0);
+  const shockMult = (field, key) => S.reduce((a, s) => a * ((s[field] && s[field][key]) || 1), 1);
+  const shockScalar = f => S.reduce((a, s) => a + (s[f] || 0), 0);
+  const shockScalarMult = f => S.reduce((a, s) => a * (s[f] || 1), 1);
+
+  const prev = state;
+  /* NO ROUND CAP.
+     This was `Math.min(12, ...)`, which silently froze both the round
+     and the year at 2072: step a state past twelve and you got 2072
+     again, and again, with the demography stuck at its last anchor. A
+     run could not fail loudly, it just stopped advancing while still
+     returning states that looked valid.
+
+     Runs are now open-ended. A team may govern for as long as their
+     strategy holds, which is the point -- proving a policy survives
+     sixty years is a stronger claim than surviving twenty-four, and a
+     failing run should be ended by its failure rather than by the
+     calendar. See `collapse()` below and docs/EVIDENCE.md section 8. */
+  const nextRound = prev.meta.round + 1;
+  const demo = demography(nextRound);
+
+  /* --- 7.1 prices -----------------------------------------------------
+     Import inflation is the reason a nominal UBI lies to you. A society
+     can raise the dollar figure every round and still make its people
+     poorer. Only real_ubi_index is scored. */
+  /* SCARCITY, FROM LAST ROUND'S REALISED TIGHTNESS.
+     Deliberately lagged. Demand and capacity for this round are not
+     known until the sector loop below, and letting price depend on a
+     quantity that depends on price is a circularity with no obvious
+     fixed point. A one-round lag is also how prices actually behave:
+     they respond to observed scarcity, not to scarcity that has not
+     happened yet. */
+  const lastTight = prev._computeTightness == null ? 1 : prev._computeTightness;
+  const scarcityPressure = Math.max(0, lastTight - P.SCARCITY_SLACK_BAND);
+  const scarcityPush = scarcityPressure > 0
+    ? P.SCARCITY_ELASTICITY * Math.pow(scarcityPressure, P.SCARCITY_CONVEXITY)
+    /* Slack pulls prices back down, but more slowly than scarcity pushes
+       them up. Capacity built for a boom does not un-build itself, and
+       prices are stickier downward than upward. */
+    : -P.SCARCITY_RELIEF * Math.min(0.25, P.SCARCITY_SLACK_BAND - lastTight);
+
+  const computePrice = clamp(
+    (prev._computePrice || 1) * (1 + shockScalar('compute_price') * 0.6 + 0.01 + scarcityPush),
+    0.5, P.SCARCITY_PRICE_CEILING);
+  const importPush = shockScalar('import_price');
+  const priceIndex = (prev._priceIndex || 1) *
+    (1 + P.BASE_INFLATION + P.IMPORT_SHARE * importPush +
+     P.COMPUTE_SCARCITY_PASSTHROUGH * (computePrice - 1) * 0.5);
+
+  /* --- 7.2 working week ----------------------------------------------- */
+  const weekDays = L.working_week_days;
+  const weekSpread = Math.pow(5 / weekDays, P.WEEK_SPREAD); // >1 when the week is shorter
+  const weekOutput = Math.pow(weekDays / 5, P.WEEK_OUTPUT); // <1 when the week is shorter
+
+  /* --- 7.3 demand drivers ---------------------------------------------
+     `consumption` is where last round's household spending re-enters the
+     economy. THIS IS THE RETURNING ARROW IN THE CIRCULAR FLOW. */
+  const d1 = DEMOGRAPHY_ANCHORS[0];
+  const drivers = {
+    population: demo.total / d1.total,
+    elderly: demo.age_65_plus / d1.age_65_plus,
+    youth: demo.age_0_19 / d1.age_0_19,
+    consumption: prev.indicators.consumption_index / 100,
+    compute: 1
+  };
+
+  /* --- 7.4 automation moves toward the lever, never jumps to it -------- */
+  const ceiling = 1 + shockScalar('automation_ceiling');
+  // The compute levy taxes automation directly, and so slows how fast a
+  // society can adopt it even when the lever says "go".
+  const levyBrake = clamp(1 - P.LEVY_ADOPTION_BRAKE * (L.compute_levy - 0.05), 0.25, 1.4);
+  /* WHAT THE FIRMS DECIDED, IF ANYONE ASKED THEM.
+     ------------------------------------------------------------------
+     `exo.firms[sector].automation` is a firm's own chosen level. When it
+     is present the government's lever stops being a TARGET and becomes a
+     CEILING: firms may sit anywhere beneath it and the state cannot make
+     them climb. That is the realistic reading of an automation policy —
+     a government can forbid, tax and subsidise, but it cannot compel a
+     firm to invest — and it is what makes the compute levy interesting
+     rather than decorative.
+
+     Absent, which it is until firm agents exist, every line below
+     behaves exactly as it did: the lever is the target.
+
+     `automation_ceiling` is accepted as an alias for `automation_target`
+     so a team can write the lever under the name that now describes what
+     it does, without invalidating any saved settlement. */
+  const exoFirms = exo.firms || {};
+  const leverFor = k => {
+    const src = (L.automation_ceiling && L.automation_ceiling[k] != null)
+      ? L.automation_ceiling : L.automation_target;
+    return src[k];
+  };
+
+  const automation = {};
+  ORDER.forEach(k => {
+    const cur = prev.sectors[k].automation;
+    const cap = clamp(leverFor(k), 0, ceiling);
+    const firmAsked = exoFirms[k] && exoFirms[k].automation;
+    /* The firm's choice, never above the ceiling. With no firm, the
+       ceiling IS the target and nothing changes. */
+    const tgt = (typeof firmAsked === 'number' && isFinite(firmAsked))
+      ? clamp(Math.min(firmAsked, cap), 0, ceiling) : cap;
+    let stepMax;
+    if (tgt > cur) {
+      /* How fast a sector CAN absorb automation, as a function of how
+         far it already has. Blended with the old constant step so the
+         curve can be introduced without moving a result. */
+      const F = clamp(cur / Math.max(0.01, cap), 0, 1);
+      const bass = (P.BASS_P + P.BASS_Q * F) * (1 - F) * P.BASS_SCALE;
+      const shaped = (1 - P.DIFFUSION_WEIGHT) * P.AUTOMATION_STEP_UP +
+                     P.DIFFUSION_WEIGHT * bass;
+      stepMax = shaped * levyBrake;
+    } else {
+      stepMax = P.AUTOMATION_STEP_DOWN;
+      // Irreversibility: some doors close behind you.
+      if (cur > P.IRREVERSIBLE_ABOVE) stepMax *= (1 - P.IRREVERSIBLE_DRAG);
+      // Reskilling spend buys back some of that lost optionality.
+      stepMax *= (1 + 3.0 * L.reskilling_spend_pct);
+    }
+    automation[k] = clamp(cur + clamp(tgt - cur, -stepMax, stepMax), 0, 0.98);
+  });
+
+  /* --- what the sectors have LEARNED to use ---------------------------
+     Experience chases automation rather than equalling it. A sector that
+     jumps from 0.3 to 0.8 in one round has bought capacity it cannot yet
+     run; a sector that has sat at 0.8 for a decade has absorbed it. */
+  const prevExperience = prev._autoExperience || {};
+  const autoExperience = {};
+  ORDER.forEach(k => {
+    const had = prevExperience[k] == null ? prev.sectors[k].automation : prevExperience[k];
+    autoExperience[k] = had + (automation[k] - had) * P.J_ABSORB_RATE;
+  });
+
+  /* --- the learning curve ---------------------------------------------
+     Cumulative compute consumed, indexed to round 1. Cost falls as the
+     index rises, floored so experience never makes compute free. */
+  const cumulativeIn = prev._computeCumulative == null ? 1 : prev._computeCumulative;
+  const learningRaw = Math.pow(Math.max(1, cumulativeIn), -P.LEARNING_EXPONENT);
+  const learningFactor = (1 - P.LEARNING_WEIGHT) +
+    P.LEARNING_WEIGHT * clamp(learningRaw, P.LEARNING_FLOOR, 1);
+
+  // Compute & Energy demand is driven by how automated everything else is.
+  // Automation is not free, and this is where the bill is rendered.
+  const autoWeighted = ORDER.reduce((a, k) => a + automation[k] * SECTORS[k].base_output_bn, 0) / CAL.GDP;
+  drivers.compute = Math.pow(autoWeighted / CAL.AUTO_WEIGHTED, 1.05) * drivers.population;
+
+  /* --- 7.5 the real economy, sector by sector -------------------------- */
+  const sectors = {};
+  const sectorMargin = {};
+  let wageBill = 0, employedTotal = 0, grossProfit = 0, gdp = 0, publicSubsidy = 0;
+  let computeTightness = 1;
+
+  /* CIVIC FRICTION. Nothing happens below the threshold — a grumbling
+     society still turns up. Past it the loss climbs with the square of how
+     far past, because withdrawal of cooperation compounds: one absence is
+     covered, a third of the shift absent closes the line. */
+  const unrest = clamp(Number(exo.civic_unrest) || 0, 0, 100);
+  const over = Math.max(0, unrest - P.UNREST_THRESHOLD) / (100 - P.UNREST_THRESHOLD);
+  const unrestDrag = 1 - P.UNREST_DRAG * over * over;
+  const unrestServiceHit = P.UNREST_SERVICE_DRAG * over * over;
+
+  // Infrastructure money voted LAST round builds THIS round's capacity.
+  const infraRatio = (prev._infraSpend_bn || CAL.INFRA) / CAL.INFRA;
+  // The capital stock firms did or did not reinvest in, last round.
+  const capitalIndex = prev._capitalIndex == null ? 1 : prev._capitalIndex;
+  /* Per-sector capital carried forward. Absent on a state written before
+     this existed, which is why every read defaults to 1 rather than
+     assuming the key is there. */
+  const prevSectorCapital = prev._sectorCapital || {};
+  const sectorCapitalIn = k => (prevSectorCapital[k] == null ? 1 : prevSectorCapital[k]);
+  /* The applied term. At weight 0 this is exactly 1 for every sector and
+     the multiplication below is a no-op. */
+  const sectorCapitalTerm = k =>
+    1 - P.SECTOR_CAPITAL_WEIGHT + P.SECTOR_CAPITAL_WEIGHT * sectorCapitalIn(k);
+
+  ORDER.forEach(k => {
+    const c = SECTORS[k], p = prev.sectors[k];
+
+    // What the population is asking this sector for.
+    const demand = c.base_output_bn * drivers[c.demand_driver] * (shockMult('demand', k) || 1);
+
+    // What the sector could produce if every buyer turned up.
+    /* THE J-CURVE. `experience` is automation the sector has learned to
+       use; the gap above it is capacity bought and not yet absorbed, and
+       it costs output until the complementary work is done. At weight 0
+       experience is ignored and this is the old affine gain. */
+    const experience = autoExperience[k];
+    const unabsorbed = Math.max(0, automation[k] - experience);
+    const legacyGain = 1 + c.productivity * (automation[k] - c.automation_r1);
+    const jGain = 1 + c.productivity * P.J_MATURE * (experience - c.automation_r1)
+                    - P.J_DIP * c.productivity * unabsorbed;
+    const prodGain = (1 - P.J_CURVE_WEIGHT) * legacyGain + P.J_CURVE_WEIGHT * jGain;
+    let capacityAbs = c.base_output_bn * prodGain * weekOutput * capitalIndex *
+                      sectorCapitalTerm(k) *
+                      (shockMult('capacity_mult', k) || 1) * shockScalarMult('output_mult') *
+                      (exoCap[k] || 1) *          // imported or exported capacity
+                      unrestDrag;                 // and what people withhold
+
+    // The people needed to run it at that level.
+    const labourRequired = c.base_headcount * (1 - automation[k]) / (1 - c.automation_r1) *
+                           (capacityAbs / c.base_output_bn) * weekSpread;
+    let headcount = Math.max(0, Math.round(labourRequired));
+
+    // Care job guarantee: the state hires into care, deliberately at a loss.
+    if (L.care_job_guarantee && k === 'care_services') {
+      const unemployed = Math.max(0, prev.population.by_age.age_20_64 - prev.population.employed_total);
+      const hired = Math.round(unemployed * P.GUARANTEE_INTAKE);
+      headcount += hired;
+      // Care is the one sector where more hands genuinely means more care
+      // delivered - it is the least automatable thing in the economy.
+      capacityAbs *= (1 + 0.55 * hired / Math.max(1, labourRequired));
+    }
+
+    /* Skilled labour lent by another society. It staffs the sector and it
+       draws the same wage as anyone else - borrowed hands are not free. */
+    if (exoHead[k]) headcount = Math.max(0, headcount + Math.round(exoHead[k]));
+
+    /* ================== THE CLIFF ==================
+       Output is SOLD, not merely made. You cannot sell into demand that
+       is not there. Every automation decision eventually arrives back
+       here as a smaller `demand`, and this one `min` is what turns a
+       productivity boom into a depression. */
+    const output = Math.min(capacityAbs, demand);
+    /* =============================================== */
+
+    const capacity = capacityAbs / demand;
+    const wages = headcount * c.avg_wage / 1e9;
+    /* WRIGHT'S LAW. Every unit of compute consumed makes the next one
+       cheaper, so a society far along the curve gets more automation per
+       dollar than one starting out. This is the mechanism that makes AI
+       compound rather than merely be large. */
+    const computeCost = c.compute_int * automation[k] * output * computePrice * learningFactor;
+    const otherCost = COST_SHARE[k] * output;
+    const profit = output - wages - computeCost - otherCost;
+
+    /* Quality is a target the sector drifts toward, never jumps to.
+       Services are sticky: they take rounds to break and rounds to fix. */
+    const capTerm = P.Q_CAPACITY * clamp(capacity - 1, -0.55, 0.35);
+    const infraTerm = P.Q_INFRA * clamp(infraRatio - 1, -0.9, 0.9);
+    const overAuto = Math.max(0, automation[k] - c.comfort);
+    const humanTerm = -P.Q_HUMAN * c.human_touch * overAuto;
+    const staffTerm = P.Q_STAFF * clamp(headcount / Math.max(1, labourRequired) - 1, -0.5, 0.6);
+    const guarTerm = (L.care_job_guarantee && (k === 'care_services' || k === 'healthcare')) ? P.Q_GUARANTEE : 0;
+    /* Unrest is felt first where people meet the state: the ward, the
+       waiting room, the school gate. */
+    const frictionTerm = (k === 'care_services' || k === 'healthcare' ||
+                          k === 'public_safety' || k === 'education_research' ||
+                          k === 'public_admin') ? -unrestServiceHit : 0;
+
+    const legacyTarget = P.Q_BASE + capTerm + infraTerm + humanTerm +
+                         staffTerm + guarTerm + frictionTerm;
+
+    /* --- the sector's own scorecard ------------------------------------
+       The same readings the legacy terms use, normalised to roughly
+       [-1, 1] so a mission weight means the same thing everywhere. */
+    const accessSignal = clamp(capacity - 1, -0.55, 0.35);
+    const deliverySignal = clamp(headcount / Math.max(1, labourRequired) - 1, -0.5, 0.6);
+    const humanitySignal = -c.human_touch * overAuto;
+    const reliabilitySignal = clamp(infraRatio - 1, -0.9, 0.9);
+    /* Affordability reads the household price index for most sectors and
+       the compute price for the two that sell compute and power, because
+       that is the price their customers actually face. */
+    const priceFelt = (k === 'energy_utilities' || k === 'compute_telecom')
+      ? computePrice : priceIndex;
+    const affordabilitySignal = clamp(-(priceFelt - 1) * 0.6, -1, 0.4);
+    /* EQUITY IS A PROXY, and a weak one: the engine has no per-cohort
+       access figure, so it reads how much of the population is exposed
+       to losing its income and charges rationing more heavily when that
+       share is large. Rationing always falls hardest on the people with
+       fewest alternatives. A real measure would read the worst-served
+       cohort directly, which means the citizen corpus reaching the
+       engine; that is a bigger change and is not this one. */
+    const exposedShare = prev.population && prev.population.by_exposure
+      ? prev.population.by_exposure.high / Math.max(1, prev.population.total) : 0.22;
+    const equitySignal = Math.min(0, capacity - 1) * (0.5 + exposedShare);
+
+    const scored = MISSIONS.scoreAgainstMission(k, {
+      access: accessSignal, delivery: deliverySignal, humanity: humanitySignal,
+      reliability: reliabilitySignal, affordability: affordabilitySignal,
+      equity: equitySignal
+    }, P.Q_BASE);
+    /* The guarantee and the unrest friction sit outside the scorecard:
+       one is a policy the state bought, the other is damage done to the
+       sector from outside it. Neither is something the industry is FOR. */
+    const missionTarget = scored.target + guarTerm + frictionTerm;
+
+    const target = clamp(
+      (1 - P.MISSION_WEIGHT) * legacyTarget + P.MISSION_WEIGHT * missionTarget, 0, 100);
+    const quality = clamp(Math.round(
+      p.quality + (target - p.quality) * P.QUALITY_INERTIA + shockSum('quality', k)), 0, 100);
+
+    sectors[k] = {
+      automation: round2(automation[k]),
+      headcount: headcount,
+      capacity: round2(capacity),
+      quality: quality,
+      margin: round2(output > 0 ? profit / output : 0),
+      note: p.note
+    };
+    /* `capacity` is supply/demand, so its reciprocal is how tight the
+       sector is. Recorded for compute & energy because that is where
+       automation policy shows up as scarcity, and next round's price
+       reads it. */
+    if (k === 'energy_utilities') {
+      computeTightness = capacity > 0.01 ? 1 / capacity : 100;
+    }
+
+    wageBill += wages;
+    employedTotal += headcount;
+    grossProfit += profit;
+    sectorMargin[k] = output > 0 ? profit / output : 0;
+    gdp += output;
+
+    /* An essential service that loses money does not close. The state
+       covers the loss. That bill lands on the same budget the UBI comes
+       out of, and it grows exactly when the tax base is shrinking. */
+    if (c.essential && profit < 0) publicSubsidy += -profit;
+  });
+
+  /* --- 7.6 capital, profit and the revenue base ------------------------ */
+  const autoCapital = ORDER.reduce(
+    (a, k) => a + automation[k] * (gdp * SECTORS[k].base_output_bn / CAL.GDP), 0);
+  const capitalReturn = P.CAPITAL_RETURN_RATE * autoCapital;
+  const corporateProfit = grossProfit + capitalReturn;
+
+  /* Public ownership: a claim on the machines themselves. This is the one
+     revenue stream that does not depend on taxing a shrinking profit base,
+     which is why it is the sovereign-wealth answer to the loop. */
+  const publicDividend = L.public_ownership_pct *
+    (capitalReturn + P.DIVIDEND_PROFIT_SHARE * Math.max(0, grossProfit));
+  const taxableProfit = Math.max(0, corporateProfit - publicDividend);
+
+  const computeOutput = gdp * SECTORS.compute_telecom.base_output_bn / CAL.GDP;
+
+  const taxRevenue =
+    L.corporate_tax_rate * taxableProfit +
+    L.compute_levy * computeOutput * (automation.compute_telecom / SECTORS.compute_telecom.automation_r1) +
+    P.LABOUR_TAX_RATE * wageBill +                              // collapses as wages vanish
+    P.CONSUMPTION_TAX * (prev._consumptionSpend_bn || CAL.SPEND) + // collapses as demand vanishes
+    P.OTHER_TAX_GDP * gdp;
+
+  /* --- 7.7 the budget ---------------------------------------------------
+     Obligations come off the top. Only what survives them is yours to
+     split. This is why a society can hold its allocation lever perfectly
+     still and still watch its UBI fall: the numerator shrank. */
+  const income = taxRevenue + publicDividend;
+
+  // The care job guarantee is a deliberate public loss.
+  let guaranteeCost = 0;
+  if (L.care_job_guarantee) {
+    const cs = SECTORS.care_services;
+    const organic = cs.base_headcount * (1 - automation.care_services) / (1 - cs.automation_r1);
+    const extra = Math.max(0, sectors.care_services.headcount - organic);
+    guaranteeCost = extra * (L.care_guarantee_wage || P.GUARANTEE_WAGE_DEFAULT) * 12 / 1e9;
+  }
+
+  const reskillSpend = income * L.reskilling_spend_pct;
+  const obligations = reskillSpend + publicSubsidy + guaranteeCost;
+  const spendable = income - obligations;
+
+  const a = L.allocation;
+  const allocSum = (a.ubi + a.infrastructure + a.reserves) || 1;
+  // When obligations exceed income, the shortfall is financed - the UBI
+  // and infrastructure still have to be paid, and reserves absorb it.
+  const ubiPot = Math.max(0, spendable) * a.ubi / allocSum;
+  const infraBn = Math.max(0, spendable) * a.infrastructure / allocSum;
+  const reserveAdd = spendable >= 0
+    ? spendable * a.reserves / allocSum
+    : spendable; // the whole shortfall lands on reserves
+
+  /* --- 7.8 UBI ----------------------------------------------------------- */
+  const eff = P.UBI_ADMIN_EFFICIENCY[L.ubi_design] || 0.97;
+  let shares;
+  if (L.ubi_design === 'means_tested') shares = demo.total * P.MEANS_TEST_COVERAGE;
+  else if (L.ubi_design === 'age_weighted') shares = (demo.total - demo.age_65_plus) + demo.age_65_plus * P.AGE_WEIGHT_SENIOR;
+  else shares = demo.total;
+
+  const ubiTotalPaid = ubiPot * eff;
+  // The per-SHARE payment. Under age-weighting a senior receives 1.6 of
+  // these; under means-testing only the qualifying 55% receive one.
+  const ubiBaseShare = Math.round((ubiTotalPaid * 1e9) / (shares * 12));
+  // The headline figure is the MEAN payment per resident, so that three
+  // very different UBI designs can be compared on one axis without the
+  // design itself flattering or penalising the number.
+  const ubiMonthly = Math.round((ubiTotalPaid * 1e9) / (demo.total * 12));
+  const realUbiIndex = Math.round((ubiMonthly / priceIndex) / CAL.UBI_MONTHLY * 100);
+
+  /* --- 7.9 reserves ------------------------------------------------------ */
+  // Credits settled by the trade layer land here, before the shock penalty.
+  let reserves = prev.fiscal.reserves_bn + reserveAdd + (exo.reserves_bn || 0);
+  if (reserves < 0) reserves -= Math.abs(reserves) * shockScalar('borrowing_penalty');
+
+  /* --- 7.9b reinvestment: what firms do with the profit you left them ----
+     The other half of the corporate tax trade-off (spec 5). Take more now
+     and there is less capital stock to tax later. The compute levy bites
+     the same way. Nothing here is a penalty for "greed" - it is simply
+     that machines wear out and somebody has to pay to replace them. */
+  const retained = Math.max(0, corporateProfit * (1 - L.corporate_tax_rate) - publicDividend * 0.5);
+  const investRate = retained / Math.max(1, gdp);
+  const taxDrag = clamp(1 - P.INVEST_TAX_ELASTICITY * (L.corporate_tax_rate - 0.19), 0.15, 1.15);
+  const levyDrag = clamp(1 - P.INVEST_LEVY_ELASTICITY * (L.compute_levy - 0.05), 0.30, 1.15);
+  // A firm cannot build capacity faster than the economy can absorb it,
+  // however much profit it is sitting on. Ratio caps at 1.
+  const privateReinvest = clamp(investRate / P.BASE_INVEST_RATE, 0, 1) * taxDrag * levyDrag;
+  // Machines the PUBLIC owns are maintained out of the infrastructure
+  // vote, not out of retained private profit. This is the mechanism
+  // behind the spec's claim that public ownership answers the loop: it
+  // decouples keeping the capital stock alive from how hard you tax.
+  const publicReinvest = clamp(infraRatio, 0, 1.4);
+  const own = clamp(L.public_ownership_pct, 0, 1);
+  // A quarter of the capital stock is public whoever owns the firms -
+  // grid, roads, port, data centres. Starve infrastructure to fund cash
+  // payouts and the economy that funds the payouts physically shrinks.
+  const reinvestment = 0.75 * ((1 - own) * privateReinvest + own * publicReinvest) +
+                       0.25 * publicReinvest;
+  const nextCapitalIndex = clamp(
+    capitalIndex * (1 - P.DEPRECIATION + P.DEPRECIATION * reinvestment), 0.30, 1.9);
+
+  /* --- per-sector capital ----------------------------------------------
+     THE MISSING FEEDBACK LOOP. A sector's own margin funds its own stock,
+     so a profitable sector outgrows a failing one instead of both
+     receiving the same economy-wide multiplier.
+
+     Margin is measured against the round-1 margin the sector was
+     CALIBRATED to, not against zero. Care services run at -0.09 by design
+     and are not a failing business; judging every sector against the same
+     absolute bar would have care and education decay to the floor in
+     every run whatever a government did, which is a statement about the
+     scoring, not about the country.
+
+     The economy-wide reinvestment term still applies, because the public
+     share of the stock is maintained out of the infrastructure vote
+     whoever owns the firms. */
+  const nextSectorCapital = {};
+  ORDER.forEach(k => {
+    const baseline = R1_MARGINS[k];
+    const actual = sectorMargin[k] == null ? baseline : sectorMargin[k];
+    /* Relative to its own calibrated margin, and bounded so one
+       catastrophic round cannot wipe a stock that took decades. */
+    const own = clamp(1 + (actual - baseline) * 2.0, 0.25, 1.75);
+    const blended = 0.6 * own + 0.4 * reinvestment;
+    nextSectorCapital[k] = clamp(
+      sectorCapitalIn(k) * (1 - P.SECTOR_CAPITAL_DEPRECIATION +
+                            P.SECTOR_CAPITAL_DEPRECIATION * blended),
+      P.SECTOR_CAPITAL_FLOOR, P.SECTOR_CAPITAL_CEILING);
+  });
+
+  /* --- 7.10 HOUSEHOLD INCOME -> CONSUMPTION ------------------------------
+     The ring closes here. Wages fell because of automation. UBI rises to
+     replace them. But UBI is funded by taxing profit, and profit needs
+     somebody to sell to. If the transfer does not fully replace the lost
+     wage income - and it rarely does, because only part of the profit is
+     taxed and only part of the tax becomes UBI - consumption falls, and
+     next round every sector's `demand` is lower.
+
+     Go round this ring twelve times and you have the Thinkathon. */
+  const capitalToHouseholds = Math.max(0, corporateProfit - publicDividend) * 0.35;
+  const nominalHouseholdIncome = wageBill + ubiTotalPaid + capitalToHouseholds;
+
+  const desiredSpendReal = (P.MPC_WAGE * wageBill +
+                            P.MPC_UBI * ubiTotalPaid +
+                            P.MPC_CAPITAL * capitalToHouseholds) / priceIndex;
+
+  const consumptionIndex = Math.round(lerp(
+    desiredSpendReal / CAL.SPEND * 100,
+    prev.indicators.consumption_index,
+    P.CONSUMPTION_INERTIA));
+
+  /* --- 7.11 reskilling shifts people between exposure bands -------------
+     Pays off three rounds late, which is why it feels like a waste when
+     you fund it and like a miracle when you did. */
+  const reskillHistory = (prev._reskillHistory || []).concat([reskillSpend]);
+  const matured = reskillHistory.length > P.RESKILL_LAG
+    ? reskillHistory[reskillHistory.length - 1 - P.RESKILL_LAG] : 0;
+  const moved = Math.round(matured * P.RESKILL_POTENCY / 1000) * 1000;
+
+  const pe = prev.population.by_exposure;
+  const scale = demo.age_20_64 / prev.population.by_age.age_20_64;
+  let hi = Math.round(pe.high * scale), md = Math.round(pe.medium * scale);
+  let lo = Math.max(0, demo.age_20_64 - hi - md);
+
+  // Reskilling moves people DOWN the exposure ladder: high -> medium -> low.
+  const shiftHi = Math.min(hi, Math.round(moved * 0.6));
+  const shiftMd = Math.min(md, Math.round(moved * 0.4));
+  hi -= shiftHi;
+  md = md - shiftMd + shiftHi;
+  lo += shiftMd;
+
+  /* ...and automation pushes them back UP it. A job that was safe from
+     the machines last round is not necessarily safe from them this one.
+     Without this the ladder is a one-way ratchet and every worker in
+     Meridian ends up classified "low exposure" in an economy that has
+     automated ninety per cent of everything. */
+  const prevAutoWeighted = ORDER.reduce(
+    (a, k) => a + prev.sectors[k].automation * SECTORS[k].base_output_bn, 0) / CAL.GDP;
+  const exposed = Math.round(
+    Math.max(0, autoWeighted - prevAutoWeighted) * demo.age_20_64 * P.EXPOSURE_SENSITIVITY);
+  const upLo = Math.min(lo, Math.round(exposed * 0.6));
+  const upMd = Math.min(md, Math.round(exposed * 0.4));
+  lo -= upLo;
+  md = md + upLo - upMd;
+  hi += upMd;
+  lo = Math.max(0, demo.age_20_64 - hi - md);
+
+  /* --- 7.12 social indicators -------------------------------------------- */
+  const employmentRate = employedTotal / demo.age_20_64;
+  const worstEssential = Math.min.apply(null, ESSENTIAL.map(k => sectors[k].quality));
+
+  /* EFFECTIVE purchasing power. Spec 4: "A household on $3,000 a month
+     where the hospital sits at quality 42 is poorer than a household on
+     $2,000 where the hospital sits at 84. Cash is worth only what it can
+     buy." When the services a household depends on are failing, it must
+     buy privately what the state no longer provides, and the same dollar
+     goes less far. This, not the nominal figure, is what is scored. */
+  const serviceAccess = clamp(0.30 + 0.70 * clamp((worstEssential - 20) / 55, 0, 1), 0.30, 1.0);
+  const effectiveUbiIndex = Math.round(realUbiIndex * serviceAccess);
+
+  const capitalShare = corporateProfit / Math.max(1, gdp);
+  const transferShare = ubiTotalPaid / Math.max(1, nominalHouseholdIncome);
+  const giniTarget = clamp(
+    0.355 + 0.42 * capitalShare - 0.30 * transferShare -
+    0.14 * L.public_ownership_pct - 0.05 * (employmentRate - 0.30), 0.15, 0.70);
+  const gini = round2(lerp(giniTarget, prev.indicators.gini, P.GINI_INERTIA));
+
+  const cohesionTarget = clamp(
+    18 +
+    30 * clamp(employmentRate / 0.70, 0, 1) +
+    24 * clamp((worstEssential - 30) / 50, 0, 1) +
+    16 * clamp(realUbiIndex / 160, 0, 1) +
+    30 * (0.45 - gini) +
+    (L.care_job_guarantee ? 4 : 0) +
+    (weekDays <= 4 ? 3 : 0), 0, 100);
+  const cohesion = clamp(Math.round(
+    prev.indicators.cohesion + (cohesionTarget - prev.indicators.cohesion) * P.COHESION_INERTIA +
+    shockScalar('cohesion') + (exo.cohesion_bonus || 0) - over * 14), 0, 100);
+
+  const legitimacyTarget = clamp(
+    14 +
+    32 * clamp((worstEssential - 25) / 55, 0, 1) +
+    24 * clamp(realUbiIndex / 170, 0, 1.05) +
+    24 * clamp(cohesion / 85, 0, 1) +
+    (reserves > 0 ? 6 : -16), 0, 100);
+  const legitimacy = clamp(Math.round(
+    prev.indicators.legitimacy + (legitimacyTarget - prev.indicators.legitimacy) * P.LEGITIMACY_INERTIA +
+    shockScalar('legitimacy') + (exo.legitimacy_bonus || 0)), 0, 100);
+
+  /* --- 7.13 endogenous shocks arm themselves for NEXT round -------------- */
+  const endogenous = [];
+  if (cohesion < 35) endogenous.push('civil_unrest');
+  if (reserves < 0 && prev.fiscal.reserves_bn < 0) endogenous.push('fiscal_crisis');
+  if (worstEssential < 40) endogenous.push('service_failure_cascade');
+  // Sustained fury is its own shock, whatever the cohesion formula says.
+  if (unrest >= 75 && endogenous.indexOf('civil_unrest') < 0) endogenous.push('civil_unrest');
+
+  /* --- 7.14 assemble ------------------------------------------------------ */
+  return {
+    meta: {
+      state_label: prev.meta.state_label,
+      society_name: prev.meta.society_name,
+      round: nextRound,
+      year: 2048 + nextRound * 2,
+      narrative: prev.meta.narrative
+    },
+    population: {
+      total: demo.total,
+      by_age: { age_0_19: demo.age_0_19, age_20_64: demo.age_20_64, age_65_plus: demo.age_65_plus },
+      by_exposure: { high: hi, medium: md, low: lo },
+      employed_total: employedTotal
+    },
+    sectors: sectors,
+    fiscal: {
+      gdp_bn: round2(gdp),
+      corporate_profit_bn: round2(corporateProfit),
+      tax_revenue_bn: round2(taxRevenue),
+      public_dividend_bn: round2(publicDividend),
+      reserves_bn: round2(reserves),
+      allocation: { ubi: a.ubi, infrastructure: a.infrastructure, reserves: a.reserves }
+    },
+    indicators: {
+      ubi_monthly_sgd: ubiMonthly,
+      ubi_base_share_sgd: ubiBaseShare,
+      real_ubi_index: realUbiIndex,
+      effective_ubi_index: effectiveUbiIndex,
+      employment_rate: round2(employmentRate),
+      gini: gini,
+      cohesion: cohesion,
+      legitimacy: legitimacy,
+      consumption_index: consumptionIndex,
+      civic_unrest: unrest
+    },
+    levers: deepClone(L),
+    trade: prev.trade || { reputation: 50, active_contracts: [] },
+    shocks: names.slice(),
+    personas: prev.personas || [],
+    news: [],
+    score: { total: 0, gates_failed: [] },
+
+    /* engine carry-forward. Prefixed _, not part of the published schema. */
+    _priceIndex: priceIndex,
+    _computePrice: computePrice,
+    _computeTightness: round2(computeTightness),
+    _capitalIndex: nextCapitalIndex,
+    _autoExperience: autoExperience,
+    /* One round's compute draw added to the running total. `autoWeighted`
+       is the economy's automation share, so this is "how much compute has
+       this society ever consumed", indexed to round 1. */
+    _computeCumulative: cumulativeIn + Math.max(0, autoWeighted / CAL.AUTO_WEIGHTED),
+    _sectorCapital: nextSectorCapital,
+    _infraSpend_bn: infraBn,
+    _consumptionSpend_bn: desiredSpendReal * priceIndex,
+    _reskillHistory: reskillHistory,
+    _endogenousNext: endogenous,
+    _wageBill_bn: round2(wageBill),
+    _ubiTotalPaid_bn: round2(ubiTotalPaid),
+    _guaranteeCost_bn: round2(guaranteeCost),
+    _publicSubsidy_bn: round2(publicSubsidy),
+    _obligations_bn: round2(obligations),
+    _spendable_bn: round2(spendable),
+    _worstEssential: worstEssential,
+    _unrestDrag: round2(unrestDrag)
+  };
+}
+
+
+/* ---------------------------------------------------------------------
+   7b. HOUSEHOLD RESPONSE
+   ---------------------------------------------------------------------
+   The forty households respond to conditions, identically in every
+   society - that is what makes cross-team comparison mean anything. This
+   is the deterministic part. A household voice agent may render Mdm Tan's
+   round in first person however it likes, but it may not change this
+   number, and the number is what the auditor sees.
+
+   Each household leans on different parts of the state depending on where
+   it sits in the life course.
+   --------------------------------------------------------------------- */
+function personaDeps(age) {
+  if (age >= 65) return ['care_services', 'healthcare'];
+  if (age < 25) return ['education_research', 'retail_commerce'];
+  return ['healthcare', 'retail_commerce'];
+}
+
+function updatePersonas(personas, state, prev) {
+  const ind = state.indicators;
+  const purchasing = ind.effective_ubi_index != null ? ind.effective_ubi_index : ind.real_ubi_index;
+  return (personas || []).map(p => {
+    const age = p.age + 2;                       // each round is two years
+    const deps = personaDeps(age);
+    const services = deps.reduce((a, k) => a + (state.sectors[k] ? state.sectors[k].quality : 60), 0) / deps.length;
+
+    // Working-age households also carry the labour market; retirees do not.
+    const workWeight = (age >= 65 || age < 20) ? 0 : 1;
+    const target = clamp(
+      14 +
+      34 * clamp(services / 85, 0, 1.05) +
+      30 * clamp(purchasing / 150, 0, 1.05) +
+      18 * workWeight * clamp(ind.employment_rate / 0.6, 0, 1) +
+      (workWeight ? 0 : 14) +
+      10 * clamp((0.45 - ind.gini) / 0.2, 0, 1), 0, 100);
+
+    // Wellbeing is sticky: lives do not turn around in a single round.
+    const wellbeing = clamp(Math.round(p.wellbeing + (target - p.wellbeing) * 0.42), 0, 100);
+    return Object.assign({}, p, { age: age, wellbeing: wellbeing });
+  });
+}
+
+/* ---------------------------------------------------------------------
+   7c. BULLETIN
+   ---------------------------------------------------------------------
+   Deterministic facts, not narration. The news bureau agent dresses these
+   up; it does not get to invent them, and it does not get to leave one
+   out. Every society reporting the same round from the same state reports
+   the same facts.
+   --------------------------------------------------------------------- */
+function bulletin(state, prev) {
+  const out = [];
+  const ind = state.indicators, pind = prev.indicators;
+  const money = v => '$' + Math.round(v).toLocaleString('en-SG');
+
+  (state.shocks || []).forEach(k => {
+    if (SHOCKS[k]) out.push(SHOCKS[k].label + ' declared. Emergency measures in force.');
+  });
+
+  const dU = ind.ubi_monthly_sgd - pind.ubi_monthly_sgd;
+  if (Math.abs(dU) >= 20) {
+    out.push('Universal payment ' + (dU > 0 ? 'raised to ' : 'cut to ') + money(ind.ubi_monthly_sgd) +
+      ' a month' + (ind.real_ubi_index < pind.real_ubi_index && dU > 0
+        ? ', though prices rose faster and purchasing power fell.' : '.'));
+  }
+
+  ORDER.forEach(k => {
+    const q = state.sectors[k].quality, pq = prev.sectors[k].quality;
+    if (q < 40 && pq >= 40) out.push(SECTORS[k].name + ' falls below the critical service threshold.');
+    else if (q >= 40 && pq < 40) out.push(SECTORS[k].name + ' recovers above the critical threshold.');
+    else if (q >= 65 && pq < 65) out.push(SECTORS[k].name + ' returns to a healthy service level.');
+  });
+
+  const dE = (ind.employment_rate - pind.employment_rate) * 100;
+  if (Math.abs(dE) >= 3) {
+    out.push('Employment ' + (dE > 0 ? 'rises' : 'falls') + ' ' + Math.abs(dE).toFixed(0) +
+      ' points to ' + Math.round(ind.employment_rate * 100) + '% of working age.');
+  }
+
+  if (state.fiscal.reserves_bn < 0 && prev.fiscal.reserves_bn >= 0) {
+    out.push('Reserves exhausted. The budget is now financed by borrowing.');
+  }
+  if (ind.cohesion < 35 && pind.cohesion >= 35) {
+    out.push('Cohesion falls below the unrest threshold.');
+  }
+  if (ind.consumption_index < 80 && pind.consumption_index >= 80) {
+    out.push('Household spending falls below 80% of its 2050 level; firms report thinning order books.');
+  }
+
+  if (!out.length) {
+    out.push('No change of record. Universal payment holds at ' + money(ind.ubi_monthly_sgd) +
+      ', worst essential service at ' + state._worstEssential + '.');
+  }
+  return out.slice(0, 4);
+}
+
+/* ---------------------------------------------------------------------
+   8. TRAJECTORY
+   ---------------------------------------------------------------------
+   Run levers forward from round 1. `leversFor` may be a plain object
+   (hold these levers for all twelve rounds - this is what the live lab
+   does while you drag) or a function of round (replay a real game where
+   the team changed their mind every round).
+   --------------------------------------------------------------------- */
+function seed(baseState) {
+  const s = deepClone(baseState);
+  s._priceIndex = 1;
+  s._computePrice = 1;
+  s._computeTightness = 1;
+  s._capitalIndex = 1;
+  s._autoExperience = {};
+  ORDER.forEach(k => { s._autoExperience[k] = s.sectors[k].automation; });
+  s._computeCumulative = 1;
+  s._sectorCapital = {};
+  ORDER.forEach(k => { s._sectorCapital[k] = 1; });
+  s._infraSpend_bn = CAL.INFRA;
+  s._consumptionSpend_bn = CAL.SPEND;
+  s._reskillHistory = [118 * 0.08];
+  s._endogenousNext = [];
+  s._worstEssential = Math.min.apply(null, ESSENTIAL.map(k => s.sectors[k].quality));
+  if (s.indicators.effective_ubi_index == null) {
+    const acc = clamp(0.30 + 0.70 * clamp((s._worstEssential - 20) / 55, 0, 1), 0.30, 1.0);
+    s.indicators.effective_ubi_index = Math.round(s.indicators.real_ubi_index * acc);
+  }
+  if (s.indicators.ubi_base_share_sgd == null) s.indicators.ubi_base_share_sgd = s.indicators.ubi_monthly_sgd;
+  if (s.indicators.civic_unrest == null) s.indicators.civic_unrest = 0;
+  return s;
+}
+
+function runTrajectory(baseState, leversFor, shockSchedule, rounds, exogenousFor) {
+  rounds = rounds || 12;
+  const getLevers = typeof leversFor === 'function' ? leversFor : () => leversFor;
+  const sched = shockSchedule || {};
+  const out = [seed(baseState)];
+
+  for (let r = 1; r < rounds; r++) {
+    const prev = out[out.length - 1];
+    const drawn = (sched[r + 1] || []).slice();
+    // Endogenous shocks armed last round fire now.
+    (prev._endogenousNext || []).forEach(e => { if (drawn.indexOf(e) < 0) drawn.push(e); });
+    const next = step(prev, getLevers(r + 1), drawn.filter(x => SHOCKS[x]),
+                      exogenousFor ? exogenousFor(r + 1) : null);
+    next.personas = updatePersonas(prev.personas, next, prev);
+    next.news = bulletin(next, prev);
+    out.push(next);
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------------
+   9. SCORING — the Societal Resilience Index
+   ---------------------------------------------------------------------
+   Scored across the WHOLE trajectory, not the final round. You cannot fix
+   round 9 in round 12. Two design choices do most of the work:
+
+     - UBI is scored on purchasing power indexed to round 1, never on the
+       dollar figure. Import inflation can raise a nominal UBI while the
+       people receiving it get poorer.
+     - Services are scored on your WORST sector, never the average, so you
+       cannot sacrifice healthcare to fund transport.
+   --------------------------------------------------------------------- */
+function score(traj, constitution, opts) {
+  const n = traj.length;
+  /* Scored on EFFECTIVE purchasing power, never the dollar figure and
+     never even the inflation-adjusted figure: a large cheque in a society
+     whose hospitals have failed does not buy a large life. */
+  const realUbi = traj.map(s => s.indicators.effective_ubi_index != null
+    ? s.indicators.effective_ubi_index : s.indicators.real_ubi_index);
+  const meanReal = realUbi.reduce((x, y) => x + y, 0) / n;
+  // Round 1 is 100 by definition, so it is excluded: everyone would
+  // otherwise be handed the minimum-UBI marks for free.
+  const minReal = Math.min.apply(null, realUbi.slice(1));
+
+  const worstEver = Math.min.apply(null,
+    traj.map(s => Math.min.apply(null, ESSENTIAL.map(k => s.sectors[k].quality))));
+
+  const last = traj[n - 1];
+  const meanCohesion = traj.reduce((x, s) => x + s.indicators.cohesion, 0) / n;
+  const meanGini = traj.reduce((x, s) => x + s.indicators.gini, 0) / n;
+
+  /* Constitutional fidelity: how far the levers drifted from the founding
+     settings the team sealed in week one, before they knew what was
+     coming. Drift is not automatically a sin - at judging you are asked
+     whether you can justify it - but it is measured.
+
+     WHY THIS TAKES A PRE-COMPUTED FIGURE
+     ------------------------------------
+     These fifteen marks are the only ones a team's WRITING can earn, and
+     until now they were awarded for free. The block below reads
+     `constitution.levers` - a numeric block that only the JSON-authored
+     constitutions in `engine/harnesses/reference.js` carry. A markdown
+     constitution, which is what `harness/cabinet.js` parses and what the
+     spec asks teams to write, has no such key, so `terms` stayed zero,
+     `fidelity` stayed 1, and every prose-authored government collected
+     all fifteen marks whatever it did.
+
+     `harness/auditor.js` has computed the real figure all along -
+     unminuted departures, rules broken, rounds ungoverned, clause
+     coverage, volatility - and was wired to nothing. It needs the TRACE,
+     which a scoring function over a trajectory does not have, so the
+     caller computes it and passes it in:
+
+         E.score(traj, con, { constitutional_drift: audit.constitutional_drift })
+
+     The lever-block comparison is kept as the fallback for callers with
+     no trace, so nothing that scored before scores differently now. */
+  let fidelity = 1;
+  if (opts && typeof opts.constitutional_drift === 'number' &&
+      isFinite(opts.constitutional_drift)) {
+    fidelity = clamp(1 - opts.constitutional_drift, 0, 1);
+  } else if (constitution && constitution.levers) {
+    const c = constitution.levers, f = last.levers;
+    let drift = 0, terms = 0;
+    ['corporate_tax_rate', 'compute_levy', 'reskilling_spend_pct', 'public_ownership_pct'].forEach(k => {
+      if (c[k] != null) { drift += Math.abs(f[k] - c[k]); terms++; }
+    });
+    if (c.allocation && c.allocation.ubi != null) { drift += Math.abs(f.allocation.ubi - c.allocation.ubi); terms++; }
+    if (c.care_job_guarantee != null && c.care_job_guarantee !== f.care_job_guarantee) { drift += 0.25; terms++; }
+    if (c.working_week_days != null) { drift += Math.abs(f.working_week_days - c.working_week_days) * 0.12; terms++; }
+    fidelity = terms ? clamp(1 - (drift / terms) * 2.2, 0, 1) : 1;
+  }
+
+  const components = {
+    sustained_real_ubi: 25 * clamp(Math.sqrt(clamp(meanReal, 0, 260) / 260), 0, 1),
+    minimum_ubi: 15 * clamp(minReal / 130, 0, 1),
+    worst_service: 20 * clamp((worstEver - 25) / 58, 0, 1),
+    cohesion_equality: 15 * (0.6 * clamp(meanCohesion / 100, 0, 1) +
+                             0.4 * clamp((0.50 - meanGini) / 0.25, 0, 1)),
+    constitutional_fidelity: 15 * fidelity,
+    fiscal_sustainability: 10 * (0.6 * clamp(last.fiscal.reserves_bn / 90, 0, 1) +
+                                 0.4 * (traj.every(s => s.fiscal.reserves_bn >= 0) ? 1 : 0))
+  };
+  Object.keys(components).forEach(k => { components[k] = Math.round(components[k] * 10) / 10; });
+  let total = Object.keys(components).reduce((x, k) => x + components[k], 0);
+
+  /* Hard gates CAP the total. They do not merely subtract from it. */
+  const gates = [];
+  if (traj.some(s => s.fiscal.reserves_bn < 0)) gates.push('insolvency');
+  ESSENTIAL.forEach(k => {
+    for (let i = 1; i < n; i++) {
+      if (traj[i].sectors[k].quality < 40 && traj[i - 1].sectors[k].quality < 40) {
+        gates.push('service_critical_' + k);
+        break;
+      }
+    }
+  });
+  if (last.indicators.legitimacy < 25) gates.push('legitimacy_collapse');
+  if (gates.length) total = Math.min(total, 45 - 6 * (gates.length - 1));
+
+  return {
+    total: Math.max(0, Math.round(total)),
+    gates_failed: gates,
+    components: components,
+    diagnostics: {
+      mean_real_ubi: Math.round(meanReal),
+      min_real_ubi: minReal,
+      worst_essential_ever: worstEver,
+      mean_cohesion: Math.round(meanCohesion),
+      mean_gini: round2(meanGini),
+      final_reserves_bn: last.fiscal.reserves_bn,
+      final_ubi_monthly: last.indicators.ubi_monthly_sgd
+    }
+  };
+}
+
+
+/* ---------------------------------------------------------------------
+   10. VITALS — the people behind the curve
+   ---------------------------------------------------------------------
+   A population line falling from 5.94 to 5.52 million is not a line. It
+   is roughly twenty-eight thousand babies a year and rather more funerals,
+   and a society that only ever sees the line has been taught the wrong
+   thing.
+
+   Nothing here is invented. Both numbers are already implied by the age
+   bands the engine carries; this reads them back out. Deaths come from the
+   over-65 band at a mortality rate calibrated to give Singapore's real
+   birth rate as the residual; births are then whatever must have happened
+   for the total to land where it did.
+
+   None of it is scored. It is true, and it is for the news bureau.
+   --------------------------------------------------------------------- */
+const MORTALITY_65_PLUS = 0.025;   // per year, over-65 band
+
+function vitals(prev, next) {
+  const years = 2;
+  const p0 = prev.population, p1 = next.population;
+
+  const deaths = Math.round(p0.by_age.age_65_plus * MORTALITY_65_PLUS * years);
+  // Total change is births minus deaths, so births fall out of it.
+  const births = Math.max(0, Math.round((p1.total - p0.total) + deaths));
+
+  // Flows between the bands: who turned 65, who left school for the
+  // labour market that may not have a job for them.
+  const turned65 = Math.max(0, Math.round((p1.by_age.age_65_plus - p0.by_age.age_65_plus) + deaths));
+  const leftSchool = Math.max(0, Math.round(births - (p1.by_age.age_0_19 - p0.by_age.age_0_19)));
+
+  const jobsLost = Math.max(0, p0.employed_total - p1.employed_total);
+  const jobsMade = Math.max(0, p1.employed_total - p0.employed_total);
+
+  return {
+    years: years,
+    births: births, deaths: deaths,
+    births_per_year: Math.round(births / years),
+    deaths_per_year: Math.round(deaths / years),
+    turned_65: turned65,
+    left_school: leftSchool,
+    jobs_lost: jobsLost, jobs_created: jobsMade,
+    net_population: p1.total - p0.total
+  };
+}
+
+/* ---------------------------------------------------------------------
+   11. INTERPOLATION — the years between the checkpoints
+   ---------------------------------------------------------------------
+   The engine settles the world every two years, but the world does not
+   wait for it. A round's state is not a photograph of one instant, it is
+   where the society had got to by then — so reading the path between two
+   checkpoints is legitimate, and it is the difference between watching a
+   society live and clicking through twelve slides.
+
+   `t` runs 0 to 1 across the round. Continuous quantities move; counts
+   round; anything a government chose rather than the world produced —
+   levers, the ubi design, the shock list — holds until the round turns.
+   --------------------------------------------------------------------- */
+function interpolate(a, b, t) {
+  t = clamp(t, 0, 1);
+  if (t <= 0) return deepClone(a);
+  if (t >= 1) return deepClone(b);
+  const L = (x, y) => x + (y - x) * t;
+  const Li = (x, y) => Math.round(L(x, y));
+  const out = deepClone(a);
+
+  out.meta.round = a.meta.round;
+  out.meta.year = a.meta.year;
+  out.meta.year_exact = Math.round((a.meta.year + t * 2) * 10) / 10;
+  out.meta.progress = Math.round(t * 100) / 100;
+
+  const pa = a.population, pb = b.population;
+  out.population.total = Li(pa.total, pb.total);
+  ['age_0_19', 'age_20_64', 'age_65_plus'].forEach(k => {
+    out.population.by_age[k] = Li(pa.by_age[k], pb.by_age[k]);
+  });
+  ['high', 'medium', 'low'].forEach(k => {
+    out.population.by_exposure[k] = Li(pa.by_exposure[k], pb.by_exposure[k]);
+  });
+  out.population.employed_total = Li(pa.employed_total, pb.employed_total);
+
+  ORDER.forEach(k => {
+    const sa = a.sectors[k], sb = b.sectors[k], so = out.sectors[k];
+    so.automation = round2(L(sa.automation, sb.automation));
+    so.capacity = round2(L(sa.capacity, sb.capacity));
+    so.margin = round2(L(sa.margin, sb.margin));
+    so.headcount = Li(sa.headcount, sb.headcount);
+    // Quality is what colours the city, so let it move smoothly too.
+    so.quality = Li(sa.quality, sb.quality);
+  });
+
+  ['gdp_bn', 'corporate_profit_bn', 'tax_revenue_bn', 'public_dividend_bn', 'reserves_bn']
+    .forEach(k => {
+      if (a.fiscal[k] != null && b.fiscal[k] != null) out.fiscal[k] = round2(L(a.fiscal[k], b.fiscal[k]));
+    });
+
+  const ia = a.indicators, ib = b.indicators, io_ = out.indicators;
+  io_.ubi_monthly_sgd = Li(ia.ubi_monthly_sgd, ib.ubi_monthly_sgd);
+  if (ia.ubi_base_share_sgd != null) io_.ubi_base_share_sgd = Li(ia.ubi_base_share_sgd, ib.ubi_base_share_sgd);
+  io_.real_ubi_index = Li(ia.real_ubi_index, ib.real_ubi_index);
+  if (ia.effective_ubi_index != null) io_.effective_ubi_index = Li(ia.effective_ubi_index, ib.effective_ubi_index);
+  io_.employment_rate = Math.round(L(ia.employment_rate, ib.employment_rate) * 1000) / 1000;
+  io_.gini = round2(L(ia.gini, ib.gini));
+  io_.cohesion = Li(ia.cohesion, ib.cohesion);
+  io_.legitimacy = Li(ia.legitimacy, ib.legitimacy);
+  io_.consumption_index = Li(ia.consumption_index, ib.consumption_index);
+
+  // Households age continuously; their wellbeing drifts with the world.
+  if (Array.isArray(a.personas) && Array.isArray(b.personas)) {
+    out.personas = a.personas.map((pa2, i) => {
+      const pb2 = b.personas[i] || pa2;
+      const q = deepClone(pa2);
+      q.age = Math.floor(L(pa2.age, pb2.age));
+      q.wellbeing = Li(pa2.wellbeing, pb2.wellbeing);
+      return q;
+    });
+  }
+
+  // A shock is declared, not eased into; the same goes for the bulletin.
+  out.shocks = (t >= 0.5 ? b : a).shocks;
+  out.news = (t >= 0.5 ? b : a).news;
+  return out;
+}
+
+/* --------------------------------------------------------------------- */
+root.MeridianEngine = {
+  step: step,
+  seed: seed,
+  updatePersonas: updatePersonas,
+  bulletin: bulletin,
+  runTrajectory: runTrajectory,
+  score: score,
+  demography: demography,
+  vitals: vitals,
+  interpolate: interpolate,
+  MORTALITY_65_PLUS: MORTALITY_65_PLUS,
+  SECTORS: SECTORS,
+  ORDER: ORDER,
+  ESSENTIAL: ESSENTIAL,
+  SHOCKS: SHOCKS,
+  DEFAULT_LEVERS: DEFAULT_LEVERS,
+  PARAMS: P,
+  COST_SHARE: COST_SHARE,
+  /* The margin each sector was CALIBRATED to. Industry agents need
+     it to tell 'we are doing badly' from 'this is what this
+     industry always does' — care services run at -0.09 by design,
+     and a firm judging itself against zero would be permanently
+     convinced it was failing. */
+  R1_MARGINS: R1_MARGINS,
+  CAL: CAL,
+  /* What each industry is FOR. Exposed rather than stored on the state:
+     a mission does not change round to round, so putting it in every
+     sector block of every round would be noise in the trace and churn in
+     the world-state schema. Reports and industry agents read it here. */
+  MISSIONS: MISSIONS ? MISSIONS.MISSIONS : null,
+  DIMENSIONS: MISSIONS ? MISSIONS.DIMENSIONS : null,
+  version: '1.0.0'
+};
+
+})(typeof window !== 'undefined' ? window : globalThis);
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = (typeof window !== 'undefined' ? window : globalThis).MeridianEngine;
+}
+
+</script>
+<script>
+(function(){
+var module={exports:{}}, exports=module.exports;
+var require=function(p){if(p.indexOf("meridian-engine")>=0) return window.MeridianEngine;
+throw new Error("unexpected require: "+p);};
+/* =====================================================================
+   CITIZEN FRICTION — what 5.9 million people make of your budget
+   ---------------------------------------------------------------------
+   A society is not a spreadsheet with a conscience bolted on. Governments
+   fail because people stop cooperating: they strike, they boycott, they
+   stop turning up, they vote you out. This module is where that enters
+   the model.
+
+   Twelve stratified archetypes stand in for the population — spanning
+   income percentile, exposure to automation, and age. Each round they are
+   shown what actually changed and asked what they make of it. Their
+   answers aggregate into one number, `civic_unrest` (0-100), which the
+   engine takes as friction on capacity.
+
+   WHY THIS IS NOT INSIDE THE ENGINE
+   ---------------------------------
+   A model's reading of a mood cannot be allowed to change what the same
+   levers produce, or cross-team comparison dies and a trace stops
+   replaying. So unrest is computed OUT here, passed IN as exogenous, and
+   recorded in the trace — exactly as trade is. The feedback loop is real;
+   the engine stays pure.
+
+   AND WHY IT WORKS WITHOUT A MODEL
+   --------------------------------
+   `reactDeterministic` reads the same signals from the same state and
+   returns the same shape. No API key, no server, no network: the loop
+   still closes, the tests still run, and a Thinkathon whose model server
+   falls over at 2pm carries on. The model adds voice and nuance; it is
+   not load-bearing for the simulation to function.
+   ===================================================================== */
+
+'use strict';
+
+const E = require('./meridian-engine.js');
+
+/* ---------------------------------------------------------------------
+   THE CORPUS
+   ---------------------------------------------------------------------
+   Twelve people who between them cover the ways this economy can treat
+   somebody. `weight` is the share of the population each stands for, and
+   they sum to 1. `depends` names the services whose decay they feel
+   first; `exposure` is how directly the machines came for their work.
+   --------------------------------------------------------------------- */
+const ARCHETYPES = [
+  { id:'A01', name:'Rahim bin Yusof', role:'logistics coordinator, 34',
+    weight:.11, income:45, exposure:'high', working:true,
+    depends:['retail_commerce','transport_logistics'],
+    voice:'Watched the depot go from forty people to four. Still employed, and knows it is luck.' },
+  { id:'A02', name:'Mdm Tan Ah Choo', role:'retired cleaner, 68',
+    weight:.09, income:12, exposure:'n/a', working:false,
+    depends:['care_services','healthcare'],
+    voice:'Lives alone on the payment and small savings. Counts the cost of everything.' },
+  { id:'A03', name:'Sister Grace Lim', role:'nurse, 45',
+    weight:.08, income:58, exposure:'low', working:true,
+    depends:['healthcare','care_services'],
+    voice:'The one job the machines could not take. Works the shifts nobody else will.' },
+  { id:'A04', name:'Nurul Aisyah', role:'ITE graduate, 22',
+    weight:.07, income:8, exposure:'high', working:false,
+    depends:['education_research','manufacturing'],
+    voice:'Trained for work that stopped existing while she was training for it.' },
+  { id:'A05', name:'Daniel Ong', role:'owns automated capital, 52',
+    weight:.04, income:97, exposure:'low', working:true,
+    depends:['finance','compute_telecom'],
+    voice:'Owns three of the warehouses that stopped needing people. Comfortable, and quietly uneasy.' },
+  { id:'A06', name:'Farah Idris', role:'gig artisan, 27',
+    weight:.09, income:24, exposure:'medium', working:true,
+    depends:['retail_commerce','transport_logistics'],
+    voice:'Six income streams, none of them a job. Good months and months of nothing.' },
+  { id:'A07', name:'Wei Sheng', role:'data centre technician, 31',
+    weight:.05, income:71, exposure:'low', working:true,
+    depends:['compute_telecom','energy_utilities'],
+    voice:'Keeps the machines running. Aware that this is why he still has work.' },
+  { id:'A08', name:'Priya Raman', role:'single parent, part-time retail, 36',
+    weight:.10, income:19, exposure:'high', working:true,
+    depends:['education_research','care_services','retail_commerce'],
+    voice:'Hours cut twice. Childcare and the payment are the whole budget.' },
+  { id:'A09', name:'Lim Boon Hock', role:'hawker, 49',
+    weight:.07, income:33, exposure:'medium', working:true,
+    depends:['food_agri','retail_commerce'],
+    voice:'Sells to people who have less money than they used to. Feels demand before economists do.' },
+  { id:'A10', name:'Mr Krishnan', role:'chronic illness, 74',
+    weight:.08, income:10, exposure:'n/a', working:false,
+    depends:['healthcare','care_services'],
+    voice:'Three appointments a month. Notices a waiting list before it appears in a statistic.' },
+  { id:'A11', name:'Cheryl Goh', role:'secondary teacher, 41',
+    weight:.06, income:54, exposure:'medium', working:true,
+    depends:['education_research','public_admin','public_safety'],
+    voice:'Teaches children whose parents have no work. Sees what that does before anyone else.' },
+  { id:'A12', name:'Marcus Teo', role:'displaced analyst, 44',
+    weight:.16, income:28, exposure:'high', working:false,
+    depends:['retail_commerce','finance','housing_construction'],
+    voice:'Earned well for twenty years. Now on the payment, and has not said so at dinner.' }
+];
+
+/* Sanity: the population is fully accounted for. */
+const WEIGHT_SUM = ARCHETYPES.reduce((a, p) => a + p.weight, 0);
+
+const clamp = (v, lo, hi) => (v < lo ? lo : (v > hi ? hi : v));
+
+/* ---------------------------------------------------------------------
+   WHAT EACH PERSON IS SHOWN
+   ---------------------------------------------------------------------
+   Not the whole world state — what changed, for them. A round's delta in
+   the terms a person would actually notice.
+   --------------------------------------------------------------------- */
+function macroDelta(prev, next) {
+  const worst = s => Math.min.apply(null, E.ESSENTIAL.map(k => s.sectors[k].quality));
+  const d = (a, b) => Math.round((b - a) * 10) / 10;
+  return {
+    round: next.meta.round,
+    year: next.meta.year,
+    payment_now: next.indicators.ubi_monthly_sgd,
+    payment_change: next.indicators.ubi_monthly_sgd - prev.indicators.ubi_monthly_sgd,
+    purchasing_power: next.indicators.effective_ubi_index,
+    purchasing_power_change: d(prev.indicators.effective_ubi_index, next.indicators.effective_ubi_index),
+    employment_pct: Math.round(next.indicators.employment_rate * 100),
+    employment_change: d(prev.indicators.employment_rate * 100, next.indicators.employment_rate * 100),
+    worst_service: worst(next),
+    worst_service_change: d(worst(prev), worst(next)),
+    inequality: next.indicators.gini,
+    shocks: (next.shocks || []).map(k => (E.SHOCKS[k] || {}).label || k),
+    services: E.ORDER.reduce((o, k) => {
+      o[k] = { quality: next.sectors[k].quality,
+               change: next.sectors[k].quality - prev.sectors[k].quality };
+      return o;
+    }, {})
+  };
+}
+
+/* ---------------------------------------------------------------------
+   THE DETERMINISTIC READING
+   ---------------------------------------------------------------------
+   How each archetype feels, computed from the same state the engine
+   already carries. Runs with no model, no network, and no key — which is
+   what makes the whole loop dependable rather than a demo.
+   --------------------------------------------------------------------- */
+function reactDeterministic(prev, next) {
+  const md = macroDelta(prev, next);
+  const reactions = ARCHETYPES.map(p => {
+    // The services this person actually leans on, not the average.
+    const svc = p.depends.reduce((a, k) => a + md.services[k].quality, 0) / p.depends.length;
+    const svcMove = p.depends.reduce((a, k) => a + md.services[k].change, 0) / p.depends.length;
+
+    /* Poorer households live closer to the edge of every number, so the
+       same cut lands harder. This is the whole reason a stratified corpus
+       beats one average citizen. */
+    const exposureToCuts = 1 + (60 - clamp(p.income, 0, 100)) / 100;
+
+    let discontent = 0;
+    discontent += clamp((62 - svc) * 0.9, -25, 45);                    // services
+    discontent += clamp(-svcMove * 2.2, -12, 22);                      // and their direction
+    discontent += clamp((100 - md.purchasing_power) * 0.30, -18, 36) * exposureToCuts;
+    discontent += clamp(-md.purchasing_power_change * 1.6, -12, 26) * exposureToCuts;
+    if (p.working === false && p.exposure !== 'n/a') {
+      discontent += clamp((45 - md.employment_pct) * 0.55, -8, 26);    // no work, and no prospect
+    }
+    if (p.exposure === 'high') discontent += clamp((45 - md.employment_pct) * 0.30, -6, 16);
+    if (p.income > 85) discontent -= 8;                                // owners are insulated
+    discontent += md.shocks.length * 6;
+
+    const sentiment = clamp(Math.round(50 - discontent), -100, 100);   // +50 content, -100 furious
+    return {
+      id: p.id, name: p.name, role: p.role, weight: p.weight,
+      sentiment: sentiment,
+      concern: dominantConcern(p, md, svc),
+      quote: null                                    // the model supplies voice; this does not
+    };
+  });
+  return { reactions: reactions, delta: md, source: 'deterministic' };
+}
+
+function dominantConcern(p, md, svc) {
+  const pains = [
+    ['services', (62 - svc) * 0.9],
+    ['the payment', (100 - md.purchasing_power) * 0.30],
+    ['no work', p.working === false ? (45 - md.employment_pct) * 0.55 : -99],
+    ['a shock', md.shocks.length ? 18 : -99]
+  ].sort((a, b) => b[1] - a[1]);
+  return pains[0][1] > 4 ? pains[0][0] : 'nothing in particular';
+}
+
+/* ---------------------------------------------------------------------
+   THE AGGREGATE
+   ---------------------------------------------------------------------
+   One number the engine can take as friction, plus the three voices worth
+   putting on a screen.
+   --------------------------------------------------------------------- */
+function aggregate(result) {
+  const rs = result.reactions;
+  // Weighted mean sentiment -> unrest. -100 sentiment is 100 unrest.
+  const mean = rs.reduce((a, r) => a + r.sentiment * r.weight, 0) / WEIGHT_SUM;
+  let unrest = clamp(Math.round((50 - mean) * 0.9), 0, 100);
+
+  /* A society where most are content and a tenth are desperate is not the
+     same as one where everybody is mildly put out, and it is usually the
+     more dangerous of the two. The spread is part of the reading. */
+  const furious = rs.filter(r => r.sentiment < -35)
+                    .reduce((a, r) => a + r.weight, 0) / WEIGHT_SUM;
+  unrest = clamp(Math.round(unrest + furious * 30), 0, 100);
+
+  const loudest = rs.slice().sort((a, b) => a.sentiment - b.sentiment).slice(0, 3);
+  return {
+    civic_unrest: unrest,
+    mean_sentiment: Math.round(mean),
+    share_furious: Math.round(furious * 100),
+    dispatches: loudest.map(r => ({
+      name: r.name, role: r.role, sentiment: r.sentiment,
+      concern: r.concern, quote: r.quote
+    })),
+    reactions: rs,
+    source: result.source
+  };
+}
+
+/* ---------------------------------------------------------------------
+   THE MODEL READING
+   ---------------------------------------------------------------------
+   One batched call for the whole corpus rather than twelve — a local
+   model answering twelve prompts a round, twelve rounds, five teams is
+   720 calls and an afternoon. One call also lets the model see the
+   population together, which is what you want it reasoning about.
+
+   Any failure falls back to the deterministic reading and says so. The
+   round never fails because a model did.
+   --------------------------------------------------------------------- */
+function buildPrompt(prev, next) {
+  const md = macroDelta(prev, next);
+  const arrow = v => (v > 0 ? '+' + v : String(v));
+  const svc = E.ORDER.map(k =>
+    '  ' + E.SECTORS[k].name.padEnd(21) + String(md.services[k].quality).padStart(3) +
+    '  (' + arrow(md.services[k].change) + ')').join('\n');
+  const people = ARCHETYPES.map(p =>
+    '  ' + p.id + '  ' + p.name + ' — ' + p.role +
+    '\n        income percentile ' + p.income + ', AI exposure ' + p.exposure +
+    ', ' + (p.working ? 'in work' : 'not in work') +
+    '\n        leans on: ' + p.depends.map(k => E.SECTORS[k].name).join(', ') +
+    '\n        ' + p.voice).join('\n');
+
+  return `Meridian, ${md.year}. Round ${md.round} of 12.
+
+You are reading the mood of a city-state of 5.9 million people after this round's
+budget. Twelve residents stand in for the population. Answer as each of them.
+
+WHAT CHANGED THIS ROUND
+  Universal payment      $${md.payment_now}/month  (${arrow(md.payment_change)})
+  What it actually buys  ${md.purchasing_power} vs 100 in 2050  (${arrow(md.purchasing_power_change)})
+  Employment             ${md.employment_pct}%  (${arrow(md.employment_change)} points)
+  Worst public service   ${md.worst_service}/100  (${arrow(md.worst_service_change)})
+  Inequality (gini)      ${md.inequality}
+  In force               ${md.shocks.length ? md.shocks.join(', ') : 'nothing unusual'}
+
+SERVICE QUALITY, 0-100
+${svc}
+
+THE TWELVE
+${people}
+
+For each person give a sentiment from -100 to 100:
+  +50 and up   content, things are working
+  0            uneasy, watching
+  -40          angry, would sign something
+  -80 and down would strike, riot, or leave
+
+Judge from where THEY stand, not from the averages. A cut lands harder on
+someone with nothing behind them. Somebody whose hospital is failing does not
+care that transport improved. An owner of automated capital may be doing well
+while the city is not.
+
+Reply with nothing but a \`\`\`json fenced object:
+
+{
+  "reactions": [
+    { "id": "A01", "sentiment": -30, "concern": "no work",
+      "quote": "one sentence in their own voice, under 20 words" }
+  ]
+}
+
+All twelve, in order, ids exactly as given.`;
+}
+
+function reactionSchema(data) {
+  if (!data || !Array.isArray(data.reactions)) return { ok: false, reason: 'need a `reactions` array' };
+  const byId = {};
+  data.reactions.forEach(r => { if (r && r.id) byId[r.id] = r; });
+  const missing = ARCHETYPES.filter(p => !byId[p.id]).map(p => p.id);
+  if (missing.length > 4) return { ok: false, reason: 'missing reactions for ' + missing.join(', ') };
+  return { ok: true, value: byId };
+}
+
+/**
+ * readTheRoom(prev, next, opts) -> aggregate
+ *   opts.client  an llm_client; omit for the deterministic reading
+ *   opts.onFault called with a reason when the model could not be used
+ */
+async function readTheRoom(prev, next, opts) {
+  opts = opts || {};
+  const fallback = () => aggregate(reactDeterministic(prev, next));
+  if (!opts.client) return fallback();
+
+  try {
+    const r = await opts.client.json(buildPrompt(prev, next), {
+      schema: reactionSchema, temperature: 0.7, maxTokens: 1400
+    });
+    if (!r.data) {
+      if (opts.onFault) opts.onFault('citizens: ' + (r.invalid || 'no usable reply'));
+      return fallback();
+    }
+    /* THE MODEL GIVES THE VOICE. THE ARITHMETIC GIVES THE NUMBER.
+       ---------------------------------------------------------------
+       `sentiment` stays deterministic, because it becomes civic_unrest,
+       which the engine consumes, which moves the score. If a model set it,
+       the same twelve levers would produce a different country depending
+       on what a 7B model felt like that afternoon, and no two teams could
+       be compared.
+
+       That is not hypothetical. When sentiment came from the model, a
+       country still paying $657 with its worst service at 67 was read at
+       95/100 unrest in round 3 — small models narrate hardship
+       dramatically, which is exactly what you want from a quote and
+       exactly what you cannot have in a scored input.
+
+       What the model contributes is what it is good at: what this person
+       is worried about, and how they would say it. Set
+       `sentimentFromModel: true` to hand the number back to the model —
+       useful for a demo of how unstable that is, never for a scored run. */
+    const det = reactDeterministic(prev, next);
+    const trusted = opts.sentimentFromModel === true;
+    const merged = det.reactions.map(base => {
+      const m = r.data[base.id];
+      if (!m) return base;
+      const s = Number(m.sentiment);
+      return Object.assign({}, base, {
+        sentiment: (trusted && isFinite(s)) ? clamp(Math.round(s), -100, 100) : base.sentiment,
+        // Kept for the bulletin and for showing students the gap between
+        // how a model reads a round and how the arithmetic reads it.
+        model_sentiment: isFinite(s) ? clamp(Math.round(s), -100, 100) : null,
+        concern: typeof m.concern === 'string' ? m.concern.slice(0, 60) : base.concern,
+        quote: typeof m.quote === 'string' ? m.quote.slice(0, 160) : null
+      });
+    });
+    return aggregate({ reactions: merged, delta: det.delta,
+                       source: trusted ? 'model' : 'model-voiced' });
+  } catch (err) {
+    if (opts.onFault) opts.onFault('citizens: ' + (err && err.message));
+    return fallback();
+  }
+}
+
+module.exports = {
+  ARCHETYPES, WEIGHT_SUM,
+  macroDelta, reactDeterministic, aggregate, readTheRoom, buildPrompt, reactionSchema
+};
+
+window.MeridianCitizens = module.exports;
+})();
+(function(){
+var module={exports:{}}, exports=module.exports;
+var require=function(p){
+throw new Error("unexpected require: "+p);};
+/* =====================================================================
+   PERSONALITY — the Big Five, and what it is allowed to do
+   ---------------------------------------------------------------------
+   Five traits, each 0-1, attached to every cohort in the corpus:
+
+     O  openness           curiosity, tolerance of change
+     C  conscientiousness  planning, rule-following, duty
+     E  extraversion       sociability, assertion
+     A  agreeableness      compassion, cooperation
+     N  neuroticism        anxiety, threat sensitivity
+
+   WHY NOT MBTI
+   ------------
+   MBTI is the popular one and it fails the project's own rule that no
+   number is arbitrary. Between a quarter and a third of people change at
+   least one letter on retest; six-month stability sits around 0.55-0.75
+   against the Big Five's 0.75-0.90; and it is, in the literature's own
+   phrasing, virtually unused in psychological research. There is no
+   published effect size linking "INFP" to volunteering, because nobody
+   who studies volunteering uses the instrument.
+
+   The Big Five has what we actually need: population distributions, and
+   measured links to the specific behaviours this simulation models.
+
+   HOW MUCH PERSONALITY IS ALLOWED TO MATTER
+   -----------------------------------------
+   Very little, and this is the most important line in the file.
+
+   The evidence on personality and civic engagement reports effects that
+   are "small but robust" - real, replicated, and modest, comparable in
+   magnitude to age, education or income rather than dominating them.
+
+   So traits SHIFT THRESHOLDS AT THE MARGIN. They never override
+   circumstance. A cheerful, agreeable, open person whose hospital has
+   collapsed and whose payment buys nothing is still in trouble, and the
+   simulation must say so. If personality could rescue a cohort from bad
+   policy, the whole teaching point would invert: teams would be scored
+   on the luck of the draw rather than on how they governed.
+
+   Every coefficient below is capped so that the total swing from
+   personality is a fraction of the swing from circumstance. That is
+   deliberate, it is evidenced, and it should stay that way.
+
+   Sources for everything below: docs/EVIDENCE.md sections 1.1-1.4.
+
+   DIRECTIONS, FROM THE LITERATURE
+   -------------------------------
+   Agreeableness, extraversion and openness are associated with MORE
+   civic engagement - volunteering and charitable giving especially.
+   Conscientiousness and neuroticism are associated with LESS.
+
+   The conscientiousness sign surprises people, so it is worth stating
+   plainly rather than quietly reversing it because it feels wrong: the
+   finding is that conscientious people report less of this kind of
+   engagement, not more. Duty to one's own obligations is not the same
+   thing as duty to strangers.
+   ===================================================================== */
+
+'use strict';
+
+const clamp = (v, lo, hi) => (v < lo ? lo : (v > hi ? hi : v));
+
+/* ---------------------------------------------------------------------
+   ASSIGNMENT
+   ---------------------------------------------------------------------
+   PLACEHOLDER, and labelled as such. These are hand-set per cohort to be
+   plausible and varied rather than sampled from a fitted distribution.
+
+   Phase 1 replaces this with draws from published population norms, so
+   that the corpus reproduces a real spread rather than one author's
+   intuitions about who is anxious. Until then, no result that depends on
+   the precise value of a trait should be reported as a finding.
+   --------------------------------------------------------------------- */
+const TRAITS = {
+  A01: { o: 0.45, c: 0.70, e: 0.55, a: 0.60, n: 0.45 },  // Rahim, logistics
+  A02: { o: 0.30, c: 0.75, e: 0.40, a: 0.70, n: 0.55 },  // Mdm Tan, retired
+  A03: { o: 0.55, c: 0.80, e: 0.60, a: 0.85, n: 0.40 },  // Sister Grace, nurse
+  A04: { o: 0.75, c: 0.45, e: 0.65, a: 0.60, n: 0.60 },  // Nurul, ITE grad
+  A05: { o: 0.60, c: 0.75, e: 0.70, a: 0.35, n: 0.25 },  // Daniel Ong, capital
+  A06: { o: 0.85, c: 0.40, e: 0.60, a: 0.65, n: 0.50 },  // Farah, gig artisan
+  A07: { o: 0.65, c: 0.70, e: 0.35, a: 0.50, n: 0.35 },  // Wei Sheng, data centre
+  A08: { o: 0.40, c: 0.65, e: 0.45, a: 0.75, n: 0.65 },  // Priya, single parent
+  A09: { o: 0.35, c: 0.60, e: 0.75, a: 0.70, n: 0.40 },  // Lim Boon Hock, hawker
+  A10: { o: 0.35, c: 0.55, e: 0.30, a: 0.60, n: 0.70 },  // Mr Krishnan, chronic illness
+  A11: { o: 0.70, c: 0.75, e: 0.60, a: 0.80, n: 0.45 },  // Cheryl Goh, teacher
+  A12: { o: 0.55, c: 0.70, e: 0.50, a: 0.45, n: 0.60 }   // Marcus Teo, displaced
+};
+
+const DEFAULT = { o: 0.5, c: 0.5, e: 0.5, a: 0.5, n: 0.5 };
+
+function traitsFor(id) {
+  return TRAITS[id] || DEFAULT;
+}
+
+/* ---------------------------------------------------------------------
+   WHAT TRAITS DO
+   ---------------------------------------------------------------------
+   Each returns a small signed adjustment, and the caps are the point.
+   `civic` moves a threshold by at most about eight points on a
+   hundred-point pressure scale; circumstance routinely moves it by fifty.
+   --------------------------------------------------------------------- */
+
+/** Propensity to act WITH others: organising, mutual aid, volunteering. */
+function civic(t) {
+  // A, E, O positive; C and N negative. Centred so 0.5 across the board
+  // gives exactly zero adjustment.
+  const raw = (t.a - 0.5) * 0.40 + (t.e - 0.5) * 0.30 + (t.o - 0.5) * 0.20
+            - (t.c - 0.5) * 0.15 - (t.n - 0.5) * 0.25;
+  return clamp(raw, -0.5, 0.5);
+}
+
+/** Willingness to uproot. Openness travels; neuroticism stays home. */
+function venturesome(t) {
+  const raw = (t.o - 0.5) * 0.45 - (t.n - 0.5) * 0.30 + (t.e - 0.5) * 0.15;
+  return clamp(raw, -0.5, 0.5);
+}
+
+/** How early a given pressure registers as intolerable. */
+function threatSensitivity(t) {
+  const raw = (t.n - 0.5) * 0.50 - (t.a - 0.5) * 0.10;
+  return clamp(raw, -0.5, 0.5);
+}
+
+/** Deference to the arrangement as it stands. */
+function conformity(t) {
+  const raw = (t.c - 0.5) * 0.40 - (t.o - 0.5) * 0.30;
+  return clamp(raw, -0.5, 0.5);
+}
+
+/**
+ * A short phrase for a prompt or a UI, so a page never has to print five
+ * decimals at a reader. Descriptive only; nothing reads this back.
+ */
+function describe(t) {
+  const bits = [];
+  /* No pronouns. An earlier version said "set in her ways" for every
+     cohort, which described a 74-year-old man named Mr Krishnan as her. */
+  if (t.o >= 0.7) bits.push('curious'); else if (t.o <= 0.35) bits.push('set in their ways');
+  if (t.c >= 0.7) bits.push('dutiful'); else if (t.c <= 0.35) bits.push('improvises');
+  if (t.e >= 0.7) bits.push('sociable'); else if (t.e <= 0.35) bits.push('private');
+  if (t.a >= 0.75) bits.push('looks after people'); else if (t.a <= 0.35) bits.push('guarded');
+  if (t.n >= 0.65) bits.push('anxious'); else if (t.n <= 0.3) bits.push('unflappable');
+  return bits.slice(0, 3).join(', ') || 'even-tempered';
+}
+
+/** Every adjustment for one cohort, in one object. */
+function profile(id) {
+  const t = traitsFor(id);
+  return {
+    big_five: t,
+    civic: civic(t),
+    venturesome: venturesome(t),
+    threat: threatSensitivity(t),
+    conformity: conformity(t),
+    words: describe(t)
+  };
+}
+
+module.exports = { TRAITS, traitsFor, profile, civic, venturesome,
+                   threatSensitivity, conformity, describe };
+
+window.MeridianTraits = module.exports;
+})();
+</script>
+<script>
+(function(){
+var module={exports:{}}, exports=module.exports;
+var require=function(p){if(p.indexOf("meridian-engine")>=0) return window.MeridianEngine;
+if(p.indexOf("citizen_friction")>=0) return window.MeridianCitizens;
+if(p.indexOf("traits")>=0) return window.MeridianTraits;
+throw new Error("unexpected require: "+p);};
+/* =====================================================================
+   THE FEED — society, in its own words
+   ---------------------------------------------------------------------
+   PROTOTYPE. Everything here is deterministic and templated: no model,
+   no network, no key. That is deliberate for two reasons.
+
+   One, it proves the architecture without a GPU in the room — the same
+   posts appear on a laptop, in CI, and at the event.
+
+   Two, it establishes the CONTRACT the model will later fill. A post is
+   not free-form text. It is a cohort declaring a BEHAVIOUR at an
+   INTENSITY, with words attached. The words are the only part a language
+   model will ever be allowed to write. Swap the templates for a model and
+   nothing downstream changes, because nothing downstream reads the words.
+
+        pressure (arithmetic)  ->  behaviour (chosen)  ->  words (dressing)
+
+   THE ONE IDEA WORTH READING THIS FILE FOR
+   ----------------------------------------
+   The same behaviour means opposite things depending on SLACK. A
+   neighbourhood organising childcare because the state stopped providing
+   it is a symptom. The identical act, by people who have time and money
+   to spare, is a society flourishing. Same verb, opposite diagnosis, and
+   the discriminator is arithmetic: time, money, security.
+
+   A simulation that cannot tell those apart cannot say anything useful
+   about a post-work society, which is the entire subject.
+   ===================================================================== */
+
+(function (root, factory) {
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = factory(require('../engine/meridian-engine.js'),
+                             require('../engine/citizen_friction.js'),
+                             require('../engine/traits.js'));
+  } else {
+    root.MeridianFeed = factory(root.MeridianEngine, root.MeridianCitizens,
+                                root.MeridianTraits);
+  }
+})(typeof window !== 'undefined' ? window : globalThis, function (E, C, TRAITS) {
+'use strict';
+
+const clamp = (v, lo, hi) => (v < lo ? lo : (v > hi ? hi : v));
+
+/* ---------------------------------------------------------------------
+   1. DISPOSITION
+   ---------------------------------------------------------------------
+   The corpus does not carry personality yet — that is Phase 1, and it
+   will be fitted to real trait distributions rather than invented. Until
+   then these are derived from what each archetype already has, so the
+   feed is driven by the same facts as the engine rather than by a second
+   set of numbers nobody reconciled.
+
+   Every one of these is a placeholder with a known replacement.
+   --------------------------------------------------------------------- */
+function disposition(p) {
+  const age = parseInt(String(p.role).replace(/\D+/g, ''), 10) || 40;
+
+  /* Can this person leave? Qualifications and savings help, age and
+     dependants do not. This is the trait that makes emigration
+     SELECTIVE — a country in trouble does not lose a random slice of
+     its people, it loses the ones who could go. */
+  const mobility = clamp(
+    (p.income / 100) * 0.5 +
+    (age < 35 ? 0.45 : age < 50 ? 0.2 : 0.02) +
+    (p.exposure === 'high' ? 0.08 : 0), 0, 1);
+
+  // Owners of capital and the securely employed trust the arrangement.
+  const trust = clamp(0.35 + (p.income / 100) * 0.4 + (p.working ? 0.12 : -0.1), 0, 1);
+
+  // Solidarity: who acts WITH others rather than alone.
+  const solidarity = clamp(0.75 - (p.income / 100) * 0.5 + (p.working ? 0.1 : 0), 0, 1);
+
+  const ambition = clamp((p.income / 100) * 0.3 + (age < 40 ? 0.45 : 0.15), 0, 1);
+
+  return { age, mobility, trust, solidarity, ambition };
+}
+
+/* ---------------------------------------------------------------------
+   2. SLACK — the discriminator
+   ---------------------------------------------------------------------
+   Does this cohort have anything spare? Three things, all of which must
+   be present: time, money, and enough security to plan past next month.
+
+   Sources: docs/EVIDENCE.md section 3.
+
+   Slack is what separates a society coping from a society flourishing,
+   and the working week is in it because that is the lever a government
+   actually holds. Trials of shorter weeks report the freed day going to
+   exactly the activities modelled here.
+   --------------------------------------------------------------------- */
+function slack(p, s, d) {
+  const week = s.levers && s.levers.working_week_days ? s.levers.working_week_days : 5;
+
+  // TIME. A shorter week frees it; being out of work does not, because
+  // insecure time is not leisure.
+  const time = p.working ? clamp((5 - week) / 2, 0, 1) * 0.8 + 0.1
+                         : (d.purchasing_power >= 105 ? 0.55 : 0.05);
+
+  /* MONEY, AT THIS COHORT'S OWN POSITION.
+     The national purchasing-power index is an average, and slack is not
+     an average thing. A capital owner and a retired cleaner living on the
+     same payment in the same year do not have the same room to spare, and
+     an earlier draft of this function gave them identical numbers — which
+     made every cohort pick the same behaviour and produced a country that
+     was 100% flourishing for twenty-four consecutive years.
+
+     The payment is flat, so it lifts the bottom far more than the top in
+     PROPORTIONAL terms; what it does not do is give someone at the twelfth
+     percentile the same discretionary room as someone at the ninetieth. */
+  const standing = 0.45 + (clamp(p.income, 0, 100) / 100) * 1.1;
+  const money = clamp((d.purchasing_power * standing - 92) / 42, 0, 1);
+
+  // SECURITY. The services this person leans on, working as they should.
+  const svc = p.depends.reduce((a, k) => a + d.services[k].quality, 0) / p.depends.length;
+  const security = clamp((svc - 55) / 25, 0, 1);
+
+  // All three, or none. A cohort with time and no money has not got slack.
+  return clamp(Math.min(time, money, security) * 1.15, 0, 1);
+}
+
+/* ---------------------------------------------------------------------
+   3. PRESSURE
+   ---------------------------------------------------------------------
+   How hard this cohort is being squeezed, 0-100, in four channels. The
+   engine already computes everything this reads; nothing new is invented.
+   --------------------------------------------------------------------- */
+function pressure(p, s, d, dis) {
+  const svc = p.depends.reduce((a, k) => a + d.services[k].quality, 0) / p.depends.length;
+
+  // Poorer households live closer to the edge of every number.
+  const exposure = 1 + (60 - clamp(p.income, 0, 100)) / 100;
+
+  const material = clamp((100 - d.purchasing_power) * 0.6 * exposure, 0, 100);
+  const service = clamp((62 - svc) * 1.5, 0, 100);
+  const work = p.working ? clamp((45 - d.employment_pct) * 0.5, 0, 100)
+                         : clamp((55 - d.employment_pct) * 0.9, 0, 100);
+  const voice = clamp((55 - (s.indicators.legitimacy || 55)) * 1.2, 0, 100);
+
+  /* WORST CHANNEL DOMINATES. Must stay identical to `pressureOf` in
+     engine/society_round.js — `engine/test_society.js` asserts the two
+     agree cohort by cohort, because a country cannot be under one
+     pressure on the page and another in the simulation.
+
+     This was a weighted mean until behaviour started depending on it,
+     at which point a cohort with one catastrophe and three channels it
+     has no exposure to came out reading as mildly inconvenienced. See
+     the note in society_round.js for the case that exposed it. */
+  const channels = [['material', material], ['service', service],
+                    ['work', work], ['voice', voice]];
+  const sorted = channels.slice().sort((a, b) => b[1] - a[1]);
+  const total = clamp(sorted[0][1] + ((sorted[1][1] + sorted[2][1] + sorted[3][1]) / 3) * 0.35, 0, 100);
+
+  return { material, service, work, voice, total, worst: sorted[0][0] };
+}
+
+/* ---------------------------------------------------------------------
+   4. CHOOSING A BEHAVIOUR
+   ---------------------------------------------------------------------
+   The taxonomy: prosocial, antisocial, conforming, collective, economic,
+   political. In the real build a model chooses from this space and this
+   function is the fallback. The point of writing the fallback FIRST is
+   that it defines the vocabulary the model must answer in, and gives us
+   a known-good baseline to compare a model against.
+   --------------------------------------------------------------------- */
+const BEHAVIOURS = {
+  flourish:   { family: 'prosocial',  label: 'building something',  tone: 'good' },
+  mutual_aid: { family: 'prosocial',  label: 'covering for the state', tone: 'mid' },
+  endure:     { family: 'conforming', label: 'getting on with it',  tone: 'quiet' },
+  obey:       { family: 'conforming', label: 'trusting the plan',   tone: 'quiet' },
+  debate:     { family: 'political',  label: 'arguing about it',    tone: 'mid' },
+  activism:   { family: 'political',  label: 'campaigning',         tone: 'mid' },
+  save:       { family: 'economic',   label: 'holding back',        tone: 'mid' },
+  organise:   { family: 'collective', label: 'organising',          tone: 'bad' },
+  strike:     { family: 'collective', label: 'striking',            tone: 'bad' },
+  emigrate:   { family: 'economic',   label: 'leaving',             tone: 'bad' },
+  withdraw:   { family: 'economic',   label: 'going through the motions', tone: 'bad' },
+  breakrules: { family: 'antisocial', label: 'going around the rules', tone: 'bad' }
+};
+
+function choose(p, pr, sl, dis, prevKey) {
+  /* THRESHOLDS VARY BY COHORT, AND THE VARIATION IS NOW PERSONALITY.
+     This used to be `p.id.charCodeAt(1) * 7 + ...` — a hash of the
+     string "A07". It varied, which was the stated goal, and a hash and
+     a personality produce equally varied output; only one of them can
+     be reasoned about, defended in a room, or fitted to published
+     norms later.
+
+     It must stay identical to `deterministicChoose` in
+     engine/decide.js. Two copies of a decision rule is one rule and one
+     bug, so a country cannot decide one thing on this page and another
+     in the simulation. */
+  const tr = TRAITS.profile(p.id);
+
+  /* Anxious people register a given pressure as intolerable sooner.
+     `threat` is capped at ±0.5 by traits.js, so this spans ±8 points on
+     a 100-point scale — the magnitude the literature supports, and
+     about a sixth of what circumstance moves. */
+  const t = clamp(pr.total + tr.threat * 16, 0, 100);
+
+  // The dispositions, nudged by the traits that bear on each.
+  dis = {
+    age: dis.age,
+    solidarity: clamp(dis.solidarity + tr.civic * 0.3, 0, 1),
+    mobility: clamp(dis.mobility + tr.venturesome * 0.25, 0, 1),
+    trust: clamp(dis.trust + tr.conformity * 0.2, 0, 1),
+    ambition: dis.ambition
+  };
+
+  /* SLACK FIRST. A cohort with room to spare is not deciding how to
+     cope, it is deciding what to do with itself — and that is the
+     branch of this function the whole project is about. */
+  if (sl > 0.45 && t < 30) return 'flourish';
+
+  if (t < 18) return dis.trust > 0.6 ? 'obey' : 'endure';
+
+  // Leaving is available only to those who can, which is the point.
+  if (t > 52 && dis.mobility > 0.55 && pr.worst !== 'voice') return 'emigrate';
+
+  // Sustained collective pressure, and people who act with others.
+  if (t > 62 && dis.solidarity > 0.55) return prevKey === 'organise' ? 'strike' : 'organise';
+  if (t > 44 && dis.solidarity > 0.6) return 'organise';
+
+  // Where the state has failed and neighbours have not.
+  if (pr.service > 45 && dis.solidarity > 0.5) return 'mutual_aid';
+
+  if (t > 58 && dis.trust < 0.35) return 'breakrules';
+  if (t > 40 && dis.trust < 0.45) return 'withdraw';
+
+  // Owners and the comfortable respond to uncertainty by sitting on money.
+  if (p.income > 70 && t > 22) return 'save';
+
+  if (pr.voice > 35) return 'activism';
+  return t > 30 ? 'debate' : 'endure';
+}
+
+/* ---------------------------------------------------------------------
+   5. WORDS
+   ---------------------------------------------------------------------
+   Templated, and deliberately so. Every line here is a slot a model will
+   fill later; the structure around it will not change. Where a number
+   appears it is the real number from the state, because a feed that
+   invents figures is worse than no feed.
+   --------------------------------------------------------------------- */
+function say(p, key, pr, d, s) {
+  const svc = p.depends.map(k => E.SECTORS[k].name.toLowerCase());
+  const worstDep = p.depends.slice().sort((a, b) => d.services[a].quality - d.services[b].quality)[0];
+  /* The sector names already read as services — "care services",
+     "healthcare" — so appending the word produces "the care services
+     service". Templates below use the bare name. */
+  const worstName = E.SECTORS[worstDep].name.toLowerCase();
+  const works = !!p.working;
+  const q = d.services[worstDep].quality;
+  const pay = Math.round(d.payment_now);
+  const buys = d.purchasing_power;
+  const week = (s.levers && s.levers.working_week_days) || 5;
+
+  const T = {
+    /* Split the same way as the rest: half of these presuppose a job,
+       and a retired cleaner announcing her four-day roster is the same
+       credibility failure as her announcing a double shift. */
+    flourish: works ? [
+      `Fourth week of the ${week}-day roster and the block has a repair workshop running on Thursdays. Nobody is paid. Nobody wants to be.`,
+      `Taught my first class at the community workshop today. Years in ${svc[0]} and it turns out somebody wanted to know how it works.`,
+      `I do the week at work and one day with the youth group now. The second one is unpaid and I would not swap it.`,
+      `The Thursday cooking rota has turned into something else entirely. Forty of us eat together now. Nobody organised it, exactly.`,
+      `Spent the free day recording the old folks in the block talking about what this place was in 2020. Somebody should have done it years ago.`
+    ] : [
+      `We started a reading group at the void deck for the kids whose parents work nights. Twelve of them now. This is what the time is for.`,
+      `Grew more than we can eat again. Boxes at the lift lobby, take what you need, that is the whole system.`,
+      `Choir practice, badminton, and an argument about the lift upgrade that lasted two hours. Best week I have had.`,
+      `Been showing the young ones how we used to do things before the machines. They are politer about it than I expected.`,
+      `The block has a repair workshop on Thursdays now. I cannot lift much but I can sort screws and I can make coffee.`
+    ],
+    mutual_aid: [
+      `Rota is up for this month — six of us covering the ${worstName} runs. If your parent needs a lift, put the name down.`,
+      `We are doing this because ${worstName} is at ${q} and somebody has to. Do not mistake it for us managing.`,
+      `Third month of the neighbours' rota. It works until one of us gets sick, and then it does not.`,
+      `Mrs Lim next door has been minding four children since the centre cut its hours. She is seventy-one. This is not a solution.`,
+      `We have a group chat for lifts, one for medicines and one for the forms. None of this existed five years ago.`
+    ],
+    endure: [`Same as last year. Nothing to report.`,
+             `Payment is $${pay}. Rent is rent. We manage.`],
+    obey: [`It is a long plan and I would rather they finished it than changed it again.`,
+           `People complain, but I have seen worse years than this one.`],
+    debate: [
+      `Payment went up to $${pay} and it buys ${buys} of what it bought in 2050. Both of those are true and only one gets said out loud.`,
+      `Genuine question for the ministry: at what number for ${worstName} does someone actually do something? It is ${q} now.`
+    ],
+    activism: [
+      `Writing to my MP about ${worstName} for the fourth time. Posting it here so there is a record of the date.`,
+      `We are not asking for more money. We are asking for the ${worstName} service to work. Those are different demands.`
+    ],
+    save: [
+      `Not investing anything new this year. Nothing personal — I do not know what the levy will be in two years and neither do they.`,
+      `Sitting on cash. Everyone I know is doing the same, which is probably the problem, and I am doing it anyway.`
+    ],
+    /* WORK-SHAPED SENTENCES ONLY GO TO PEOPLE WITH WORK.
+       An earlier version had a retired cleaner announcing her third
+       double shift, which is the kind of detail that costs a simulation
+       its credibility in front of a room that knows better. */
+    organise: works ? [
+      `Third double shift this week. We are not short of work, we are short of people. Meeting Thursday — come if you have had enough.`,
+      `Forty of us now. If you work in ${svc[0]} and you have been carrying this quietly, you are not the only one.`,
+      `We have asked twice through the proper channels. Third time we are asking together.`
+    ] : [
+      `Meeting at the void deck on Thursday about ${worstName}. Bring anyone who has been told to wait.`,
+      `They think because we are not at a workplace we cannot organise. There are more of us with time than without.`,
+      `Forty signatures from this block alone. We are not going away because ${worstName} is at ${q}.`
+    ],
+    strike: works ? [
+      `We are stopping. Not for more pay — for enough staff that ${worstName} is not at ${q}. It should never have got this far.`,
+      `Nobody wanted this. We told them in ${(s.meta.year || 2050) - 4}, we told them in ${(s.meta.year || 2050) - 2}, and here we are.`
+    ] : [
+      `Nobody is going to the appointments this month. If the system cannot see us, it can count us.`,
+      `We are withholding the one thing we still have, which is our cooperation. ${worstName} is at ${q}.`
+    ],
+    emigrate: [
+      `Got the offer overseas. Four years of applications here. I did everything they told me to do.`,
+      `Flight is in March. I will miss it and I am not staying to watch ${worstName} get worse.`
+    ],
+    withdraw: works ? [
+      `Turning up. Doing exactly what is on the job sheet and not one thing more. That is what $${pay} buys.`,
+      `Stopped volunteering for anything at work. Ask me why.`
+    ] : [
+      `Stopped going to the community meetings. Nothing I said at the last four made any difference.`,
+      `I have stopped filling in the forms. Somebody else can chase it.`
+    ],
+    breakrules: [
+      `Everyone I know is being paid cash now. You can call that a problem or you can ask what made it worth the risk.`,
+      `Not declaring it. The payment does not cover the month and I have stopped feeling bad about the arithmetic.`
+    ]
+  };
+  const arr = T[key] || T.endure;
+  /* Deterministic, but keyed on WHO is speaking first and the round
+     second. An earlier version led with pressure, which meant every
+     cohort under the same conditions said the identical sentence — three
+     people announcing the same repair workshop in the same week, which
+     reads as a bug rather than a society. */
+  const who = p.id.charCodeAt(1) * 31 + p.id.charCodeAt(2) * 7;
+  const i = (who + Math.floor((s.meta.round || 1) / 3)) % arr.length;
+  return arr[i];
+}
+
+/* ---------------------------------------------------------------------
+   6. THE FEED FOR A ROUND
+   --------------------------------------------------------------------- */
+function feedFor(traj, round, memory) {
+  const i = clamp(round - 1, 0, traj.length - 1);
+  if (i < 1) return { round: round, year: traj[0].meta.year, posts: [], trending: [], mood: null };
+
+  const prev = traj[i - 1], s = traj[i];
+  const d = C.macroDelta(prev, s);
+  const prevKeys = memory || {};
+  const posts = [];
+
+  C.ARCHETYPES.forEach(p => {
+    const dis = disposition(p);
+    const sl = slack(p, s, d);
+    const pr = pressure(p, s, d, dis);
+    const key = choose(p, pr, sl, dis, prevKeys[p.id]);
+    const b = BEHAVIOURS[key];
+
+    /* Not everyone posts every round. Silence is data: a quiet feed in a
+       collapsing country means people have given up rather than that
+       nothing is wrong, and the mood strip shows that even when the
+       posts do not. */
+    const loud = pr.total > 22 || key === 'flourish' || key === 'strike' ||
+                 key === 'emigrate' || (p.weight > 0.1 && pr.total > 14);
+    if (!loud) { prevKeys[p.id] = key; return; }
+
+    posts.push({
+      id: p.id, name: p.name, role: p.role, weight: p.weight,
+      behaviour: key, family: b.family, label: b.label, tone: b.tone,
+      slack: Math.round(sl * 100),
+      pressure: Math.round(pr.total),
+      concern: pr.worst,
+      text: say(p, key, pr, d, s),
+      /* Below a real threshold there is no dominant worry, and printing
+         the largest of four near-zero numbers invents a grievance that
+         nobody has. A flourishing cohort reports what it is doing
+         instead. */
+      note: pr.total < 12 ? (b.family === 'prosocial' ? 'has time to spare' : 'nothing pressing')
+                          : 'worried about ' + pr.worst,
+      // Flags the distinction the whole design turns on.
+      prosocial_kind: b.family === 'prosocial' ? (key === 'flourish' ? 'surplus' : 'deficit') : null
+    });
+    prevKeys[p.id] = key;
+  });
+
+  // Loudest first, but a flourishing post is never buried.
+  posts.sort((a, b) => (b.behaviour === 'flourish' ? 1 : 0) - (a.behaviour === 'flourish' ? 1 : 0) ||
+                       b.pressure - a.pressure);
+
+  const counts = {};
+  posts.forEach(x => { counts[x.behaviour] = (counts[x.behaviour] || 0) + x.weight; });
+  const trending = Object.keys(counts)
+    .sort((a, b) => counts[b] - counts[a]).slice(0, 3)
+    .map(k => ({ key: k, label: BEHAVIOURS[k].label, share: Math.round(counts[k] * 100) }));
+
+  const room = C.aggregate(C.reactDeterministic(prev, s));
+
+  return {
+    round: s.meta.round, year: s.meta.year,
+    posts: posts, trending: trending, memory: prevKeys,
+    mood: { unrest: room.civic_unrest, sentiment: room.mean_sentiment,
+            furious: room.share_furious,
+            flourishing: Math.round(posts.filter(x => x.behaviour === 'flourish')
+              .reduce((a, x) => a + x.weight, 0) * 100),
+            coping: Math.round(posts.filter(x => x.behaviour === 'mutual_aid')
+              .reduce((a, x) => a + x.weight, 0) * 100) }
+  };
+}
+
+/** Every round in order, carrying cohort memory forward. */
+function feedAll(traj) {
+  const out = [];
+  let mem = {};
+  for (let r = 2; r <= traj.length; r++) {
+    const f = feedFor(traj, r, mem);
+    mem = f.memory;
+    out.push(f);
+  }
+  return out;
+}
+
+return { feedFor, feedAll, BEHAVIOURS, disposition, slack, pressure, choose, say };
+});
+
+window.MeridianFeed = module.exports;
+})();
+</script>
+<script>
+(function(){
+'use strict';
+var E=window.MeridianEngine, C=window.MeridianCitizens, F=window.MeridianFeed;
+var BASE={"meta":{"state_label":"Baseline","society_name":"Republic of Meridian","round":1,"year":2050,"narrative":"Mixed economy. Automation is real but partial. Most people still work. UBI is a modest supplement, not a livelihood."},"population":{"total":5940000,"by_age":{"age_0_19":950000,"age_20_64":3325000,"age_65_plus":1665000},"by_exposure":{"high":1330000,"medium":1165000,"low":830000},"employed_total":2125000},"sectors":{"healthcare":{"automation":0.22,"headcount":200000,"capacity":1.02,"quality":78,"margin":0.09,"note":"Diagnostics automated, care delivery still human. Waiting times stable."},"care_services":{"automation":0.12,"headcount":210000,"capacity":0.94,"quality":71,"margin":-0.09,"note":"Chronically understaffed. Ageing demand climbing 4% a round."},"education_research":{"automation":0.2,"headcount":170000,"capacity":1,"quality":79,"margin":-0.04,"note":"Tutoring augmented, teaching human. Reskilling intake rising."},"transport_logistics":{"automation":0.45,"headcount":180000,"capacity":1.08,"quality":81,"margin":0.16,"note":"Autonomous fleet at 45%. Driver redeployment programme running."},"energy_utilities":{"automation":0.55,"headcount":55000,"capacity":1.15,"quality":77,"margin":0.14,"note":"The grid. Ninety per cent of demand is now compute, and it is keeping up."},"compute_telecom":{"automation":0.6,"headcount":80000,"capacity":1.15,"quality":77,"margin":0.21,"note":"Surplus capacity. Chip imports secure. Exportable."},"housing_construction":{"automation":0.3,"headcount":150000,"capacity":1.04,"quality":76,"margin":0.12,"note":"Grid management automated. Maintenance crews unchanged."},"food_agri":{"automation":0.35,"headcount":100000,"capacity":0.98,"quality":72,"margin":0.07,"note":"91% imported. Vertical farms cover 9% of calories."},"manufacturing":{"automation":0.5,"headcount":260000,"capacity":1.06,"quality":74,"margin":0.19,"note":"Precision engineering and pharma. Highly automated, still the largest single slice of output."},"finance":{"automation":0.55,"headcount":200000,"capacity":1.12,"quality":80,"margin":0.24,"note":"Back-office fully automated. Advisory roles holding."},"retail_commerce":{"automation":0.5,"headcount":320000,"capacity":1.06,"quality":74,"margin":0.11,"note":"Checkout and logistics automated. Largest displacement exposure."},"public_admin":{"automation":0.25,"headcount":100000,"capacity":1.03,"quality":82,"margin":-0.06,"note":"The apparatus itself. Slow to automate, and nobody has asked it to."},"public_safety":{"automation":0.28,"headcount":100000,"capacity":1.03,"quality":82,"margin":-0.02,"note":"Monitoring automated. Response teams human."}},"fiscal":{"gdp_bn":782,"corporate_profit_bn":164,"tax_revenue_bn":118,"reserves_bn":42,"allocation":{"ubi":0.45,"infrastructure":0.4,"reserves":0.15}},"indicators":{"ubi_monthly_sgd":680,"real_ubi_index":100,"employment_rate":0.64,"gini":0.37,"cohesion":72,"legitimacy":78,"consumption_index":100},"levers":{"corporate_tax_rate":0.19,"compute_levy":0.05,"allocation":{"ubi":0.45,"infrastructure":0.4,"reserves":0.15},"ubi_design":"flat","reskilling_spend_pct":0.08,"public_ownership_pct":0.05,"working_week_days":5,"care_job_guarantee":false},"trade":{"reputation":50,"active_contracts":[]},"shocks":[],"personas":[{"id":"H07","name":"Mdm Tan Ah Choo","age":68,"household":"Lives alone, 2-room flat","status":"Retired cleaner. UBI plus small savings. Managing.","wellbeing":64},{"id":"H14","name":"Rahim bin Yusof","age":34,"household":"Married, two children","status":"Logistics coordinator. Employed, watching automation approach his role.","wellbeing":71},{"id":"H22","name":"Nurul Aisyah","age":22,"household":"Lives with parents","status":"Recent ITE graduate. Six months searching for entry-level work.","wellbeing":52},{"id":"H31","name":"Sister Grace Lim","age":45,"household":"Single, rental flat","status":"Nurse. Overworked but secure. Sector is short-staffed.","wellbeing":67}],"news":["Parliament approves first universal payment at $680 a month.","Retail sector automation crosses 50% for the first time.","Care services report third consecutive quarter of staffing shortfall."],"score":{"total":58,"gates_failed":[]}};
+var LEVERS={"corporate_tax_rate":0.28,"compute_levy":0.16,"allocation":{"ubi":0.48,"infrastructure":0.36,"reserves":0.16},"ubi_design":"age_weighted","reskilling_spend_pct":0.12,"public_ownership_pct":0.35,"working_week_days":4,"care_job_guarantee":true,"automation_target":{"healthcare":0.55,"care_services":0.2,"education_research":0.31,"transport_logistics":0.89,"energy_utilities":0.79,"compute_telecom":0.86,"housing_construction":0.74,"food_agri":0.72,"manufacturing":0.91,"finance":0.93,"retail_commerce":0.91,"public_admin":0.47,"public_safety":0.52},"care_guarantee_wage":3200};
+
+/* WHOSE COUNTRY IS THIS?
+   The studio publishes its levers to localStorage on every change, and
+   this page shares its origin, so by default the feed watches the team's
+   ACTUAL society rather than a demo scenario. That is the difference
+   between a showcase and an instrument: a team changes a lever, reloads
+   the feed, and reads what their own citizens made of it.
+
+   Falls back to the built-in scenario when the studio has not been opened
+   in this browser, so the page is never blank. */
+var live=false, shocks={};
+try{
+  var stored=localStorage.getItem('mrd_levers');
+  if(stored){
+    var L2=JSON.parse(stored);
+    /* A SAVED LEVER SET CAN OUTLIVE THE SECTOR TABLE.
+       localStorage survives a redeploy, so a team that opened the studio
+       before the industries changed still has a lever set naming sectors
+       that no longer exist and missing ones that now do. Taking it at
+       face value gave a country governed half by the saved settlement and
+       half by defaults, with the header cheerfully claiming it was
+       watching your society.
+
+       So the shape is checked, not just the presence: every current
+       sector must be named. A stale set is discarded and the page falls
+       back to the demo scenario, which is visible in the header. */
+    var fresh = !!(L2 && L2.allocation && L2.automation_target) &&
+                E.ORDER.every(function(k){ return L2.automation_target[k] != null; });
+    if(fresh){ LEVERS=L2; live=true; }
+    else if(L2){ try{ localStorage.removeItem('mrd_levers'); }catch(e2){} }
+  }
+  var st=localStorage.getItem('mrd_shocks'); if(st) shocks=JSON.parse(st)||{};
+}catch(e){}
+
+var traj=E.runTrajectory(BASE, LEVERS, shocks, 12);
+var all=F.feedAll(traj);
+var round=2, govPosts={};
+
+/* AGENTS MODE.
+   The client-side `all` is the arithmetic baseline: it is computed here,
+   in the browser, with no server and no model, which is what makes this
+   page work on a projector with the wi-fi down.
+
+   Agents mode replaces a round WHOLESALE — posts, trending and mood —
+   with a round from a real closed-loop run on the server, decided by the
+   Concordia agents. That is a bigger substitution than `voice`, which
+   only ever swapped the words, so the two are deliberately separate
+   toggles and the header always says which country you are reading. */
+var agentsOn=false, agentRounds={}, agentBusy=false, agentNote='';
+function current(){
+  return (agentsOn && agentRounds[round]) ? agentRounds[round] : all[round-2];
+}
+
+var FAM={prosocial:'pro',antisocial:'anti',collective:'col',political:'pol',
+         economic:'eco',conforming:'conf'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function paint(){
+  var f=current();
+  var w=document.getElementById('whose');
+  if(w){
+    /* WHO DECIDED THIS, ALWAYS ON SCREEN.
+       A page that can show either arithmetic or agents and does not say
+       which is worse than a page that only shows one. */
+    var whoseCountry = live ? 'watching your society' : 'demo scenario';
+    var decided = agentsOn
+      ? (agentRounds[round] ? 'agents deciding' : 'asking the agents...')
+      : 'arithmetic deciding';
+    w.textContent = whoseCountry + ' · ' + decided + (agentNote ? ' · ' + agentNote : '');
+  }
+  document.getElementById('yr').textContent=f.year;
+  document.getElementById('mUnrest').textContent=f.mood.unrest;
+  var mu=document.getElementById('mUnrest');
+  if(mu){
+    /* In an agent run, unrest is mood PLUS what people actually did.
+       Showing both makes the difference legible instead of asserted. */
+    mu.title = (f.mood.sentiment_unrest!=null && f.mood.sentiment_unrest!==f.mood.unrest)
+      ? ('mood alone would be ' + f.mood.sentiment_unrest +
+         '; the rest is what people are doing about it')
+      : 'weighted mean sentiment, plus militancy';
+  }
+  document.getElementById('mFlour').textContent=f.mood.flourishing+'%';
+  document.getElementById('mCope').textContent=f.mood.coping+'%';
+  document.getElementById('mFur').textContent=f.mood.furious+'%';
+
+  document.getElementById('scrub').innerHTML=all.map(function(x){
+    var c=x.round===round?' on':(x.round<round?' past':'');
+    return '<button class="pip'+c+'" data-r="'+x.round+'">'+x.round+'</button>';}).join('');
+
+  var html='';
+  var gp=govPosts[round];
+  if(gp) html+='<div class="post pol"><div class="ph"><span class="pn">Government of Meridian</span>'+
+    '<span class="pr">verified</span><span class="tag pol">statement</span></div>'+
+    '<div class="pt">'+esc(gp)+'</div>'+
+    '<div class="pm"><i>no effect on any indicator</i></div></div>';
+
+  if(agentsOn&&!agentRounds[round]&&!agentBusy) fetchAgents(round);
+  if(voiceOn&&!voiced[round]&&!busy) fetchVoice(round);
+  if(!f.posts.length){
+    /* Silence is data, but silence with no caption is just an empty
+       page. What the country chose is known either way — it is in the
+       trending strip — so say it here too, because a reader looking at
+       a blank feed should not have to work out whether the run failed. */
+    var top=(f.trending&&f.trending[0])?f.trending[0]:null;
+    html+='<div class="quiet"><b>Nobody posted this round.</b> That is not the same as '+
+      'nothing being wrong — a quiet feed in a country under pressure means people have '+
+      'stopped expecting it to help. Check the dashboard before you relax.'+
+      (top?'<br><br>What they are doing instead: <b>'+esc(top.label)+'</b> ('+top.share+'% of the country).':'')+
+      '</div>';
+  }
+  var list=(voiceOn&&voiced[round])?voiced[round]:f.posts;
+  html+=list.map(function(p){
+    var fam=FAM[p.family]||'conf';
+    return '<div class="post '+fam+'">'+
+      '<div class="ph"><span class="pn">'+esc(p.name)+'</span>'+
+      '<span class="pr">'+esc(p.role)+'</span>'+
+      '<span class="tag '+fam+'">'+esc(p.label)+'</span></div>'+
+      '<div class="pt">'+esc(p.text)+'</div>'+
+      '<div class="pm">'+
+        '<i>pressure <b>'+p.pressure+'</b></i>'+
+        '<i>slack <b>'+p.slack+'</b></i>'+
+        '<i>'+esc(p.note||('worried about '+p.concern))+'</i>'+
+        '<i>speaks for <b>'+Math.round(p.weight*100)+'%</b></i>'+
+        (p.prosocial_kind?'<i class="kind '+p.prosocial_kind+'">'+p.prosocial_kind+'</i>':'')+
+        /* WHAT THEY ASKED FOR, WHEN THE WORLD SAID NO.
+           An agent deciding to emigrate at 74 on a chronic illness has
+           made a coherent choice it cannot act on. Hiding the refusal
+           would flatter the run; showing it is how a team finds out the
+           prompt needs work. */
+        (p.asked?'<i class="asked" title="'+esc(p.redirected||'')+'">wanted to '+esc(p.asked)+'</i>':'')+
+        (p.departed?'<i class="gone"><b>'+p.departed+'%</b> already left</i>':'')+
+        (p.voiced?'<i class="voiced">written by the model</i>':'')+
+      '</div></div>';
+  }).join('');
+  document.getElementById('posts').innerHTML=html;
+
+  document.getElementById('trend').innerHTML=f.trending.length?f.trending.map(function(t){
+    return '<div class="trow"><span>'+esc(t.label)+'</span><b>'+t.share+'%</b></div>'+
+      '<div class="bar"><i style="width:'+t.share+'%;background:var(--rust)"></i></div>';
+  }).join(''):'<div class="legend">Nothing is trending. Everyone is getting on with it.</div>';
+
+  document.querySelectorAll('[data-r]').forEach(function(b){
+    b.onclick=function(){ round=+b.dataset.r; paint(); document.querySelector('.stream').scrollTop=0; };
+  });
+}
+/* THE MODEL WRITES THE WORDS, AND ONLY THE WORDS.
+   Fetching a voiced round replaces post TEXT and nothing else — the
+   behaviours, intensities and mood on screen are the ones the arithmetic
+   already decided, and they do not move. If the model is down the
+   templated text stays and the page carries on. */
+var voiced={}, voiceOn=false, busy=false;
+function apply(f){ if(!f||!f.posts) return; voiced[f.round]=f.posts; paint(); }
+async function fetchVoice(r){
+  if(busy||voiced[r]) return;
+  busy=true; var b=document.getElementById('voice');
+  b.disabled=true; b.textContent='✎ writing…';
+  try{
+    var q=new URLSearchParams(location.search);
+    q.set('round',r); q.set('voice','1');
+    if(agentsOn) q.set('decider','concordia');
+    /* Voicing an agent round must voice THAT round, so the same levers
+       and decider go with the request; otherwise the words would come
+       from a different country than the decisions on screen. */
+    var res=await fetch('/api/feed?'+q.toString(), agentsOn?{
+      method:'POST', headers:{'content-type':'application/json'},
+      body:JSON.stringify({decider:'concordia',round:r,
+                           levers:live?LEVERS:null,shocks:shocks})
+    }:undefined);
+    var f=await res.json();
+    if(f.faults&&f.faults.length) console.warn('feed faults:',f.faults);
+    apply(f);
+  }catch(e){ console.warn('voice failed',e); }
+  busy=false; b.disabled=false; b.textContent='✎ voice';
+  b.className='hbtn'+(voiceOn?' on':'');
+}
+/* ASKING THE AGENTS.
+   POSTs the studio's live levers, so the twelve agents decide about the
+   TEAM'S country rather than a demo scenario. The first request runs the
+   whole twelve rounds server-side and is slow — 144 model calls on a
+   local 7B — so the button says so, and every later round is served from
+   the same cached run. Two rounds of one country, never two countries. */
+async function fetchAgents(r){
+  if(agentBusy||agentRounds[r]) return;
+  agentBusy=true;
+  var b=document.getElementById('agents');
+  b.disabled=true; b.textContent='⚟ asking…';
+  agentNote='this takes a minute the first time'; paint();
+  try{
+    var q=new URLSearchParams(location.search);
+    q.set('decider','concordia'); q.set('all','1');
+    var res=await fetch('/api/feed?'+q.toString(),{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({ decider:'concordia', all:true,
+                            levers: live?LEVERS:null, shocks: shocks })
+    });
+    var f=await res.json();
+    if(f.error) throw new Error(f.error);
+
+    /* HONEST FAILURE.
+       If the sidecar is not there the server says so and serves the
+       arithmetic run. Showing that under an "agents" label would be the
+       one thing this page must not do, so the toggle goes back off and
+       the reason goes on screen. */
+    if(f.decidedBy!=='concordia'){
+      agentsOn=false;
+      agentNote=(f.faults&&f.faults.length)?String(f.faults[0]):'agents unavailable';
+      console.warn('agents unavailable:',f.faults);
+    }else{
+      agentRounds=f.rounds||{};
+      agentNote='';
+    }
+  }catch(e){
+    agentsOn=false;
+    agentNote='agents unavailable: '+(e&&e.message?e.message:'request failed');
+    console.warn('agents failed',e);
+  }
+  agentBusy=false;
+  b.disabled=false; b.textContent='⚟ agents';
+  b.className='hbtn'+(agentsOn?' on':'');
+  paint();
+}
+
+document.getElementById('agents').onclick=function(){
+  agentsOn=!agentsOn; agentNote='';
+  this.className='hbtn'+(agentsOn?' on':'');
+  /* Voicing caches words against a round's posts. Those posts are about
+     to be different people doing different things, so the cache has to
+     go or the page would show one country's words over another's
+     decisions. */
+  voiced={};
+  if(agentsOn) fetchAgents(round); else paint();
+};
+
+document.getElementById('voice').onclick=function(){
+  voiceOn=!voiceOn; this.className='hbtn'+(voiceOn?' on':'');
+  if(voiceOn) fetchVoice(round); else paint();
+};
+document.getElementById('back').onclick=function(){ if(round>2){round--;paint();} };
+document.getElementById('fwd').onclick=function(){ if(round<12){round++;paint();} };
+document.getElementById('govsend').onclick=function(){
+  var t=document.getElementById('govtext').value.trim();
+  if(!t) return;
+  govPosts[round]=t; document.getElementById('govtext').value=''; paint();
+};
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='TEXTAREA') return;
+  if(e.key==='ArrowLeft'&&round>2){round--;paint();}
+  if(e.key==='ArrowRight'&&round<12){round++;paint();}
+});
+paint();
+})();
+</script>
+</body></html>

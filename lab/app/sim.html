@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Simulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/app.css">
+<style>
+  body{overflow:hidden}
+  .stage{position:relative;height:calc(100vh - 56px);display:grid;grid-template-columns:minmax(0,1fr) 360px}
+  @media(max-width:980px){.stage{grid-template-columns:1fr;height:auto}.side{max-height:none}body{overflow:auto}.mapwrap{height:70vh}}
+  .mapwrap{position:relative;overflow:hidden;background:#F1ECE3}
+
+  /* ---- the map ---- */
+  .mmap{position:absolute;inset:0;cursor:grab;touch-action:none}
+  .mmap:active{cursor:grabbing}
+  .mmap canvas{position:absolute;left:0;top:0}
+  .mmap-dots{pointer-events:none}
+  .mmap-labels{position:absolute;inset:0;pointer-events:none}
+  .mmap-chip{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;display:flex;align-items:center;gap:6px;
+    font:inherit;font-size:11.5px;font-weight:700;color:var(--ink);background:rgba(253,251,247,.94);border:1px solid rgba(93,107,125,.45);
+    border-radius:999px;padding:3px 5px 3px 8px;white-space:nowrap;cursor:pointer;box-shadow:0 1px 4px rgba(47,54,50,.12)}
+  .mmap-chip i{width:8px;height:8px;border-radius:50%;background:var(--good)}
+  .mmap-chip.mid i{background:var(--mid)} .mmap-chip.bad i{background:var(--bad)}
+  .mmap-chip b{font-family:"Space Mono",monospace;font-size:11px;background:var(--sunk);border-radius:999px;padding:1px 6px}
+  .mmap-chip.bad b{background:#F2DDD5;color:#8A3F2D}
+  .mmap-chip.on{border-color:var(--rust);box-shadow:0 0 0 2px rgba(168,98,76,.35)}
+  .mmap-leader{position:absolute;width:1px;background:rgba(93,107,125,.5);transform:translateX(-.5px)}
+
+  /* ---- overlays on the map ---- */
+  .ov{position:absolute;z-index:5;background:rgba(253,251,247,.95);border:1px solid var(--line2);border-radius:6px;
+    box-shadow:0 2px 12px rgba(47,54,50,.10)}
+  .source{left:16px;top:16px;padding:12px 14px;width:min(420px,calc(100% - 32px))}
+  .source h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:24px;margin:0 0 8px;line-height:1.05}
+  .source .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .source .note{font-size:12px;color:var(--muted2);margin-top:8px;line-height:1.45}
+  .source .note b{color:var(--ink)}
+  .source select{width:auto;padding:6px 8px;font-size:12.5px}
+  .source .runlen{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted2);white-space:nowrap}
+  .source .runlen input{width:66px;padding:6px 8px;font-size:12.5px}
+  .legend{left:16px;bottom:84px;padding:10px 12px;font-size:11.5px;max-width:260px}
+  .legend .lg{display:grid;grid-template-columns:14px 1fr;gap:4px 8px;align-items:center}
+  .legend .sw{width:14px;height:14px;border-radius:2px;border:1px solid rgba(47,54,50,.35)}
+  .legend .dot{width:9px;height:9px;border-radius:50%;justify-self:center}
+  .legend .sep{grid-column:1/-1;height:1px;background:var(--line);margin:4px 0}
+  .legend .toggles{display:flex;gap:10px;margin-top:8px}
+  .legend .toggles label{display:flex;gap:5px;align-items:center;font-weight:700;color:var(--muted2)}
+  .zoom{right:16px;top:16px;display:flex;flex-direction:column}
+  .zoom button{font:inherit;font-size:16px;width:34px;height:34px;border:0;background:transparent;cursor:pointer;color:var(--ink)}
+  .zoom button+button{border-top:1px solid var(--line)}
+  .timeline{left:16px;right:16px;bottom:16px;display:flex;align-items:center;gap:12px;padding:10px 14px}
+  .timeline .play{width:36px;height:36px;border-radius:50%;border:0;background:var(--ink);color:#F5F1E8;font-size:13px;cursor:pointer;flex:0 0 auto}
+  .ticks{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;overflow-x:auto}
+  .ticks.long{gap:1px}
+  .ticks.long .tick span{display:none}
+  .ticks.long .tick{padding:6px 0;min-width:2px}
+  .ticks .tick.yr i{height:11px;margin-top:-5px}
+  .ticks.long .tick.lbl{position:relative}
+  .ticks.long .tick.lbl span{display:block;position:absolute;top:100%;left:0;font-size:10px;white-space:nowrap}
+  .ticks.long{padding-bottom:14px}
+  .tick{font:inherit;border:0;background:transparent;cursor:pointer;padding:4px 0 2px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted)}
+  .tick i{display:block;height:6px;width:100%;border-radius:3px;background:var(--line)}
+  .tick span{font-family:"Space Mono",monospace;font-size:11px}
+  .tick.past i{background:var(--line2)}
+  .tick.on i{background:var(--rust)} .tick.on span{color:var(--ink);font-weight:700}
+  .tick.missing{opacity:.35;cursor:default}
+  .tick.event i{box-shadow:inset 0 -2px 0 var(--bad)}
+
+  /* ---- the side panel ---- */
+  .side{background:var(--panel);border-left:1px solid var(--line2);overflow-y:auto;max-height:calc(100vh - 56px)}
+  .side section{padding:16px 18px;border-bottom:1px solid var(--line)}
+  .side h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:30px;margin:0;line-height:1}
+  .side h3{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+  .yearhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .figs{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:14px}
+  .fig .v{font-family:"Space Mono",monospace;font-size:19px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+  .fig .k{font-size:11.5px;color:var(--muted2);margin-top:2px}
+  .fig .d{font-size:11px;font-family:"Space Mono",monospace;margin-left:5px}
+  .up{color:var(--good)} .down{color:var(--bad)}
+  .ind{display:grid;grid-template-columns:1fr 70px 30px;gap:6px 8px;align-items:center;font-size:12.5px}
+  .ind button{font:inherit;text-align:left;border:0;background:transparent;padding:0;cursor:pointer;color:var(--ink)}
+  .ind button:hover{color:var(--rust)}
+  .bar{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
+  .bar i{display:block;height:100%}
+  .ind .q{font-family:"Space Mono",monospace;font-size:11.5px;text-align:right}
+  .sel .facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  .ev{border-left:3px solid var(--bad);padding:2px 0 2px 10px;margin-bottom:10px;font-size:12.5px}
+  .ev b{display:block}
+  .acts{display:flex;flex-wrap:wrap;gap:6px}
+  .voice{font-size:12.5px;border-left:3px solid var(--line2);padding:2px 0 2px 10px;margin-bottom:10px}
+  .voice .who{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .news{margin:0;padding-left:16px;font-size:12.5px}
+  .news li{margin-bottom:5px}
+  .runstatus{font-size:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<header id="nav"></header>
+
+<div class="stage">
+  <div class="mapwrap" id="mapwrap">
+    <div id="map"></div>
+
+    <div class="ov source" id="source"></div>
+
+    <div class="ov zoom" aria-label="Map zoom">
+      <button id="zin" aria-label="Zoom in">+</button>
+      <button id="zout" aria-label="Zoom out">−</button>
+      <button id="zreset" aria-label="Reset view" style="font-size:12px">⟲</button>
+    </div>
+
+    <div class="ov legend" id="legend"></div>
+
+    <div class="ov timeline">
+      <button class="play" id="play" aria-label="Play through the years">▶</button>
+      <div class="ticks" id="ticks"></div>
+    </div>
+  </div>
+
+  <aside class="side" id="side" aria-label="What is happening"></aside>
+</div>
+
+<script src="/js/meridian.js"></script>
+<script src="/app/common.js"></script>
+<script src="/app/citymap.js"></script>
+<script>
+(function(){
+'use strict';
+var M = window.Meridian, E = M.E, Store = M.Store, esc = M.esc, n0 = M.n0, pct = M.pct;
+
+var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var S = {
+  source: M.lsGet('simSource', 'trial'),        // trial | run
+  runId: null, runs: [], view: null,             // agent run: rounds of views
+  traj: null, year: 0, selected: null, playing: null,
+  shock: M.lsGet('simShock', { event: '', round: 6 }),
+  runForm: M.lsGet('agentForm', { profile: 'local', rounds: 12 }),
+  trialRounds: M.lsGet('trialRounds', 12)
+};
+
+var map = MeridianMap.create(document.getElementById('map'), { onSelect: function (k) { S.selected = k; paintSide(); } });
+document.getElementById('zin').onclick = map.zoomIn;
+document.getElementById('zout').onclick = map.zoomOut;
+document.getElementById('zreset').onclick = map.reset;
+
+/* ---------------------------------------------------------------------
+   THE ROUNDS ON SCREEN
+   A trial is twelve engine states. An agent run is twelve views, each
+   carrying its people. Both are shown through the same shape.
+   --------------------------------------------------------------------- */
+function rounds() {
+  if (S.source === 'run' && S.view) {
+    /* The dots are sent only on the ticks where people decided; in between
+       the map keeps the last ones. */
+    var people = null, byMonth = S.view.some(function (v) { return v.month; });
+    return S.view.map(function (v, i) {
+      if (v.people) people = v.people;
+      return { year: v.year, month: v.month || (byMonth && i === 0 ? 1 : null), state: { sectors: v.sectors, population: v.population, indicators: v.indicators,
+               fiscal: { reserves_bn: v.reserves_bn, gdp_bn: v.gdp_bn }, shocks: v.shocks, news: v.news },
+               people: people, events: v.events, society: v.society, government: v.government || null };
+    });
+  }
+  var gov = S.traj && S.traj.government;
+  return (S.traj || []).map(function (s, i) {
+    return { year: s.meta.year, month: s.meta.month || (S.traj.ticks && i === 0 ? 1 : null), state: s, people: null, events: [], society: null, government: gov ? gov[i] : null };
+  });
+}
+
+function recompute() {
+  /* The trial runs by the month. A stress test strikes in its year and lasts twelve months. */
+  var shockAt = S.shock.event ? { event: S.shock.event, year: 2048 + S.shock.round * 2, months: 12 } : null;
+  S.traj = M.trialRun(Store.saved, { dt: 1 / 12, years: S.trialRounds * 2, shockAt: shockAt });
+}
+
+function show(i) {
+  var rs = rounds();
+  if (!rs.length) { paintSide(); paintTicks(); return; }
+  S.year = Math.max(0, Math.min(rs.length - 1, i));
+  var r = rs[S.year];
+  map.setState(r.state, r.people);
+  paintTicks(); paintSide();
+}
+
+/* ---------------------------------------------------------------------
+   SOURCE PANEL
+   --------------------------------------------------------------------- */
+function paintSource() {
+  var el = document.getElementById('source');
+  var mine = S.runs.filter(function (r) { return Store.team && M.slug(r.team) === M.slug(Store.team); });
+  var cur = mine.find(function (r) { return r.id === S.runId; });
+  var version = Store.saved.version || 0;
+  var shocksList = Object.keys(E.SHOCKS).filter(function (k) { return k !== 'civil_unrest' && k !== 'fiscal_crisis' && k !== 'service_failure_cascade'; });
+  el.innerHTML =
+    '<h1>' + (S.source === 'run' ? 'Your society, deciding' : 'Trial of your saved settings') + '</h1>' +
+    '<div class="row">' +
+      '<div class="seg" role="group" aria-label="What to show">' +
+        '<button data-src="trial" aria-pressed="' + (S.source === 'trial') + '">Trial</button>' +
+        '<button data-src="run" aria-pressed="' + (S.source === 'run') + '">Agent run</button></div>' +
+      (S.source === 'run'
+        ? (mine.length ? '<select id="runPick" aria-label="Which run">' + mine.map(function (r) {
+            return '<option value="' + esc(r.id) + '"' + (r.id === S.runId ? ' selected' : '') + '>' +
+              new Date(r.created).toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' }) + ' · ' + esc(r.status) + '</option>';
+          }).join('') + '</select>' : '')
+        : '<select id="shockEv" aria-label="Stress test"><option value="">No stress test</option>' + shocksList.map(function (k) {
+            return '<option value="' + k + '"' + (S.shock.event === k ? ' selected' : '') + '>' + esc(E.SHOCKS[k].label) + '</option>'; }).join('') + '</select>' +
+          (S.shock.event ? '<select id="shockRd" aria-label="In which year">' + Array.from({ length: Math.max(1, S.trialRounds - 1) }, function (_, i) { return i + 2; }).map(function (r) {
+            return '<option value="' + r + '"' + (S.shock.round === r ? ' selected' : '') + '>in ' + (2048 + r * 2) + '</option>'; }).join('') + '</select>' : '') +
+          '<label class="runlen">preview <input type="number" id="trialYears" min="4" max="240" step="2" value="' + S.trialRounds * 2 + '"> years</label>') +
+    '</div>' +
+    (S.source === 'trial'
+      ? '<div class="note">The physics only, from what you last <b>saved</b> (version ' + version + '). Nobody in the country decides anything, so this is a trial, not a result. ' +
+          (Store.saved.government && Store.saved.government.kind === 'llm'
+            ? 'Your government is a <b>model briefing</b>: it only governs in agent runs, so here your saved levers hold every year.'
+            : (Store.saved.government && (Store.saved.government.rules || []).length
+                ? 'Your saved <b>rules</b> adjust the levers each year, exactly as they will in an agent run.'
+                : 'You have no government rules, so your saved levers hold every year.')) + '</div>'
+      : '<div class="note">' + (cur
+          ? runLine(cur, version)
+          : 'No agent run yet. Every resident and firm will decide for themselves, using your <b>saved</b> settings (version ' + version + ').') + '</div>') +
+    (S.source === 'run' ? '<div class="row" style="margin-top:10px">' +
+      '<select id="runSize" aria-label="Run size"><option value="local"' + (S.runForm.profile === 'local' ? ' selected' : '') + '>Laptop size</option>' +
+        '<option value="classroom"' + (S.runForm.profile === 'classroom' ? ' selected' : '') + '>Classroom size</option>' +
+        '<option value="dgx"' + (S.runForm.profile === 'dgx' ? ' selected' : '') + '>DGX size</option></select>' +
+      '<label class="runlen">run for <input type="number" id="runYears" min="4" max="240" step="2" value="' + (S.runForm.rounds || 12) * 2 + '"> years</label>' +
+      '<select id="runPace" aria-label="Pace"><option value="fast"' + (S.runForm.pace !== 'live' ? ' selected' : '') + '>As fast as it can</option>' +
+        '<option value="live"' + (S.runForm.pace === 'live' ? ' selected' : '') + '>Live: 30 minutes a year</option></select>' +
+      '<label class="runlen" title="Keeps every resident\'s full reasoning so the run can be replayed exactly. About a hundred times the disk. Off: a panel of 20 residents is followed in full."><input type="checkbox" id="runFull"' + (S.runForm.fullLog ? ' checked' : '') + '> keep every decision</label>' +
+      '<button class="btn' + (cur && (cur.status === 'running' || cur.status === 'queued') ? '' : ' pri') + '" id="runGo"' + (Store.team ? '' : ' disabled') + '>' +
+        (cur && (cur.status === 'running' || cur.status === 'queued') ? 'Start a new run' : 'Run the society') + '</button>' +
+      (cur && (cur.status === 'running' || cur.status === 'queued') && cur.settings && cur.settings.systemVersion !== version
+        ? '<button class="btn pri" id="runAmend">' + (cur.paused ? 'Apply changes and resume' : 'Apply changes to this run') + '</button>' : '') +
+      (cur && cur.status === 'running' ? '<button class="btn" id="runPause">' + (cur.paused ? 'Resume' : 'Pause') + '</button>' : '') +
+      (cur && (cur.status === 'running' || cur.status === 'queued') ? '<button class="btn" id="runStop" title="Stop now and keep the evidence for the years that ran">Stop and keep</button>' : '') +
+      (cur && cur.status === 'finished' ? '<a class="btn ghost" href="/runs/' + encodeURIComponent(cur.id) + '" target="_blank" rel="noopener">Evidence ↗</a>' : '') +
+      '</div>' : '') +
+    (!Store.team ? '<div class="note"><a href="/setup">Choose your team on Setup</a> to run the society.</div>' : '');
+
+  el.querySelectorAll('[data-src]').forEach(function (b) {
+    b.onclick = function () { S.source = b.dataset.src; M.lsSet('simSource', S.source); load(); };
+  });
+  var pick = document.getElementById('runPick');
+  if (pick) pick.onchange = function () { S.runId = pick.value; loadView(); };
+  var ev = document.getElementById('shockEv');
+  if (ev) ev.onchange = function () { S.shock.event = ev.value; M.lsSet('simShock', S.shock); recompute(); paintSource(); show(S.year); };
+  var rd = document.getElementById('shockRd');
+  if (rd) rd.onchange = function () { S.shock.round = +rd.value; M.lsSet('simShock', S.shock); recompute(); show(S.year); };
+  var size = document.getElementById('runSize');
+  if (size) size.onchange = function () { S.runForm.profile = size.value; M.lsSet('agentForm', S.runForm); };
+  var yrs = document.getElementById('runYears');
+  if (yrs) yrs.onchange = function () {
+    S.runForm.rounds = Math.max(2, Math.min(120, Math.round((Number(yrs.value) || 24) / 2)));
+    yrs.value = S.runForm.rounds * 2;
+    M.lsSet('agentForm', S.runForm); paintTicks();
+  };
+  var pace = document.getElementById('runPace');
+  if (pace) pace.onchange = function () { S.runForm.pace = pace.value; M.lsSet('agentForm', S.runForm); };
+  var full = document.getElementById('runFull');
+  if (full) full.onchange = function () { S.runForm.fullLog = full.checked; M.lsSet('agentForm', S.runForm); };
+  var tYrs = document.getElementById('trialYears');
+  if (tYrs) tYrs.onchange = function () {
+    S.trialRounds = Math.max(2, Math.min(120, Math.round((Number(tYrs.value) || 24) / 2)));
+    tYrs.value = S.trialRounds * 2;
+    M.lsSet('trialRounds', S.trialRounds); recompute(); show(Math.min(S.year, S.trialRounds - 1)); paintSource();
+  };
+  var go = document.getElementById('runGo');
+  if (go) go.onclick = startRun;
+  var amend = document.getElementById('runAmend');
+  if (amend) amend.onclick = function () { amend.disabled = true; amend.textContent = 'Applying…'; amendRun(!!(cur && cur.paused)); };
+  var pause = document.getElementById('runPause');
+  if (pause) pause.onclick = function () {
+    fetch('/api/runs/' + encodeURIComponent(S.runId) + '/' + (cur && cur.paused ? 'resume' : 'pause'), { method: 'POST' }).then(refreshRuns);
+  };
+  var stop = document.getElementById('runStop');
+  if (stop) {
+    if (cur && cur.stopping) { stop.disabled = true; stop.textContent = 'Stopping…'; }
+    stop.onclick = function () {
+      stop.disabled = true; stop.textContent = 'Stopping…';
+      fetch('/api/runs/' + encodeURIComponent(S.runId) + '/stop', { method: 'POST' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return refreshRuns(); })
+        .catch(function (e) { stop.disabled = false; stop.textContent = 'Stop and keep'; alert('The stop did not reach the server: ' + e.message); });
+    };
+  }
+}
+
+function runLine(r, version) {
+  var stale = r.settings && r.settings.systemVersion != null && r.settings.systemVersion !== version;
+  var st = r.stopping ? '<b>Stopping.</b> Finishing the one model call in flight, then writing the report for the months that ran.'
+    : r.status === 'running' && r.paused ? '<b>Paused</b> in ' + (r.year || 2050) + '. Nothing is skipped; it carries on from here when resumed.'
+    : r.status === 'running' && r.waiting ? '<b>Waiting on the model</b> in ' + (r.year || 2050) + ': ' + esc(r.waiting.reason) +
+        (r.waiting.attempts ? ', asked ' + r.waiting.attempts + ' time' + (r.waiting.attempts === 1 ? '' : 's') : '') +
+        '. The run never swaps a decision for a rule, so it waits.'
+    : r.status === 'running' ? '<b>Running</b>, now in ' + (r.month ? MONTHS[r.month - 1] + ' ' : '') + (r.year || 2050) +
+        (r.settings && r.settings.pace === 'live' ? ', at ' + Math.round(r.settings.tickMs * 12 / 60000) + ' minutes a year' : '')
+    : r.status === 'queued' ? '<b>Waiting</b> for the model server'
+    : r.status === 'failed' ? '<b style="color:var(--bad)">Failed</b>: ' + esc(r.error || '')
+    : r.status === 'finished' ? '<b>Finished</b>' + (r.headline ? ' · ' + r.headline.decided_by_agents_pct + '% decided by agents' + (r.headline.degraded ? ' · <b style="color:var(--bad)">degraded</b>' : '') : '')
+    : esc(r.status);
+  var live = r.status === 'running' || r.status === 'queued';
+  var changed = r.amendments ? '<br>Changed ' + r.amendments + ' time' + (r.amendments === 1 ? '' : 's') + ' while running.' : '';
+  if (r.amendment_waiting) changed += '<br><b>Your changes are in.</b> They take effect from the next month.';
+  return st + changed + (stale
+    ? (live ? '<br><b>You have saved changes (version ' + version + ').</b> This run is on version ' + r.settings.systemVersion +
+              '. Apply them and the run carries on from the month it is in, under the new settings.'
+            : '<br>This run used saved version ' + r.settings.systemVersion + '; you have saved changes since.')
+    : (live && r.paused ? '<br>To change course: edit and save on <a href="/setup">Setup</a>, then come back here to apply it.' : ''));
+}
+
+function startRun() {
+  var btn = document.getElementById('runGo'); if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+  /* Always the latest saved version, even if it was saved in another tab
+     after this page opened. */
+  Store.refresh().then(function () { sendRun(Store.saved); });
+}
+
+/* A saved system, as the server takes it: to start a run, or to amend one. */
+function systemPayload(sys) {
+  return {
+    team: Store.team, levers: sys.levers, systemVersion: sys.version || 0,
+    constitution: { name: sys.constitution.name, commitments: sys.constitution.commitments, rules: sys.constitution.rules,
+                    policies: sys.constitution.policies, rubric: sys.case.rubric, case: sys.case.text },
+    government: sys.government, institutions: sys.institutions || [], distribution: sys.distribution || []
+  };
+}
+
+/* AMEND THE RUN THAT IS GOING. The team's saved settings take effect from
+   the run's next month; nothing that already happened changes. */
+function amendRun(andResume) {
+  Store.refresh().then(function () {
+    var body = systemPayload(Store.saved);
+    body.resume = !!andResume;
+    return fetch('/api/runs/' + encodeURIComponent(S.runId) + '/amend', { method: 'POST', headers: { 'content-type': 'application/json' },
+                                                                          body: JSON.stringify(body) });
+  }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+    .then(function (x) { if (!x.ok) alert(x.j.error || 'The change could not be applied.'); refreshRuns(); });
+}
+
+function sendRun(sys) {
+  fetch('/api/runs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(Object.assign(systemPayload(sys), {
+    profile: S.runForm.profile, rounds: S.runForm.rounds || 12,
+    years: (S.runForm.rounds || 12) * 2, pace: S.runForm.pace || 'fast',
+    fullLog: !!S.runForm.fullLog
+  })) }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+    .then(function (x) {
+      if (!x.ok) { alert(x.j.error || 'The run could not start.'); paintSource(); return; }
+      S.runId = x.j.id; S.view = null;
+      refreshRuns().then(loadView);
+    });
+}
+
+function refreshRuns() {
+  return fetch('/api/runs', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+    S.runs = j.runs || [];
+    var mine = S.runs.filter(function (r) { return Store.team && M.slug(r.team) === M.slug(Store.team); });
+    if (!S.runId && mine.length) S.runId = mine[0].id;
+    paintSource();
+    return S.runs;
+  }).catch(function () { return []; });
+}
+
+var viewTimer = null;
+function loadView() {
+  clearTimeout(viewTimer);
+  if (!S.runId) { S.view = null; show(0); paintSource(); return; }
+  fetch('/api/runs/' + encodeURIComponent(S.runId) + '/view', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      var hadRounds = S.view ? S.view.length : 0;
+      S.view = j ? j.rounds : null;
+      var atEnd = S.year >= hadRounds - 1;
+      show(atEnd && S.view ? S.view.length - 1 : S.year);
+      var r = S.runs.find(function (x) { return x.id === S.runId; });
+      if (!r || r.status === 'running' || r.status === 'queued' || !j) {
+        viewTimer = setTimeout(function () { refreshRuns().then(loadView); }, 3500);
+      }
+    });
+}
+
+/* ---------------------------------------------------------------------
+   TIMELINE
+   --------------------------------------------------------------------- */
+function paintTicks() {
+  var rs = rounds();
+  var host = document.getElementById('ticks');
+  /* However many years this run has: the planned length while it is still
+     arriving, what arrived once it has stopped. */
+  var cur = S.runs.find(function (x) { return x.id === S.runId; });
+  /* Ticks (a month each) or the older two-year rounds, whichever this is. */
+  var inTicks = S.source === 'run' ? !!(cur && cur.settings && cur.settings.tick) || rs.some(function (x) { return x.month; }) : true;
+  var planned = S.source === 'run' && cur && cur.settings
+    ? (cur.settings.tick ? (cur.settings.years || 24) * 12 + 1 : (cur.settings.rounds || 12))
+    : (S.trialRounds || 12) * 24 + 1;
+  var live = cur && (cur.status === 'running' || cur.status === 'queued');
+  var n = Math.max(rs.length, S.source === 'run' && !live ? rs.length : planned, 2);
+  var html = '';
+  host.className = 'ticks' + (n > 20 ? ' long' : '');
+  var labelEvery = inTicks ? Math.max(1, Math.ceil(n / 12 / 12)) : 1;      // about a dozen year labels, however long the run
+  for (var i = 0; i < n; i++) {
+    var r = rs[i];
+    var year = inTicks ? 2050 + Math.floor(i / 12) : 2050 + i * 2;
+    var name = inTicks ? MONTHS[i % 12] + ' ' + year : String(year);
+    var cls = !r ? 'missing' : (i === S.year ? 'on' : (i < S.year ? 'past' : ''));
+    if (r && ((r.events && r.events.length) || (r.state.shocks && r.state.shocks.length))) cls += ' event';
+    if (inTicks && i % 12 === 0) { cls += ' yr'; if ((i / 12) % labelEvery === 0) cls += ' lbl'; }
+    html += '<button class="tick ' + cls + '" data-i="' + i + '"' + (r ? '' : ' disabled') + ' title="' + name + '" aria-label="' + name + '"><i></i><span>' + year + '</span></button>';
+  }
+  host.innerHTML = html;
+  host.querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { stopPlay(); show(+b.dataset.i); }; });
+}
+document.getElementById('play').onclick = function () { S.playing ? stopPlay() : startPlay(); };
+function startPlay() {
+  var rs = rounds(); if (!rs.length) return;
+  if (S.year >= rs.length - 1) show(0);
+  document.getElementById('play').textContent = '❚❚';
+  S.playing = setInterval(function () {
+    var n = rounds().length;
+    if (S.year >= n - 1) { stopPlay(); return; }
+    show(S.year + 1);
+  }, rounds().some(function (x) { return x.month; }) ? 160 : 1400);     // a month is quick; a two-year round is not
+}
+function stopPlay() { clearInterval(S.playing); S.playing = null; document.getElementById('play').textContent = '▶'; }
+
+/* ---------------------------------------------------------------------
+   LEGEND
+   --------------------------------------------------------------------- */
+function paintLegend() {
+  var R = MeridianMap.ROLE, P = MeridianMap.PALETTE;
+  var roles = S.source === 'run' ? Object.keys(R) : ['working', 'out', 'other'];
+  var el = document.getElementById('legend');
+  el.innerHTML = '<div class="lbl" style="margin-bottom:6px">Reading the map</div><div class="lg">' +
+    '<span class="sw" style="background:' + P.south + '"></span><span>Industry working as it should</span>' +
+    '<span class="sw" style="background:' + P.amber.south + '"></span><span>Strained</span>' +
+    '<span class="sw" style="background:' + P.rust.south + '"></span><span>Failing</span>' +
+    '<span class="sw" style="background:linear-gradient(to bottom,' + P.slate + ' 0 45%,' + P.south + ' 45% 100%)"></span><span>Automated: a dark roof on any of them</span>' +
+    '<span class="sw" style="background:' + P.lotFill + ';border:1.5px dashed ' + P.lot + '"></span><span>Empty lot: short of capacity</span>' +
+    '<span class="sep"></span>' +
+    roles.map(function (k) {
+      return '<span class="dot" style="' + (R[k].ring ? 'border:1.5px solid ' + R[k].color : 'background:' + R[k].color) + '"></span><span>' + R[k].label + '</span>';
+    }).join('') +
+    '</div><div class="hint" style="margin-top:6px">Each dot is about 5,000 people.</div>' +
+    '<div class="toggles"><label><input type="checkbox" id="tLabels" checked> Labels</label><label><input type="checkbox" id="tPeople" checked> People</label></div>';
+  document.getElementById('tLabels').onchange = function (e) { map.setLayers({ labels: e.target.checked }); };
+  document.getElementById('tPeople').onchange = function (e) { map.setLayers({ people: e.target.checked }); };
+}
+
+/* ---------------------------------------------------------------------
+   SIDE PANEL
+   --------------------------------------------------------------------- */
+function paintSide() {
+  var side = document.getElementById('side');
+  var rs = rounds();
+  if (!rs.length) {
+    side.innerHTML = '<section><h2>' + (S.source === 'run' ? 'No run to show' : 'Nothing to show') + '</h2>' +
+      '<p class="hint">' + (S.source === 'run' ? 'Start an agent run from the panel on the map. Rounds appear here as the society decides.' : 'Save your settings on Setup to see them here.') + '</p></section>';
+    return;
+  }
+  var r = rs[S.year], prev = rs[Math.max(0, S.year - 1)], s = r.state, p = prev.state, i = s.indicators;
+  var worst = function (st) { return Math.min.apply(null, E.ESSENTIAL.map(function (k) { return st.sectors[k].quality; })); };
+  var delta = function (a, b, fmt, goodUp) {
+    if (S.year === 0 || a === b) return '';
+    var up = a > b, good = goodUp ? up : !up;
+    return '<span class="d ' + (good ? 'up' : 'down') + '">' + (up ? '▲' : '▼') + (fmt ? fmt(Math.abs(a - b)) : Math.abs(a - b)) + '</span>';
+  };
+  var html = '<section><div class="yearhead"><h2>' + (r.month ? MONTHS[r.month - 1] + ' ' : '') + r.year + '</h2><span class="pill">' +
+    (S.source === 'run' ? 'agent run' : 'trial') + (r.month ? ' · month ' + S.year : ' · round ' + (S.year + 1)) + '</span></div>' +
+    '<div class="figs">' +
+      fig('$' + n0(i.ubi_monthly_sgd), 'monthly payment', delta(i.ubi_monthly_sgd, p.indicators.ubi_monthly_sgd, function (v) { return '$' + n0(v); }, true)) +
+      fig(i.effective_ubi_index, 'what it buys (2050 = 95)', delta(i.effective_ubi_index, p.indicators.effective_ubi_index, null, true)) +
+      fig(pct(i.employment_rate), 'of working age employed', delta(Math.round(i.employment_rate * 100), Math.round(p.indicators.employment_rate * 100), function (v) { return v + 'pt'; }, true)) +
+      fig(worst(s), 'weakest essential service', delta(worst(s), worst(p), null, true)) +
+      fig(n0(s.population.total / 1000) + 'k', 'residents', delta(Math.round(s.population.total / 1000), Math.round(p.population.total / 1000), function (v) { return v + 'k'; }, true)) +
+      fig('$' + n0(s.fiscal.reserves_bn) + 'bn', 'reserves', delta(Math.round(s.fiscal.reserves_bn), Math.round(p.fiscal.reserves_bn), function (v) { return '$' + v + 'bn'; }, true)) +
+      (r.society ? fig(r.society.trust == null ? '–' : r.society.trust, 'trust in government, reported') : fig(i.cohesion, 'cohesion')) +
+      fig(i.legitimacy, 'legitimacy', delta(i.legitimacy, p.indicators.legitimacy, null, true)) +
+    '</div></section>';
+
+  if (r.government && S.year > 0) {
+    var g = r.government, who = S.source === 'run' ? (g.kind === 'llm' ? 'your model government' : 'your rules') : 'your rules';
+    html += '<section><h3>Government ' + (r.month ? 'this month' : 'this year') + '</h3>' +
+      (g.fallback ? '<p class="hint" style="margin:0 0 6px;color:var(--bad)"><b>Nobody governed:</b> the levers held from last year.</p>' : '') +
+      (g.rationale ? '<div class="ev"><b>Why, according to ' + who + '</b>' + esc(g.rationale) + '</div>' : '') +
+      ((g.fired || []).length ? '<p class="hint" style="margin:6px 0 0">Rules that fired: ' + g.fired.map(function (f) { return esc(String(typeof f === 'object' ? (f.when || JSON.stringify(f)) : f)); }).join(' · ') + '</p>' : '') +
+      ((g.cites || []).length ? '<p class="hint" style="margin:6px 0 0">Cited: ' + g.cites.map(esc).join(' · ') + '</p>' : '') +
+      '<div class="acts" style="margin-top:6px">' + ((g.changed || []).length
+        ? g.changed.map(function (c) { return '<span class="pill">' + esc(c) + '</span>'; }).join('')
+        : '<span class="hint">No lever changed.</span>') + '</div></section>';
+  }
+
+  var evs = (r.events || []).concat((s.shocks || []).filter(function (k) { return E.SHOCKS[k]; }).map(function (k) { return { label: E.SHOCKS[k].label, perceived: '' }; }));
+  if (evs.length) {
+    html += '<section><h3>What happened</h3>' + evs.map(function (e) {
+      return '<div class="ev"><b>' + esc(e.label) + (e.severity ? ' · severity ' + e.severity : '') + '</b>' + esc(e.perceived || '') + '</div>'; }).join('') + '</section>';
+  }
+
+  if (S.selected && s.sectors[S.selected]) {
+    var x = s.sectors[S.selected], px = p.sectors[S.selected];
+    var mission = E.MISSIONS && E.MISSIONS[S.selected];
+    html += '<section class="sel"><h3>Selected industry</h3><div class="yearhead"><div style="font-weight:800;font-size:17px">' + esc(E.SECTORS[S.selected].name) + '</div>' +
+      '<span class="pill ' + band(x.quality) + '">' + x.quality + ' / 100</span></div>' +
+      (mission ? '<p class="hint" style="margin:6px 0 0">' + esc(mission.mission) + '</p>' : '') +
+      '<div class="facts">' +
+        fig(pct(x.automation), 'automated', delta(Math.round(x.automation * 100), Math.round(px.automation * 100), function (v) { return v + 'pt'; }, false)) +
+        fig(Math.round(x.capacity * 100) + '%', 'capacity of demand', delta(Math.round(x.capacity * 100), Math.round(px.capacity * 100), function (v) { return v + 'pt'; }, true)) +
+        fig(n0(x.headcount / 1000) + 'k', 'people employed', delta(Math.round(x.headcount / 1000), Math.round(px.headcount / 1000), function (v) { return v + 'k'; }, true)) +
+        fig((x.margin > 0 ? '+' : '') + Math.round(x.margin * 100) + '%', 'margin') +
+      '</div><button class="btn sm ghost" id="clearSel">Show every industry</button></section>';
+  } else {
+    var keys = E.ORDER.slice().sort(function (a, b) { return s.sectors[a].quality - s.sectors[b].quality; });
+    html += '<section><h3>Industries, weakest first</h3><div class="ind">' + keys.map(function (k) {
+      var q = s.sectors[k].quality;
+      return '<button data-k="' + k + '">' + esc(E.SECTORS[k].name) + '</button>' +
+        '<span class="bar"><i style="width:' + q + '%;background:var(--' + band(q) + ')"></i></span><span class="q">' + q + '</span>';
+    }).join('') + '</div><p class="hint" style="margin:10px 0 0">Scored against each industry\'s fixed mission. Click one, or its label on the map.</p></section>';
+  }
+
+  if (r.society) {
+    html += '<section><h3>What people did</h3><div class="acts">' + (r.society.actions || []).slice(0, 8).map(function (a) {
+      return '<span class="pill">' + esc(a.kind.replace(/_/g, ' ')) + ' ' + a.share + '%</span>'; }).join('') + '</div>' +
+      '<p class="hint" style="margin:8px 0 0">' + n0(r.society.departed || 0) + ' left the country this round · ' + (r.society.organisations || 0) + ' organisations</p></section>';
+  }
+  if (s.news && s.news.length) {
+    html += '<section><h3>In the news</h3><ul class="news">' + s.news.slice(0, 4).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></section>';
+  }
+  side.innerHTML = html;
+  side.querySelectorAll('[data-k]').forEach(function (b) { b.onclick = function () { map.select(b.dataset.k); }; });
+  var cs = document.getElementById('clearSel'); if (cs) cs.onclick = function () { map.select(null); };
+}
+function fig(v, k, d) { return '<div class="fig"><div class="v">' + v + (d || '') + '</div><div class="k">' + k + '</div></div>'; }
+function band(q) { return q >= 65 ? 'good' : (q >= 40 ? 'mid' : 'bad'); }
+
+/* --------------------------------------------------------------------- */
+function load() {
+  paintSource(); paintLegend();
+  if (S.source === 'trial') { recompute(); show(Math.min(S.year, 11)); }
+  else refreshRuns().then(loadView);
+}
+
+Store.init().then(function () { M.nav('sim'); load(); });
+Store.on(function () { if (S.source === 'trial') { recompute(); show(S.year); } paintSource(); });
+})();
+</script>
+</body>
+</html>

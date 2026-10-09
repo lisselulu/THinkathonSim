@@ -1,0 +1,338 @@
+{
+  "teams": {
+    "guardians": {
+      "name": "Guardians",
+      "has": "",
+      "wants": "",
+      "updated": 1789000233581,
+      "_id": "guardians"
+    },
+    "accelerators": {
+      "name": "Accelerators",
+      "has": "",
+      "wants": "",
+      "updated": 1788861816572,
+      "_id": "accelerators"
+    },
+    "test-one": {
+      "_id": "test-one",
+      "name": "TEST ONE",
+      "updated": 1791193068791,
+      "system": {
+        "levers": {
+          "corporate_tax_rate": 0.19,
+          "compute_levy": 0.05,
+          "allocation": {
+            "ubi": 0.42,
+            "infrastructure": 0.42,
+            "reserves": 0.16
+          },
+          "ubi_design": "flat",
+          "reskilling_spend_pct": 0.08,
+          "public_ownership_pct": 0.05,
+          "working_week_days": 5,
+          "care_job_guarantee": false,
+          "automation_target": {
+            "healthcare": 0.51,
+            "care_services": 0.12,
+            "education_research": 0.48,
+            "transport_logistics": 0.45,
+            "energy_utilities": 0.74,
+            "compute_telecom": 0.6,
+            "housing_construction": 0.57,
+            "food_agri": 0.56,
+            "manufacturing": 0.5,
+            "finance": 0.55,
+            "retail_commerce": 0.5,
+            "public_admin": 0.52,
+            "public_safety": 0.28
+          },
+          "care_guarantee_wage": 3200
+        },
+        "government": {
+          "kind": "llm",
+          "rules": [],
+          "briefing": {
+            "persona": "A benevolent government made up of previous middle-class workers that care about the welfare of its citizens. ",
+            "doctrine": "Care work is the one thing machines must not take over, and everything else can be automated if the gains are shared. A shorter working week is the reward for automation. Only move to a four-day week when employment is above 70% and no essential service is failing.",
+            "priorities": "1. No essential service failing. If any essential service is below 40, move budget from reserves to infrastructure that year, even if reserves fall.\n2. People being able to afford life. If what the payment buys keeps falling, protect the payment's share before anything else.\n3. Trust. If people are striking or reported trust drops below 40, fix the service they are angry about rather than raising the payment.\n4. Reserves last. Rebuild them only in years when nothing above is under strain, and never let them go below zero.\n\nIf two years in a row show the same problem, act harder the second year, not the same.",
+            "trading": "Good trade relations with neighbouring countries. Fair and reciprocal. We keep our promises and never sell food or medical supplies while our own services are strained. We give aid when a neighbour is in crisis and we can spare it."
+          }
+        },
+        "constitution": {
+          "name": "",
+          "commitments": [
+            "",
+            "",
+            ""
+          ],
+          "rules": [],
+          "policies": ""
+        },
+        "case": {
+          "rubric": {
+            "social_welfare": "0",
+            "continuity_of_survival": "",
+            "quality_of_life": "",
+            "economic_profitability": ""
+          },
+          "text": ""
+        },
+        "trade": {
+          "style": "reciprocal",
+          "never_sell": []
+        },
+        "version": 3,
+        "savedAt": 1790044934088,
+        "savedSections": {
+          "economy": 1790044934088,
+          "government": 1790044934088,
+          "automation": 1790044934088,
+          "constitution": 1790044934088,
+          "case": 1790044934088,
+          "trade": 1790044934088
+        }
+      }
+    },
+    "test-two": {
+      "_id": "test-two",
+      "name": "TEST TWO",
+      "updated": 1789381131098,
+      "system": {
+        "levers": {
+          "corporate_tax_rate": 0.19,
+          "compute_levy": 0.05,
+          "allocation": {
+            "ubi": 0.45,
+            "infrastructure": 0.4,
+            "reserves": 0.15
+          },
+          "ubi_design": "flat",
+          "reskilling_spend_pct": 0.08,
+          "public_ownership_pct": 0.06,
+          "working_week_days": 5,
+          "care_job_guarantee": false,
+          "automation_target": {
+            "healthcare": 0.22,
+            "care_services": 0.12,
+            "education_research": 0.2,
+            "transport_logistics": 0.45,
+            "energy_utilities": 0.55,
+            "compute_telecom": 0.6,
+            "housing_construction": 0.3,
+            "food_agri": 0.35,
+            "manufacturing": 0.5,
+            "finance": 0.55,
+            "retail_commerce": 0.44,
+            "public_admin": 0.25,
+            "public_safety": 0.34
+          },
+          "care_guarantee_wage": 3200
+        },
+        "government": {
+          "kind": "llm",
+          "rules": [],
+          "briefing": {
+            "persona": "",
+            "doctrine": "",
+            "priorities": "",
+            "trading": ""
+          }
+        },
+        "constitution": {
+          "name": "",
+          "commitments": [
+            "",
+            "",
+            ""
+          ],
+          "rules": [],
+          "policies": ""
+        },
+        "case": {
+          "rubric": {
+            "social_welfare": "",
+            "continuity_of_survival": "",
+            "quality_of_life": "",
+            "economic_profitability": ""
+          },
+          "text": ""
+        },
+        "trade": {
+          "style": "reciprocal",
+          "never_sell": []
+        },
+        "version": 2,
+        "savedAt": 1789381131096,
+        "savedSections": {
+          "economy": 1789381124207,
+          "automation": 1789381131096
+        }
+      }
+    },
+    "testers": {
+      "name": "Testers",
+      "updated": 1790926097831,
+      "_id": "testers"
+    },
+    "demo": {
+      "_id": "demo",
+      "name": "DEMO",
+      "updated": 1791194462321,
+      "system": {
+        "levers": {
+          "corporate_tax_rate": 0.32,
+          "compute_levy": 0.08,
+          "allocation": {
+            "ubi": 0.45,
+            "infrastructure": 0.45,
+            "reserves": 0.1
+          },
+          "ubi_design": "flat",
+          "reskilling_spend_pct": 0.18,
+          "public_ownership_pct": 0.15,
+          "working_week_days": 4,
+          "care_job_guarantee": true,
+          "automation_target": {
+            "healthcare": 0.3,
+            "care_services": 0.15,
+            "education_research": 0.3,
+            "transport_logistics": 0.7,
+            "energy_utilities": 0.75,
+            "compute_telecom": 0.8,
+            "housing_construction": 0.5,
+            "food_agri": 0.6,
+            "manufacturing": 0.8,
+            "finance": 0.75,
+            "retail_commerce": 0.65,
+            "public_admin": 0.5,
+            "public_safety": 0.3
+          },
+          "care_guarantee_wage": 3200
+        },
+        "government": {
+          "kind": "rules",
+          "rules": [
+            {
+              "when": "employmentPct < 60",
+              "then": [
+                {
+                  "verb": "nudge",
+                  "target": "reskilling_spend_pct",
+                  "amount": "0.002"
+                }
+              ]
+            },
+            {
+              "when": "worstEssential < 55",
+              "then": [
+                {
+                  "verb": "shift",
+                  "target": "ubi -> infrastructure",
+                  "amount": "1"
+                }
+              ]
+            },
+            {
+              "when": "fiscal.reserves_bn < 0",
+              "then": [
+                {
+                  "verb": "nudge",
+                  "target": "corporate_tax_rate",
+                  "amount": "0.002"
+                }
+              ]
+            }
+          ],
+          "briefing": {
+            "persona": "",
+            "doctrine": "",
+            "priorities": "",
+            "trading": ""
+          }
+        },
+        "constitution": {
+          "name": "The Flexicurity Compact",
+          "commitments": [
+            "Anyone who loses work to a machine is retrained at public expense.",
+            "No essential service falls below a decent standard.",
+            "Automation is welcome wherever its gains are shared.",
+            ""
+          ],
+          "rules": [
+            {
+              "when": "always",
+              "assert": ""
+            }
+          ],
+          "policies": ""
+        },
+        "case": {
+          "rubric": {
+            "social_welfare": "",
+            "continuity_of_survival": "",
+            "quality_of_life": "",
+            "economic_profitability": ""
+          },
+          "text": ""
+        },
+        "trade": {
+          "style": "protective",
+          "never_sell": [
+            "energy"
+          ]
+        },
+        "institutions": [],
+        "version": 5,
+        "savedAt": 1791194462320,
+        "savedSections": {
+          "trade": 1790928860502,
+          "economy": 1791194151035,
+          "automation": 1791194237951,
+          "government": 1791194423231,
+          "constitution": 1791194462320
+        },
+        "distribution": []
+      }
+    }
+  },
+  "posts": {
+    "mtsi6ht0s5k4n": {
+      "from": "Accelerators",
+      "to": "Guardians",
+      "resource": "food",
+      "type": "spot",
+      "quantity": 5.8,
+      "price": 0,
+      "return_resource": "compute",
+      "return_quantity": 5.3,
+      "deliver_in": 0,
+      "note": "",
+      "round": 1,
+      "status": "agreed",
+      "ts": 1788861886848,
+      "market_id": "mtsi6hs0nupdd",
+      "answered_by": "Guardians",
+      "agreed_round": 1,
+      "answered_ts": 1788861939623
+    }
+  },
+  "messages": {
+    "mtsi92cudphbg": {
+      "from": "Guardians",
+      "to": null,
+      "text": "i really need some medicine",
+      "ts": 1788862006822,
+      "round": 3
+    }
+  },
+  "round": 1,
+  "rev": 64,
+  "clock": {
+    "lengthMs": 60000,
+    "startedAt": 1788855155330,
+    "running": false,
+    "autoAdvance": true,
+    "pausedWith": 57495
+  }
+}

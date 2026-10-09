@@ -1,0 +1,93 @@
+{
+  "team": "Guardians",
+  "constitution": {
+    "name": "The Guardian Compact",
+    "commitments": [
+      "No essential service is allowed to fail.",
+      "Care is never automated past a quarter.",
+      "The public owns a meaningful share of the machines."
+    ],
+    "rules": [
+      {
+        "id": "no-failure",
+        "commitment": 0,
+        "when": "round > 2",
+        "assert": "worstEssential >= 55"
+      },
+      {
+        "id": "care-cap",
+        "commitment": 1,
+        "when": "always",
+        "assert": "levers.automation_target.care_services <= 0.25"
+      },
+      {
+        "id": "public-share",
+        "commitment": 2,
+        "when": "round > 3",
+        "assert": "levers.public_ownership_pct >= 0.30"
+      }
+    ]
+  },
+  "harness": {
+    "kind": "policy",
+    "policy": {
+      "opening": {
+        "corporate_tax_rate": 0.28,
+        "compute_levy": 0.16,
+        "reskilling_spend_pct": 0.12,
+        "public_ownership_pct": 0.35,
+        "ubi_design": "age_weighted",
+        "working_week_days": 4,
+        "care_job_guarantee": true,
+        "allocation": {
+          "ubi": 0.48,
+          "infrastructure": 0.36,
+          "reserves": 0.16
+        },
+        "automation_target": {
+          "healthcare": 0.52,
+          "care_services": 0.18,
+          "education_research": 0.3,
+          "transport_logistics": 0.88,
+          "energy_utilities": 0.86,
+          "compute_telecom": 0.86,
+          "housing_construction": 0.74,
+          "food_agri": 0.7,
+          "manufacturing": 0.9,
+          "finance": 0.92,
+          "retail_commerce": 0.9,
+          "public_admin": 0.58,
+          "public_safety": 0.5
+        }
+      },
+      "rules": [
+        {
+          "id": "defend",
+          "when": "worstEssential < 60",
+          "then": [
+            {
+              "shift": "ubi->infrastructure",
+              "points": 5
+            }
+          ]
+        },
+        {
+          "id": "buffer",
+          "when": "fiscal.reserves_bn < 40",
+          "then": [
+            {
+              "shift": "ubi->reserves",
+              "points": 5
+            }
+          ]
+        }
+      ],
+      "trade": {
+        "style": "protective",
+        "never_sell": [
+          "food"
+        ]
+      }
+    }
+  }
+}

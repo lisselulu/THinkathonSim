@@ -1,0 +1,3402 @@
+{
+ "version": 1,
+ "built": "2026-10-05T04:28:21.650Z",
+ "items": {
+  "apply for jobs": {
+   "key": "apply for jobs",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend": {
+   "key": "attend",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend a community meeting": {
+   "key": "attend a community meeting",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend a rally": {
+   "key": "attend a rally",
+   "label": "protesting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "legitimacy",
+     "amount": -0.6
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend a town hall": {
+   "key": "attend a town hall",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend community events": {
+   "key": "attend community events",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend community meetings": {
+   "key": "attend community meetings",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend job fairs": {
+   "key": "attend job fairs",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend retraining courses": {
+   "key": "attend retraining courses",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "attend training": {
+   "key": "attend training",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "back the government": {
+   "key": "back the government",
+   "label": "supporting the government",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "boycott": {
+   "key": "boycott",
+   "label": "boycotting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "demand_shift",
+     "amount": -0.8,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "care for elderly parents": {
+   "key": "care for elderly parents",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "care for family": {
+   "key": "care for family",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "care for my family": {
+   "key": "care for my family",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "care for my parents": {
+   "key": "care for my parents",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "carry on": {
+   "key": "carry on",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "carry on as usual": {
+   "key": "carry on as usual",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "chat": {
+   "key": "chat",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "chat with": {
+   "key": "chat with",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "check on elderly neighbours": {
+   "key": "check on elderly neighbours",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "complain to the government": {
+   "key": "complain to the government",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "continue as usual": {
+   "key": "continue as usual",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "cooperate with the government": {
+   "key": "cooperate with the government",
+   "label": "supporting the government",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "cut back": {
+   "key": "cut back",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "cut back spending": {
+   "key": "cut back spending",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "cut expenses": {
+   "key": "cut expenses",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "cut my hours": {
+   "key": "cut my hours",
+   "label": "working less",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "demonstrate": {
+   "key": "demonstrate",
+   "label": "protesting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "legitimacy",
+     "amount": -0.6
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "do gig work": {
+   "key": "do gig work",
+   "label": "working informally",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "informal_production",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    },
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "do nothing": {
+   "key": "do nothing",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "do odd jobs": {
+   "key": "do odd jobs",
+   "label": "working informally",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "informal_production",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    },
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "do the minimum at work": {
+   "key": "do the minimum at work",
+   "label": "working to rule",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "do volunteer work": {
+   "key": "do volunteer work",
+   "label": "volunteering",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "donate": {
+   "key": "donate",
+   "label": "donating",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.2
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "donate food": {
+   "key": "donate food",
+   "label": "donating",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.2
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "donate money": {
+   "key": "donate money",
+   "label": "donating",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.2
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "donate to charity": {
+   "key": "donate to charity",
+   "label": "donating",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.2
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "find a job": {
+   "key": "find a job",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "find a side hustle": {
+   "key": "find a side hustle",
+   "label": "working informally",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "informal_production",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    },
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "find work": {
+   "key": "find work",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "follow the rules": {
+   "key": "follow the rules",
+   "label": "supporting the government",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "form a group": {
+   "key": "form a group",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "form a union": {
+   "key": "form a union",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "get on with life": {
+   "key": "get on with life",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "give feedback to the government": {
+   "key": "give feedback to the government",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "give to charity": {
+   "key": "give to charity",
+   "label": "donating",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.2
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "go on strike": {
+   "key": "go on strike",
+   "label": "striking",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 1
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "go shopping": {
+   "key": "go shopping",
+   "label": "spending more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "go slow": {
+   "key": "go slow",
+   "label": "working to rule",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "go to community events": {
+   "key": "go to community events",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "help my neighbors": {
+   "key": "help my neighbors",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "help my neighbours": {
+   "key": "help my neighbours",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "help neighbors": {
+   "key": "help neighbors",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "help neighbours": {
+   "key": "help neighbours",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "help others": {
+   "key": "help others",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "help out neighbours": {
+   "key": "help out neighbours",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "help people around me": {
+   "key": "help people around me",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "job hunt": {
+   "key": "job hunt",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join": {
+   "key": "join",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a club": {
+   "key": "join a club",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a community group": {
+   "key": "join a community group",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a demonstration": {
+   "key": "join a demonstration",
+   "label": "protesting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "legitimacy",
+     "amount": -0.6
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a group": {
+   "key": "join a group",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a protest": {
+   "key": "join a protest",
+   "label": "protesting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "legitimacy",
+     "amount": -0.6
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a residents group": {
+   "key": "join a residents group",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a strike": {
+   "key": "join a strike",
+   "label": "striking",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 1
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join a union": {
+   "key": "join a union",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join the protest": {
+   "key": "join the protest",
+   "label": "protesting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "legitimacy",
+     "amount": -0.6
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join the strike": {
+   "key": "join the strike",
+   "label": "striking",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 1
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "join the union": {
+   "key": "join the union",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "keep going": {
+   "key": "keep going",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "keep my head down": {
+   "key": "keep my head down",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "keep my job": {
+   "key": "keep my job",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "keep working": {
+   "key": "keep working",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "launch a business": {
+   "key": "launch a business",
+   "label": "starting a business",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 2,
+    "min_health": "poor"
+   },
+   "hours_per_week": 20,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "found_business",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "learn new skills": {
+   "key": "learn new skills",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look after family": {
+   "key": "look after family",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look after my children": {
+   "key": "look after my children",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look after my parents": {
+   "key": "look after my parents",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look after neighbours": {
+   "key": "look after neighbours",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look for a better job": {
+   "key": "look for a better job",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look for a job": {
+   "key": "look for a job",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look for a new job": {
+   "key": "look for a new job",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look for part time work": {
+   "key": "look for part time work",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "look for work": {
+   "key": "look for work",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "loot": {
+   "key": "loot",
+   "label": "rioting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "harm",
+     "amount": 1,
+     "sector": "retail_commerce"
+    },
+    {
+     "channel": "cohesion",
+     "amount": -1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "march": {
+   "key": "march",
+   "label": "protesting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "legitimacy",
+     "amount": -0.6
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "meet neighbours": {
+   "key": "meet neighbours",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "meet up with friends": {
+   "key": "meet up with friends",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "network": {
+   "key": "network",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "nothing": {
+   "key": "nothing",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "open a shop": {
+   "key": "open a shop",
+   "label": "starting a business",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 2,
+    "min_health": "poor"
+   },
+   "hours_per_week": 20,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "found_business",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "open a stall": {
+   "key": "open a stall",
+   "label": "starting a business",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 2,
+    "min_health": "poor"
+   },
+   "hours_per_week": 20,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "found_business",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "organise a group": {
+   "key": "organise a group",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "organize a group": {
+   "key": "organize a group",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "petition": {
+   "key": "petition",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "pick up more shifts": {
+   "key": "pick up more shifts",
+   "label": "working more",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "protest": {
+   "key": "protest",
+   "label": "protesting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "legitimacy",
+     "amount": -0.6
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "reconnect with old friends": {
+   "key": "reconnect with old friends",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "reduce my hours": {
+   "key": "reduce my hours",
+   "label": "working less",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "reduce spending": {
+   "key": "reduce spending",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "refuse to buy": {
+   "key": "refuse to buy",
+   "label": "boycotting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "demand_shift",
+     "amount": -0.8,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "reskill": {
+   "key": "reskill",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "retrain": {
+   "key": "retrain",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "riot": {
+   "key": "riot",
+   "label": "rioting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "harm",
+     "amount": 1,
+     "sector": "retail_commerce"
+    },
+    {
+     "channel": "cohesion",
+     "amount": -1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "save": {
+   "key": "save",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "save money": {
+   "key": "save money",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "save more": {
+   "key": "save more",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "search for work": {
+   "key": "search for work",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "seek work": {
+   "key": "seek work",
+   "label": "looking for work",
+   "requires": {
+    "job": false,
+    "working_age": true,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 5,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "sign a petition": {
+   "key": "sign a petition",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "smash things up": {
+   "key": "smash things up",
+   "label": "rioting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 4,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "unrest",
+     "amount": 1
+    },
+    {
+     "channel": "harm",
+     "amount": 1,
+     "sector": "retail_commerce"
+    },
+    {
+     "channel": "cohesion",
+     "amount": -1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "speak up": {
+   "key": "speak up",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "spend less": {
+   "key": "spend less",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "spend more": {
+   "key": "spend more",
+   "label": "spending more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "spend time with family": {
+   "key": "spend time with family",
+   "label": "caring for family",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 0.8,
+     "sector": "care_services",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "spend time with friends": {
+   "key": "spend time with friends",
+   "label": "attending community meetings",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "cohesion",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "start a business": {
+   "key": "start a business",
+   "label": "starting a business",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 2,
+    "min_health": "poor"
+   },
+   "hours_per_week": 20,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "found_business",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "start a group": {
+   "key": "start a group",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "start a petition": {
+   "key": "start a petition",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "start a small business": {
+   "key": "start a small business",
+   "label": "starting a business",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 2,
+    "min_health": "poor"
+   },
+   "hours_per_week": 20,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "found_business",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "start a union": {
+   "key": "start a union",
+   "label": "joining a group",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 2,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "organise",
+     "amount": 1,
+     "group": null
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "start my own business": {
+   "key": "start my own business",
+   "label": "starting a business",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 2,
+    "min_health": "poor"
+   },
+   "hours_per_week": 20,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "found_business",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "stay put": {
+   "key": "stay put",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "stop buying": {
+   "key": "stop buying",
+   "label": "boycotting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "demand_shift",
+     "amount": -0.8,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "stop buying from": {
+   "key": "stop buying from",
+   "label": "boycotting",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "demand_shift",
+     "amount": -0.8,
+     "sector": "retail_commerce",
+     "from_target": true
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "stop work": {
+   "key": "stop work",
+   "label": "striking",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 1
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "strike": {
+   "key": "strike",
+   "label": "striking",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 1
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "study": {
+   "key": "study",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "support my neighbours": {
+   "key": "support my neighbours",
+   "label": "helping neighbours",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "support the government": {
+   "key": "support the government",
+   "label": "supporting the government",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "take a course": {
+   "key": "take a course",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "take a side job": {
+   "key": "take a side job",
+   "label": "working informally",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "informal_production",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    },
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "take cash jobs": {
+   "key": "take cash jobs",
+   "label": "working informally",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "informal_production",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    },
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "take courses": {
+   "key": "take courses",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "take extra shifts": {
+   "key": "take extra shifts",
+   "label": "working more",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "take industrial action": {
+   "key": "take industrial action",
+   "label": "striking",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 1
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "take time off": {
+   "key": "take time off",
+   "label": "working less",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "tighten my budget": {
+   "key": "tighten my budget",
+   "label": "saving more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "treat myself": {
+   "key": "treat myself",
+   "label": "spending more",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "spending",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "trust the government": {
+   "key": "trust the government",
+   "label": "supporting the government",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": 0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "upskill": {
+   "key": "upskill",
+   "label": "retraining",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 8,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.3
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "volunteer": {
+   "key": "volunteer",
+   "label": "volunteering",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "volunteer in the community": {
+   "key": "volunteer in the community",
+   "label": "volunteering",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "volunteer locally": {
+   "key": "volunteer locally",
+   "label": "volunteering",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "volunteer my time": {
+   "key": "volunteer my time",
+   "label": "volunteering",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "volunteering": {
+   "key": "volunteering",
+   "label": "volunteering",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "time_to_sector",
+     "amount": 1,
+     "sector": "care_services",
+     "from_target": true
+    },
+    {
+     "channel": "cohesion",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "wait and see": {
+   "key": "wait and see",
+   "label": "carrying on",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [],
+   "lasting": false,
+   "any_target": true
+  },
+  "walk out": {
+   "key": "walk out",
+   "label": "striking",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 1
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "work informally": {
+   "key": "work informally",
+   "label": "working informally",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 10,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "informal_production",
+     "amount": 1,
+     "sector": "retail_commerce",
+     "from_target": true
+    },
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "work less": {
+   "key": "work less",
+   "label": "working less",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": -0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "work longer hours": {
+   "key": "work longer hours",
+   "label": "working more",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "work more": {
+   "key": "work more",
+   "label": "working more",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "work overtime": {
+   "key": "work overtime",
+   "label": "working more",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 6,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_supply",
+     "amount": 0.5
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "work to rule": {
+   "key": "work to rule",
+   "label": "working to rule",
+   "requires": {
+    "job": true,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 0,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "labour_withheld",
+     "amount": 0.4
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  },
+  "write to my mp": {
+   "key": "write to my mp",
+   "label": "petitioning",
+   "requires": {
+    "job": false,
+    "working_age": false,
+    "min_savings_months": 0,
+    "min_health": "poor"
+   },
+   "hours_per_week": 1,
+   "money_share": 0,
+   "effects": [
+    {
+     "channel": "legitimacy",
+     "amount": -0.2
+    },
+    {
+     "channel": "unrest",
+     "amount": 0.1
+    }
+   ],
+   "lasting": false,
+   "any_target": true
+  }
+ }
+}

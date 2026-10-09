@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/app.css">
+<style>
+  .page{max-width:1320px;margin:0 auto;padding:26px 24px 80px;display:grid;grid-template-columns:190px minmax(0,1fr) 340px;gap:28px;align-items:start}
+  @media(max-width:1180px){.page{grid-template-columns:minmax(0,1fr) 320px}.index{display:none}}
+  @media(max-width:860px){.page{grid-template-columns:1fr}.saved{position:static;max-height:none}}
+
+  .index{position:sticky;top:82px;display:flex;flex-direction:column;gap:2px}
+  .index a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:4px;color:var(--muted2);
+    text-decoration:none;font-weight:700;font-size:13px}
+  .index a:hover{background:var(--sunk);color:var(--ink)}
+  .index .st{width:8px;height:8px;border-radius:50%;background:var(--line2)}
+  .index .st.ok{background:var(--good)} .index .st.dirty{background:#D9A24E}
+  @media(max-width:1180px){.index{display:none}}
+
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  .head h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:44px;line-height:1;margin:0}
+  .head p{margin:6px 0 0;color:var(--muted2);max-width:58ch}
+  .forms{display:flex;flex-direction:column;gap:18px}
+
+  .card{background:var(--panel);border:1.5px solid var(--line2);border-radius:6px;scroll-margin-top:76px}
+  .card.dirty{border-color:#D9A24E;box-shadow:0 0 0 3px rgba(217,162,78,.14)}
+  .card>header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:16px 20px 0}
+  .card h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:27px;margin:0;line-height:1.1}
+  .card>header p{margin:4px 0 0;color:var(--muted2);font-size:13px;max-width:62ch}
+  .card .body{padding:16px 20px 18px;display:flex;flex-direction:column;gap:16px}
+  .card>footer{display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--line);background:var(--panel2);border-radius:0 0 6px 6px}
+  .card>footer .msg{font-size:12.5px;color:var(--muted);margin-left:auto}
+  .state{font-size:11.5px;font-weight:700;white-space:nowrap;padding:4px 9px;border-radius:999px;background:var(--sunk);color:var(--muted2)}
+  .state.dirty{background:#F5E6C8;color:#7C5A17}
+  .state.ok{background:#E3ECDD;color:#3F6B38}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .slider{display:flex;flex-direction:column;gap:4px}
+  .slider .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .slider .top span{font-size:13px;font-weight:700}
+  .slider .top b{font-family:"Space Mono",monospace;font-size:13px}
+  .slider .why{font-size:12px;color:var(--muted)}
+  .subhead{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:2px 0 -6px}
+  .choice{display:flex;flex-direction:column;gap:6px}
+  .choice>span{font-size:13px;font-weight:700}
+  .split{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .split .bar{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden;margin-top:6px}
+  .split .bar i{display:block;height:100%}
+
+  .list{display:flex;flex-direction:column;gap:10px}
+  .item{border:1.5px solid var(--line);background:var(--panel2);border-radius:5px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+  .item .row{display:flex;gap:8px;align-items:flex-end}
+  .item .row>label{flex:1}
+  .check{font-size:12px;font-weight:700}
+  .check.ok{color:var(--good)} .check.bad{color:var(--bad)}
+  .builder{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;padding:8px;border:1.5px dashed var(--line);border-radius:5px}
+  .builder>label{flex:1 1 120px}
+  .builder .lead{flex:0 0 100%;font-size:11.5px;font-weight:700;color:var(--muted)}
+  .range{font-size:11.5px;color:var(--muted)}
+  details.vocab{border:1.5px solid var(--line);border-radius:5px;padding:8px 12px;background:var(--panel2)}
+  details.vocab summary{cursor:pointer;font-size:13px;font-weight:800}
+  details.vocab .scroll{overflow-x:auto;margin-top:8px}
+  details.vocab table{border-collapse:collapse;width:100%;font-size:12.5px}
+  details.vocab th,details.vocab td{text-align:left;padding:4px 10px 4px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  details.vocab th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  details.vocab td.n{font-family:"Space Mono",monospace;white-space:nowrap}
+  details.vocab code{white-space:nowrap}
+  details.vocab h4{margin:12px 0 2px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .policycheck{font-size:12.5px;display:flex;flex-direction:column;gap:3px}
+
+  .team{background:var(--ink);color:#EDE8DC;border-radius:6px;padding:16px 20px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
+  .team label>span{color:#B9BFB8}
+  .team input{background:#3A423D;border-color:#57605A;color:#F5F1E8;min-width:240px}
+  .team .hint{color:#B9BFB8}
+
+  .saved{position:sticky;top:82px;max-height:calc(100vh - 100px);overflow-y:auto;background:var(--panel2);border:1.5px solid var(--line2);border-radius:6px}
+  .saved>header{padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel2)}
+  .saved h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:24px;margin:0}
+  .saved .meta{font-size:12px;color:var(--muted2);margin-top:2px}
+  .saved section{padding:12px 16px;border-bottom:1px solid var(--line)}
+  .saved h3{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 7px}
+  .saved h3 em{font-style:normal;font-weight:700;letter-spacing:0;text-transform:none;color:#7C5A17}
+  .kv{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12.5px}
+  .kv b{font-family:"Space Mono",monospace;font-size:12px}
+  .quote{font-size:12.5px;white-space:pre-wrap;border-left:3px solid var(--line2);padding-left:9px;margin:4px 0;color:var(--ink)}
+  .quote.none{color:var(--muted);font-style:italic;border-left-color:var(--line)}
+</style>
+</head>
+<body>
+<header id="nav"></header>
+
+<div class="page">
+  <nav class="index" id="index" aria-label="Sections"></nav>
+
+  <main>
+    <div class="head">
+      <div>
+        <h1>Setup</h1>
+        <p>Everything your government decides, in one place. Nothing counts until you save it: the Simulation page and every agent run use your last saved version.</p>
+      </div>
+      <button class="btn pri" id="saveAll" hidden>Save all changes</button>
+    </div>
+
+    <div class="team" id="team"></div>
+    <div class="forms" id="forms"></div>
+  </main>
+
+  <aside class="saved" id="saved" aria-label="Your saved system"></aside>
+</div>
+
+<script src="/js/meridian.js"></script>
+<script src="/app/common.js"></script>
+<script>
+(function(){
+'use strict';
+var M = window.Meridian, E = M.E, Store = M.Store, esc = M.esc, pct = M.pct;
+var SECTORS = E.ORDER;
+
+/* ---------------------------------------------------------------------
+   SECTION BODIES
+   Each renders from the DRAFT. Inputs carry data-path; typing edits the
+   draft only, so what is saved changes only when Save is pressed.
+   --------------------------------------------------------------------- */
+function slider(path, label, min, max, step, fmt, why) {
+  var v = M.getPath(Store.draft, path);
+  return '<div class="slider"><div class="top"><span>' + label + '</span><b data-show="' + path + '">' + fmt(v) + '</b></div>' +
+    '<input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + v + '" data-path="' + path + '" data-kind="num" aria-label="' + esc(label) + '">' +
+    (why ? '<div class="why">' + why + '</div>' : '') + '</div>';
+}
+function seg(path, label, options) {
+  var v = M.getPath(Store.draft, path);
+  return '<div class="choice"><span>' + label + '</span><div class="seg" role="group" aria-label="' + esc(label) + '">' + options.map(function (o) {
+    return '<button type="button" data-set="' + path + '" data-val=\'' + JSON.stringify(o[0]) + '\' aria-pressed="' + (JSON.stringify(v) === JSON.stringify(o[0])) + '">' + o[1] + '</button>';
+  }).join('') + '</div></div>';
+}
+
+/* ---------------------------------------------------------------------
+   THE RULE VOCABULARY
+   Everything here is drawn from MeridianRules.VOCAB, the same list the
+   interpreter checks against, so nothing offered can fail to run and
+   nobody has to read the code to learn what a rule may say.
+   --------------------------------------------------------------------- */
+var V = (window.MeridianRules || {}).VOCAB;
+function opt(value, label, sel) { return '<option value="' + esc(value) + '"' + (String(sel) === String(value) ? ' selected' : '') + '>' + esc(label) + '</option>'; }
+function leverOf(target) {
+  if (!V) return null;
+  if (String(target).indexOf(V.industryLever.prefix) === 0) return V.industryLever;
+  return V.levers.filter(function (l) { return l.id === target; })[0] || null;
+}
+function rangeWords(l) {
+  if (!l || !l.range) return '';
+  return l.kind === 'sgd' ? 'S$' + l.range[0] + ' to S$' + l.range[1] : l.range[0] + ' to ' + l.range[1] + ' (' + Math.round(l.range[0] * 100) + '% to ' + Math.round(l.range[1] * 100) + '%)';
+}
+/* What an action may act on, for the verb chosen. */
+function targetSelect(path, a) {
+  var known = false, html = '';
+  function o(v, l) { if (v === a.target) known = true; return opt(v, l, a.target); }
+  if (a.verb === 'shift') {
+    html = V.shift.targets.map(function (t) { return o(t, t.replace('->', ' → ')); }).join('');
+  } else {
+    var ls = V.levers.filter(function (l) { return a.verb === 'set' || l.kind !== 'choice'; });
+    html = '<optgroup label="Levers">' + ls.map(function (l) { return o(l.id, l.label); }).join('') + '</optgroup>' +
+      '<optgroup label="Automation ceiling, by industry">' + SECTORS.map(function (k) { return o(V.industryLever.prefix + k, E.SECTORS[k].name); }).join('') + '</optgroup>';
+  }
+  if (!known && a.target) html = opt(a.target, a.target + ' (typed by hand)', a.target) + html;
+  return '<select data-path="' + path + '.target">' + html + '</select>';
+}
+function amountField(path, a) {
+  var l = a.verb === 'shift' ? null : leverOf(a.target);
+  if (a.verb === 'set' && l && l.kind === 'choice')
+    return '<label class="field" style="flex:0 0 150px"><span>To</span><select data-path="' + path + '.amount">' + l.values.map(function (v) { return opt(v[0], v[1], a.amount); }).join('') + '</select></label>';
+  var word = a.verb === 'shift' ? 'Points' : a.verb === 'nudge' ? 'By' : 'To';
+  var note = a.verb === 'shift' ? 'percentage points of the budget' : a.verb === 'nudge' ? 'negative lowers it; allowed ' + rangeWords(l) : 'allowed ' + rangeWords(l);
+  return '<label class="field" style="flex:0 0 150px"><span>' + word + '</span><input type="text" inputmode="decimal" data-path="' + path + '.amount" value="' + esc(a.amount || '') + '"><span class="range">' + note + '</span></label>';
+}
+/* A sensible starting action when the verb or the lever changes. */
+function defaultAction(verb, target) {
+  if (verb === 'shift') return { verb: verb, target: V.shift.targets.indexOf(target) >= 0 ? target : 'reserves->ubi', amount: '1' };
+  var l = leverOf(target);
+  if (!l || (verb === 'nudge' && l.kind === 'choice')) { target = 'corporate_tax_rate'; l = leverOf(target); }
+  return { verb: verb, target: target, amount: l.kind === 'choice' ? l.values[0][0] : verb === 'nudge' ? (l.kind === 'sgd' ? '100' : '0.01') : (l.kind === 'sgd' ? '3000' : String(l.range[0])) };
+}
+/* Pick a measure, a comparison and a number; it is written into the field for you. */
+function termBuilder(path, lead) {
+  if (!V) return '';
+  var groups = {}, order = [];
+  V.terms.forEach(function (t) { if (!groups[t.group]) { groups[t.group] = []; order.push(t.group); } groups[t.group].push(t); });
+  return '<div class="builder" data-builder="' + path + '"><div class="lead">' + lead + '</div>' +
+    '<label class="field" style="flex:0 0 76px"><span>Join</span><select data-b="join">' + V.joins.map(function (j) { return opt(j[0], j[1]); }).join('') + '</select></label>' +
+    '<label class="field" style="flex:2 1 200px"><span>Measure</span><select data-b="term">' +
+      order.map(function (g) { return '<optgroup label="' + g + '">' + groups[g].map(function (t) { return opt(t.id, t.label + ' (' + t.unit + ')'); }).join('') + '</optgroup>'; }).join('') +
+      '<optgroup label="One industry">' + V.perIndustry.map(function (p) { return opt('sectors.*.' + p.id, 'An industry’s ' + p.label + ' (' + p.unit + ')'); }).join('') + '</optgroup></select></label>' +
+    '<label class="field" style="flex:1 1 150px"><span>Industry (if any)</span><select data-b="sector">' + SECTORS.map(function (k) { return opt(k, E.SECTORS[k].name); }).join('') + '</select></label>' +
+    '<label class="field" style="flex:0 0 120px"><span>Is</span><select data-b="op">' + V.operators.map(function (o) { return opt(o[0], o[1]); }).join('') + '</select></label>' +
+    '<label class="field" style="flex:0 0 90px"><span>Number</span><input type="text" inputmode="decimal" data-b="value" placeholder="60"></label>' +
+    '<button type="button" class="btn sm" data-insert="' + path + '">Add to condition</button></div>';
+}
+/* The whole vocabulary on one screen, with what each term reads today. */
+function vocabReference() {
+  if (!V) return '';
+  var frame = null;
+  try { frame = window.MeridianHarness.doctrineFrame(E.seed(window.MERIDIAN_BASELINE)); } catch (e) {}
+  function now(expr) {
+    if (!frame) return '';
+    var v = expr.split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, frame);
+    if (typeof v !== 'number') return '';
+    return Math.abs(v) >= 1000 ? Math.round(v).toLocaleString() : String(Math.round(v * 100) / 100);
+  }
+  var eg = SECTORS[0];
+  return '<details class="vocab"><summary>Every term a rule can use</summary>' +
+    '<h4>What a condition can read</h4><div class="scroll"><table><tr><th>Write this</th><th>It means</th><th>Measured in</th><th>At the start</th></tr>' +
+    V.terms.map(function (t) { return '<tr><td><code>' + t.id + '</code></td><td>' + t.label + '</td><td>' + t.unit + '</td><td class="n">' + now(t.id) + '</td></tr>'; }).join('') +
+    V.perIndustry.map(function (p) { return '<tr><td><code>sectors.' + eg + '.' + p.id + '</code></td><td>' + E.SECTORS[eg].name + ': ' + p.label + '</td><td>' + p.unit + '</td><td class="n">' + now('sectors.' + eg + '.' + p.id) + '</td></tr>'; }).join('') +
+    '</table></div>' +
+    '<div class="hint">Swap <code>' + eg + '</code> for any industry: ' + SECTORS.map(function (k) { return '<code>' + k + '</code>'; }).join(' ') + '.</div>' +
+    '<h4>How to compare and join</h4><div class="hint">' + V.operators.map(function (o) { return '<code>' + esc(o[0]) + '</code> ' + o[1]; }).join(', ') + '. ' +
+      'Join two tests with <code>&amp;&amp;</code> (both must hold) or <code>||</code> (either). The words “and” and “or” do not work, and neither do brackets. ' +
+      'Example: <code>worstEssential &lt; 60 &amp;&amp; fiscal.reserves_bn &gt; 80</code>.</div>' +
+    '<h4>What an action can change</h4><div class="scroll"><table><tr><th>Do</th><th>Write this</th><th>It means</th><th>Allowed</th></tr>' +
+    '<tr><td>shift</td><td>' + V.shift.targets.map(function (t) { return '<code>' + esc(t) + '</code>'; }).join(' ') + '</td><td>Move budget share from one pot to another</td><td>points, e.g. 1</td></tr>' +
+    V.levers.map(function (l) {
+      return '<tr><td>' + (l.kind === 'choice' ? 'set' : 'nudge, set') + '</td><td><code>' + l.id + '</code></td><td>' + l.label + '</td><td>' +
+        (l.kind === 'choice' ? l.values.map(function (v) { return '<code>' + v[0] + '</code>'; }).join(' ') : rangeWords(l)) + '</td></tr>';
+    }).join('') +
+    '<tr><td>nudge, set</td><td><code>' + V.industryLever.prefix + eg + '</code></td><td>' + E.SECTORS[eg].name + ': ' + V.industryLever.label + ' (any industry)</td><td>' + rangeWords(V.industryLever) + '</td></tr>' +
+    '</table></div></details>';
+}
+
+var ADOPTIONS = [
+  ['fund', 'Fund it', 'The state pays for it, so it happens whether or not anyone volunteers.'],
+  ['formalise', 'Licence it', 'It becomes legal and taxed. The work still happens; it stops escaping the treasury.'],
+  ['ease', 'Make it easier', 'Premises, equipment or time, so it costs each person less and more can take part.'],
+  ['endorse', 'Endorse it', 'The government says publicly that it exists and is wanted.']
+];
+
+var BODIES = {
+  economy: function () {
+    var a = Store.draft.levers.allocation;
+    var col = { ubi: 'var(--rust)', infrastructure: '#7FA3AC', reserves: '#88A87E' };
+    return '<div class="subhead">Where the budget goes</div>' +
+      '<div class="split">' + ['ubi', 'infrastructure', 'reserves'].map(function (k) {
+        return '<div class="slider"><div class="top"><span>' + ({ ubi: 'Monthly payment', infrastructure: 'Infrastructure', reserves: 'Reserves' })[k] +
+          '</span><b data-show="alloc.' + k + '">' + Math.round(a[k] * 100) + '%</b></div>' +
+          '<input type="range" min="0" max="1" step="0.01" value="' + a[k] + '" data-alloc="' + k + '" aria-label="' + k + ' share of budget">' +
+          '<div class="bar"><i data-bar="' + k + '" style="width:' + (a[k] * 100) + '%;background:' + col[k] + '"></i></div></div>';
+      }).join('') + '</div>' +
+      '<div class="hint">The three always add up to 100%. Moving one takes from the others in proportion.</div>' +
+      '<div class="subhead">Taxes and ownership</div>' +
+      '<div class="grid2">' +
+        slider('levers.corporate_tax_rate', 'Corporate tax', 0, 0.45, 0.01, pct, 'Revenue now, less reinvestment later.') +
+        slider('levers.compute_levy', 'Tax on automation', 0, 0.3, 0.01, pct, 'Raises money and slows how fast machines replace people.') +
+        slider('levers.public_ownership_pct', 'Public ownership', 0, 0.5, 0.01, pct, 'A share of the machines, and their profit, owned by the state.') +
+        slider('levers.reskilling_spend_pct', 'Reskilling', 0, 0.3, 0.01, pct, 'Retraining people out of automated work. Pays back slowly.') +
+      '</div>' +
+      '<div class="subhead">Work and welfare</div>' +
+      '<div class="grid2">' +
+        seg('levers.ubi_design', 'How the payment is shared', [['flat', 'Equal'], ['means_tested', 'Means-tested'], ['age_weighted', 'More for the old']]) +
+        seg('levers.working_week_days', 'Working week', [[5, '5 days'], [4, '4 days'], [3, '3 days']]) +
+        seg('levers.care_job_guarantee', 'Care job guarantee', [[false, 'Off'], [true, 'On']]) +
+      '</div>';
+  },
+  automation: function () {
+    return '<div class="hint">The most each industry may automate. With agents deciding, firms choose how far under this ceiling to go.</div>' +
+      '<div class="grid2">' + SECTORS.map(function (k) {
+        return slider('levers.automation_target.' + k, E.SECTORS[k].name, 0, 0.98, 0.01, pct);
+      }).join('') + '</div>';
+  },
+  government: function () {
+    var g = Store.draft.government;
+    var body = seg('government.kind', 'How your government decides each round', [['rules', 'Rules you write'], ['llm', 'A model you brief']]);
+    if (g.kind === 'llm') {
+      body += '<div class="hint">A model reads this briefing each round and sets your levers. It never touches the physics; what leaves it is numbers.</div>' +
+        [['persona', 'Who is governing', 3], ['doctrine', 'Your doctrine', 4], ['priorities', 'When things conflict, what wins', 4], ['trading', 'How you trade', 3]].map(function (f) {
+          return '<label class="field"><span>' + f[1] + '</span><textarea rows="' + f[2] + '" data-path="government.briefing.' + f[0] + '">' + esc(g.briefing[f[0]]) + '</textarea></label>';
+        }).join('');
+    } else {
+      body += '<div class="hint">Your saved economy is the opening position. Each rule adjusts it when its condition holds, in order.</div>' +
+        '<div class="list">' + (g.rules.length ? g.rules.map(function (r, i) {
+          return '<div class="item"><div class="row">' +
+            '<label class="field"><span>When</span><input type="text" data-path="government.rules.' + i + '.when" value="' + esc(r.when || '') + '" placeholder="worstEssential < 60"></label>' +
+            '<button type="button" class="btn sm ghost" data-remove="government.rules" data-i="' + i + '" aria-label="Remove rule">Remove</button></div>' +
+            (r.then || []).map(function (a, ai) {
+              return '<div class="row">' +
+                '<label class="field" style="flex:0 0 150px"><span>Do</span><select data-path="government.rules.' + i + '.then.' + ai + '.verb">' +
+                  [['shift', 'shift budget'], ['nudge', 'nudge a lever'], ['set', 'set a lever']].map(function (v) { return opt(v[0], v[1], a.verb); }).join('') + '</select></label>' +
+                '<label class="field"><span>' + (a.verb === 'shift' ? 'From → to' : 'Lever') + '</span>' +
+                  (V ? targetSelect('government.rules.' + i + '.then.' + ai, a) : '<input type="text" data-path="government.rules.' + i + '.then.' + ai + '.target" value="' + esc(a.target || '') + '">') + '</label>' +
+                (V ? amountField('government.rules.' + i + '.then.' + ai, a) : '<label class="field" style="flex:0 0 90px"><span>Amount</span><input type="text" data-path="government.rules.' + i + '.then.' + ai + '.amount" value="' + esc(a.amount || '') + '"></label>') +
+                ((r.then || []).length > 1 ? '<button type="button" class="btn sm ghost" data-remove="government.rules.' + i + '.then" data-i="' + ai + '" aria-label="Remove action">Remove</button>' : '') + '</div>';
+            }).join('') +
+            termBuilder('government.rules.' + i + '.when', 'Build the condition: pick a measure and a number, then add it. You can also type straight into “When”.') +
+            '<div><button type="button" class="btn sm" data-add-action="' + i + '">Add an action</button></div>' +
+            '<div class="check" data-rulecheck="' + i + '"></div></div>';
+        }).join('') : '<div class="empty">No rules: your government holds its opening position every round.</div>') + '</div>' +
+        '<div><button type="button" class="btn sm" data-add="rule">Add a rule</button></div>' +
+        '<div class="hint"><b>Every month</b>, every rule whose condition holds fires, in the order written, so a nudge of 0.01 that keeps firing moves a lever 0.12 in a year. Conditions read the country as it stood at the end of the month before. ' +
+        '<b>Shift</b> moves budget share between the three pots, <b>nudge</b> moves a lever by an amount, <b>set</b> puts a lever at a value.</div>' +
+        vocabReference();
+    }
+    return body;
+  },
+  constitution: function () {
+    var c = Store.draft.constitution;
+    var parsed = M.policiesFrom(c.policies);
+    return '<label class="field"><span>Name</span><input type="text" data-path="constitution.name" value="' + esc(c.name) + '" placeholder="The Care Compact"></label>' +
+      '<div class="subhead">Commitments</div>' +
+      '<div class="hint">What your government promises. The government agent compiles these into policy and reports anything it could not.</div>' +
+      '<div class="list">' + c.commitments.map(function (x, i) {
+        return '<div class="row" style="display:flex;gap:8px;align-items:flex-start"><textarea rows="2" data-path="constitution.commitments.' + i + '" aria-label="Commitment ' + (i + 1) + '" placeholder="Commitment ' + (i + 1) + '">' + esc(x) + '</textarea>' +
+          '<button type="button" class="btn sm ghost" data-remove="constitution.commitments" data-i="' + i + '">Remove</button></div>';
+      }).join('') + '</div>' +
+      '<div><button type="button" class="btn sm" data-add="commitment">Add a commitment</button></div>' +
+      '<div class="subhead">Checkable rules</div>' +
+      '<div class="hint">A promise written so it can be tested every round, e.g. <code>worstEssential &gt;= 55</code>.</div>' +
+      '<div class="list">' + (c.rules.length ? c.rules.map(function (r, i) {
+        return '<div class="item"><div class="row">' +
+          '<label class="field" style="flex:0 0 150px"><span>When</span><input type="text" data-path="constitution.rules.' + i + '.when" value="' + esc(r.when || 'always') + '"></label>' +
+          '<label class="field"><span>We promise</span><input type="text" data-path="constitution.rules.' + i + '.assert" value="' + esc(r.assert || '') + '" placeholder="worstEssential >= 55"></label>' +
+          '<button type="button" class="btn sm ghost" data-remove="constitution.rules" data-i="' + i + '">Remove</button></div>' +
+          termBuilder('constitution.rules.' + i + '.assert', 'Build the promise: pick a measure and a number, then add it.') + '</div>';
+      }).join('') : '<div class="empty">No checkable rules yet.</div>') + '</div>' +
+      '<div><button type="button" class="btn sm" data-add="crule">Add a rule</button></div>' +
+      vocabReference() +
+      '<div class="subhead">Policies you write yourself</div>' +
+      '<div class="hint">Optional. Written policies always win over what the compiler makes of your commitments. One per fenced block.</div>' +
+      '<textarea class="code" rows="8" data-path="constitution.policies" spellcheck="false" placeholder="```policy&#10;type: transfer&#10;to: carers&#10;sgd_month: 600&#10;name: Carer wage&#10;```">' + esc(c.policies) + '</textarea>' +
+      '<div class="policycheck" data-policycheck>' + policyCheck(parsed) + '</div>';
+  },
+  case: function () {
+    var r = Store.draft.case.rubric;
+    var total = M.ANGLES.reduce(function (a, g) { return a + (Number(r[g[0]]) || 0); }, 0);
+    return '<div class="hint">Weight the four angles of the guiding rubric by how much each matters to the society you are building, then argue your case. The simulation records this and never scores it; juries judge it against your run\'s evidence.</div>' +
+      '<div class="grid2">' + M.ANGLES.map(function (g) {
+        return '<label class="field"><span>' + g[1] + '</span><input type="number" min="0" max="100" data-path="case.rubric.' + g[0] + '" data-kind="numtext" value="' + esc(r[g[0]]) + '"></label>';
+      }).join('') + '</div>' +
+      '<div class="hint" data-total>' + (total ? 'Total weight ' + total + (total !== 100 ? ' (shares are read relative to the total)' : '') : 'No weights yet.') + '</div>' +
+      '<label class="field"><span>Our case</span><textarea rows="8" data-path="case.text" placeholder="Why this weighting, and what evidence from the run would show we achieved it.">' + esc(Store.draft.case.text) + '</textarea></label>';
+  },
+  distribution: function () {
+    var list = Store.draft.distribution || [];
+    var body = '<div class="hint">The simulation starts with one way of sharing out what the machines make: a payment to everyone. ' +
+      'Here you can add your own. A scheme pays people for what they <b>do</b>, in a credit that exchanges for money. ' +
+      'Everyone is told it exists, on the terms you set, and decides for themselves whether to take part. ' +
+      'You choose what to reward; you cannot change what an action counts as. Schemes only act in agent runs.</div>';
+    body += '<div class="list">' + (list.length ? list.map(function (x, i) {
+      var e = x.earns || {};
+      var perHour = Math.round((x.credits_per_hour || 1) * (x.sgd_per_credit || 10) * 10) / 10;
+      var capSgd = Math.round((x.cap_credits_month || 60) * (x.sgd_per_credit || 10));
+      return '<div class="item">' +
+        '<div class="row"><label class="field"><span>Name</span><input type="text" data-path="distribution.' + i + '.name" value="' + esc(x.name || '') + '" placeholder="Community Credit"></label>' +
+        '<button type="button" class="btn sm ghost" data-remove="distribution" data-i="' + i + '">Remove</button></div>' +
+        '<div class="subhead">What earns it</div>' +
+        '<label class="field"><span>Giving time to</span><select data-path="distribution.' + i + '.earns.sector_choice">' +
+          '<option value="all"' + (!e.sector_choice || e.sector_choice === 'all' ? ' selected' : '') + '>community work in any industry</option>' +
+          SECTORS.map(function (k) { return '<option value="' + k + '"' + (e.sector_choice === k ? ' selected' : '') + '>' + esc(E.SECTORS[k].name) + ' only</option>'; }).join('') +
+        '</select></label>' +
+        seg('distribution.' + i + '.earns.ties', 'Also for bringing people together', [[false, 'No'], [true, 'Yes']]) +
+        seg('distribution.' + i + '.earns.organising', 'Also for organising a group', [[false, 'No'], [true, 'Yes']]) +
+        '<div class="subhead">What it is worth</div>' +
+        '<div class="grid2">' +
+          '<label class="field"><span>Credits earned per hour</span><input type="number" min="0.1" max="20" step="0.1" data-path="distribution.' + i + '.credits_per_hour" data-kind="num" value="' + (x.credits_per_hour || 1) + '"></label>' +
+          '<label class="field"><span>One credit exchanges for S$</span><input type="number" min="0.5" max="200" step="0.5" data-path="distribution.' + i + '.sgd_per_credit" data-kind="num" value="' + (x.sgd_per_credit || 10) + '"></label>' +
+          '<label class="field"><span>Most credits anyone can earn a month</span><input type="number" min="1" max="400" step="1" data-path="distribution.' + i + '.cap_credits_month" data-kind="num" value="' + (x.cap_credits_month || 60) + '"></label>' +
+        '</div>' +
+        '<div class="hint">An hour is worth about <b>S$' + perHour + '</b>, up to about <b>S$' + capSgd + '</b> a month per person.</div>' +
+        seg('distribution.' + i + '.funding', 'Who pays for it', [['payment', 'The payment\'s own pot'], ['budget', 'New money from the budget']]) +
+        '<div class="hint">' + (x.funding === 'budget'
+          ? 'An obligation that comes off the top of the budget, before the payment, infrastructure and reserves are split.'
+          : 'Everyone\'s payment falls a little, and that money goes to the people who earned it. It redistributes without costing more.') + '</div>' +
+        '<label class="field"><span>Anything else people should be told (optional)</span><textarea rows="2" data-path="distribution.' + i + '.note" placeholder="Credits can be saved for up to a year.">' + esc(x.note || '') + '</textarea></label>' +
+        '</div>';
+    }).join('') : '<div class="empty">No schemes yet: the payment is the only way anything is shared out.</div>') + '</div>';
+    body += '<div><button type="button" class="btn sm" data-add="scheme">Add a scheme</button></div>';
+    return body;
+  },
+
+  institutions: function () {
+    var list = Store.draft.institutions || [];
+    var body = '<div class="hint">Your society invents things nobody planned: repair cafes, tool libraries, people selling food from their kitchens. ' +
+      'Adopting one makes it part of the country: it is funded, licensed, subsidised or endorsed, and from then on <b>everyone is told it exists</b>. ' +
+      'You cannot change what a behaviour means, only what the state does about it.</div>';
+    body += '<div class="list">' + (list.length ? list.map(function (x, i) {
+      return '<div class="item">' +
+        '<div class="row"><label class="field"><span>Name</span><input type="text" data-path="institutions.' + i + '.name" value="' + esc(x.name || '') + '" placeholder="Tool Library"></label>' +
+        '<label class="field" style="flex:0 0 190px"><span>Industry it acts in</span><select data-path="institutions.' + i + '.sector">' +
+          SECTORS.map(function (k) { return '<option value="' + k + '"' + (x.sector === k ? ' selected' : '') + '>' + esc(E.SECTORS[k].name) + '</option>'; }).join('') +
+        '</select></label>' +
+        '<button type="button" class="btn sm ghost" data-remove="institutions" data-i="' + i + '">Remove</button></div>' +
+        '<div class="choice"><span>What you are doing about it</span><div class="seg" role="group" aria-label="Adoption">' +
+          ADOPTIONS.map(function (a) {
+            return '<button type="button" data-set="institutions.' + i + '.adoption" data-val=\'"' + a[0] + '"\' aria-pressed="' + (x.adoption === a[0]) + '">' + a[1] + '</button>';
+          }).join('') + '</div>' +
+          '<div class="hint">' + esc((ADOPTIONS.find(function (a) { return a[0] === x.adoption; }) || ADOPTIONS[0])[2]) + '</div></div>' +
+        (x.adoption === 'fund' || x.adoption === 'ease'
+          ? '<label class="field"><span>Budget, S$bn a year</span><input type="number" min="0" max="60" step="0.1" data-path="institutions.' + i + '.budget_bn" data-kind="num" value="' + (x.budget_bn || 0) + '"></label>' : '') +
+        '<label class="field"><span>What it is for, in your words</span><textarea rows="2" data-path="institutions.' + i + '.mandate" placeholder="A repair workshop in every block, open to anyone">' + esc(x.mandate || '') + '</textarea></label>' +
+        (x.behaviour ? '<div class="hint">Adopted from the behaviour <b>' + esc(x.behaviour) + '</b>.</div>' : '') +
+        '</div>';
+    }).join('') : '<div class="empty">Nothing adopted yet.</div>') + '</div>';
+    body += '<div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" data-add="institution">Add one by hand</button>' +
+      '<button type="button" class="btn sm" id="fromRun">Adopt from your last run</button></div><div id="fromRunList"></div>';
+    return body;
+  },
+
+  trade: function () {
+    var t = Store.draft.trade;
+    return '<label class="field"><span>Stance</span><select data-path="trade.style">' +
+      [['reciprocal', 'Reciprocal: deal fairly, honour forwards'], ['protective', 'Protective: buy what defends services, give aid'],
+       ['extractive', 'Extractive: sell high, buy only when cheap'], ['none', 'Do not trade']].map(function (o) {
+        return '<option value="' + o[0] + '"' + (t.style === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+      }).join('') + '</select></label>' +
+      '<label class="field"><span>Never sell</span><input type="text" data-path="trade.never_sell" data-kind="csv" value="' + esc((t.never_sell || []).join(', ')) + '" placeholder="food, energy"></label>';
+  }
+};
+var BLURB = {
+  economy: 'The budget split, taxes, public ownership, and how work and welfare are organised.',
+  automation: 'How far each of the thirteen industries may automate.',
+  government: 'Who sets your levers each round, and on what basis.',
+  constitution: 'What you promise, the rules that test it, and any policies you write yourself.',
+  case: 'Your weighting of the guiding rubric, and the argument for it.',
+  trade: 'Your stance toward other societies.'
+};
+
+function policyCheck(parsed) {
+  if (!parsed.length) return '';
+  return parsed.map(function (p) {
+    return p.invalid ? '<span class="check bad">✗ ' + esc(p.reason) + '</span>' : '<span class="check ok">✓ ' + esc(describePolicy(p)) + '</span>';
+  }).join('');
+}
+function describePolicy(x) {
+  if (x.type === 'tax') return Math.round(x.rate * 100) + '% tax on ' + x.base.replace('_', ' ');
+  if (x.type === 'transfer') return 'S$' + x.sgd_month + ' a month to ' + x.to.replace('_', ' ');
+  if (x.type === 'regulate') return x.what.replace('_', ' ') + (x.sector ? ' in ' + x.sector.replace(/_/g, ' ') : '') + ' at ' + x.limit;
+  if (x.type === 'provide') return 'S$' + x.budget_bn + 'bn a year into ' + x.sector.replace(/_/g, ' ');
+  if (x.type === 'institution') return x.name + ' (S$' + x.budget_bn + 'bn)';
+  return 'announces: "' + x.text + '"';
+}
+
+/* ---------------------------------------------------------------------
+   RENDER
+   --------------------------------------------------------------------- */
+function renderForms() {
+  document.getElementById('forms').innerHTML = M.SECTIONS.map(function (s) {
+    return '<section class="card" id="sec-' + s.id + '" data-sec="' + s.id + '">' +
+      '<header><div><h2>' + s.title + '</h2><p>' + BLURB[s.id] + '</p></div><span class="state" data-state="' + s.id + '"></span></header>' +
+      '<div class="body" data-body="' + s.id + '">' + BODIES[s.id]() + '</div>' +
+      '<footer><button type="button" class="btn pri" data-save="' + s.id + '">Save ' + s.title.toLowerCase() + '</button>' +
+      '<button type="button" class="btn ghost" data-discard="' + s.id + '">Discard changes</button><span class="msg" data-msg="' + s.id + '"></span></footer></section>';
+  }).join('');
+  refreshStates();
+}
+function renderBody(id) {
+  var el = document.querySelector('[data-body="' + id + '"]');
+  if (el) el.innerHTML = BODIES[id]();
+}
+
+/* Under each rule: can it run? The same checks the server applies. */
+function refreshRuleChecks() {
+  var g = Store.draft.government;
+  if (g.kind !== 'rules' || !window.MeridianRules) return;
+  MeridianRules.checkSetupRules(g.rules).forEach(function (c) {
+    var el = document.querySelector('[data-rulecheck="' + c.index + '"]');
+    if (!el) return;
+    el.className = 'check ' + (c.ok ? 'ok' : 'bad');
+    el.textContent = c.ok ? '✓ This rule can run.' : '✗ ' + c.problems.join('; ');
+  });
+}
+
+/* What your society actually invented, offered back to you to adopt. */
+function paintBehaviours(data) {
+  var host = document.getElementById('fromRunList');
+  if (!host) return;
+  if (!data) { host.innerHTML = '<div class="hint">Looking for your last run…</div>'; return; }
+  if (data.error) { host.innerHTML = '<div class="hint">' + esc(data.error) + '</div>'; return; }
+  var mine = Store.draft.institutions || [];
+  host.innerHTML = '<div class="hint" style="margin-top:10px">From <b>' + esc(data.when) + '</b>. ' +
+      'Novel behaviours are the ones nothing in the simulation expected.</div>' +
+    '<div class="list">' + data.behaviours.slice(0, 12).map(function (b, i) {
+      var taken = mine.some(function (x) { return x.behaviour === b.label; });
+      return '<div class="item"><div class="row" style="align-items:center">' +
+        '<div style="flex:1"><b>' + esc(b.label) + '</b>' + (b.novel ? ' <span class="state">novel</span>' : '') +
+        '<div class="hint">first seen ' + b.first_year + ' · reached ' + b.peak_share + '% of adults · ' +
+          esc((b.examples || []).slice(0, 1).map(function (x) { return '"' + x + '"'; }).join('')) + '</div></div>' +
+        '<button type="button" class="btn sm" data-adopt="' + i + '"' + (taken ? ' disabled' : '') + '>' + (taken ? 'Adopted' : 'Adopt') + '</button>' +
+        '</div></div>';
+    }).join('') + '</div>';
+  host.querySelectorAll('[data-adopt]').forEach(function (btn) {
+    btn.onclick = function () {
+      var b = data.behaviours[+btn.dataset.adopt], d = b.institution_draft || {};
+      Store.edit('institutions', (Store.draft.institutions || []).concat([{
+        id: b.label.replace(/[^a-z0-9]+/g, '-'), name: d.name || b.label, behaviour: b.label,
+        sector: d.sector || 'public_admin', adoption: d.adoption || 'fund', budget_bn: d.budget_bn || 0, mandate: ''
+      }]));
+      renderBody('institutions'); refreshStates(); paintBehaviours(data);
+    };
+  });
+}
+
+async function loadBehaviours() {
+  paintBehaviours(null);
+  try {
+    var runs = await (await fetch('/api/runs', { cache: 'no-store' })).json();
+    var mine = (runs.runs || []).filter(function (r) { return Store.team && M.slug(r.team) === M.slug(Store.team) && r.report; });
+    if (!mine.length) return paintBehaviours({ error: 'No finished run yet. Run your society on the Simulation page, and what it invents will appear here.' });
+    var full = await (await fetch('/api/runs/' + encodeURIComponent(mine[0].id), { cache: 'no-store' })).json();
+    var bs = full.evidence && full.evidence.society ? full.evidence.society.behaviours : null;
+    if (!bs || !bs.length) return paintBehaviours({ error: 'That run recorded no behaviours. Runs with a model interpret every action and list what people invented.' });
+    paintBehaviours({ when: new Date(mine[0].created).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), behaviours: bs });
+  } catch (e) { paintBehaviours({ error: 'Could not read your last run: ' + e.message }); }
+}
+
+function refreshStates() {
+  refreshRuleChecks();
+  var saved = Store.saved;
+  M.SECTIONS.forEach(function (s) {
+    var dirty = Store.dirty(s.id);
+    var card = document.getElementById('sec-' + s.id);
+    var st = document.querySelector('[data-state="' + s.id + '"]');
+    var at = saved.savedSections && saved.savedSections[s.id];
+    if (card) card.classList.toggle('dirty', dirty);
+    if (st) {
+      st.className = 'state ' + (dirty ? 'dirty' : (at ? 'ok' : ''));
+      st.textContent = dirty ? 'Unsaved changes' : (at ? 'Saved ' + M.timeOf(at) : 'Not saved yet');
+    }
+    var sb = document.querySelector('[data-save="' + s.id + '"]');
+    if (sb) sb.disabled = !dirty;
+    var db = document.querySelector('[data-discard="' + s.id + '"]');
+    if (db) db.disabled = !dirty;
+  });
+  document.getElementById('saveAll').hidden = !Store.dirty();
+  document.getElementById('index').innerHTML = M.SECTIONS.map(function (s) {
+    var dirty = Store.dirty(s.id), at = saved.savedSections && saved.savedSections[s.id];
+    return '<a href="#sec-' + s.id + '"><span>' + s.title + '</span><i class="st ' + (dirty ? 'dirty' : (at ? 'ok' : '')) + '" title="' +
+      (dirty ? 'unsaved changes' : (at ? 'saved' : 'not saved yet')) + '"></i></a>';
+  }).join('');
+  renderSaved();
+}
+
+/* The saved system, exactly as committed. Text is shown as written. */
+function renderSaved() {
+  var s = Store.saved, L = s.levers, g = s.government, c = s.constitution, k = s.case;
+  var dirty = function (id) { return Store.dirty(id) ? '<em>edits not saved</em>' : ''; };
+  var quote = function (t) { return t && String(t).trim() ? '<div class="quote">' + esc(t) + '</div>' : '<div class="quote none">Nothing written</div>'; };
+  var html = '<header><h2>Your saved system</h2><div class="meta">' + (s.savedAt ? 'Version ' + s.version + ' · saved ' + M.timeOf(s.savedAt) : 'Nothing saved yet. Until you save, runs use the defaults shown here.') + '</div></header>';
+  html += '<section><h3>Economy ' + dirty('economy') + '</h3><div class="kv">' +
+    '<span>Payment · infrastructure · reserves</span><b>' + Math.round(L.allocation.ubi * 100) + ' · ' + Math.round(L.allocation.infrastructure * 100) + ' · ' + Math.round(L.allocation.reserves * 100) + '</b>' +
+    '<span>Corporate tax</span><b>' + pct(L.corporate_tax_rate) + '</b><span>Tax on automation</span><b>' + pct(L.compute_levy) + '</b>' +
+    '<span>Public ownership</span><b>' + pct(L.public_ownership_pct) + '</b><span>Reskilling</span><b>' + pct(L.reskilling_spend_pct) + '</b>' +
+    '<span>Payment shared</span><b>' + ({ flat: 'equally', means_tested: 'by means', age_weighted: 'by age' })[L.ubi_design] + '</b>' +
+    '<span>Working week</span><b>' + L.working_week_days + ' days</b><span>Care job guarantee</span><b>' + (L.care_job_guarantee ? 'on' : 'off') + '</b></div></section>';
+  html += '<section><h3>AI adoption ' + dirty('automation') + '</h3><div class="kv">' + SECTORS.map(function (x) {
+    return '<span>' + esc(E.SECTORS[x].name) + '</span><b>' + pct(L.automation_target[x]) + '</b>'; }).join('') + '</div></section>';
+  html += '<section><h3>Government ' + dirty('government') + '</h3>' + (g.kind === 'llm'
+    ? '<div class="kv"><span>Decides by</span><b>model briefing</b></div>' +
+      [['persona', 'Who is governing'], ['doctrine', 'Doctrine'], ['priorities', 'When things conflict'], ['trading', 'Trading']].map(function (f) {
+        return '<div class="lbl" style="margin-top:6px">' + f[1] + '</div>' + quote(g.briefing[f[0]]); }).join('')
+    : '<div class="kv"><span>Decides by</span><b>' + g.rules.length + ' rule' + (g.rules.length === 1 ? '' : 's') + '</b></div>' +
+      g.rules.map(function (r) { return '<div class="quote">when ' + esc(r.when || '…') + ': ' + (r.then || []).map(function (a) { return esc(a.verb + ' ' + (a.target || '') + ' ' + (a.amount || '')); }).join('; ') + '</div>'; }).join('')) + '</section>';
+  var commits = c.commitments.filter(function (x) { return x && x.trim(); });
+  html += '<section><h3>Constitution ' + dirty('constitution') + '</h3>' +
+    '<div class="kv"><span>Name</span><b style="font-family:inherit">' + (c.name ? esc(c.name) : '–') + '</b></div>' +
+    (commits.length ? commits.map(function (x, i) { return '<div class="quote">' + (i + 1) + '. ' + esc(x) + '</div>'; }).join('') : quote('')) +
+    (c.rules.length ? '<div class="lbl" style="margin-top:6px">Checkable rules</div>' + c.rules.map(function (r) { return '<div class="quote">' + esc((r.when || 'always') + ' → ' + (r.assert || '')) + '</div>'; }).join('') : '') +
+    (c.policies && c.policies.trim() ? '<div class="lbl" style="margin-top:6px">Written policies</div>' + M.policiesFrom(c.policies).map(function (p) {
+      return '<div class="quote">' + (p.invalid ? '✗ ' + esc(p.reason) : esc(describePolicy(p))) + '</div>'; }).join('') : '') + '</section>';
+  html += '<section><h3>Your case ' + dirty('case') + '</h3><div class="kv">' + M.ANGLES.map(function (a) {
+    return '<span>' + a[1] + '</span><b>' + (k.rubric[a[0]] === '' || k.rubric[a[0]] == null ? '–' : esc(k.rubric[a[0]])) + '</b>'; }).join('') + '</div>' + quote(k.text) + '</section>';
+  html += '<section><h3>Distribution ' + dirty('distribution') + '</h3>' +
+    ((s.distribution || []).length
+      ? (s.distribution || []).map(function (x) {
+          return '<div class="kv"><span>' + esc(x.name || 'unnamed') + '</span><b>S$' + Math.round((x.credits_per_hour || 1) * (x.sgd_per_credit || 10)) + '/hour · ' +
+            (x.funding === 'budget' ? 'new money' : 'from the payment') + '</b></div>';
+        }).join('')
+      : '<div class="quote none">The payment only</div>') + '</section>';
+
+  html += '<section><h3>Institutions ' + dirty('institutions') + '</h3>' +
+    ((s.institutions || []).length
+      ? (s.institutions || []).map(function (x) {
+          return '<div class="kv"><span>' + esc(x.name || 'unnamed') + '</span><b>' + esc(x.adoption) + (x.budget_bn ? ' · $' + x.budget_bn + 'bn' : '') + '</b></div>';
+        }).join('')
+      : '<div class="quote none">Nothing adopted</div>') + '</section>';
+
+  html += '<section><h3>Trade ' + dirty('trade') + '</h3><div class="kv"><span>Stance</span><b>' + esc(s.trade.style) + '</b><span>Never sell</span><b>' +
+    ((s.trade.never_sell || []).length ? esc(s.trade.never_sell.join(', ')) : '–') + '</b></div></section>';
+  document.getElementById('saved').innerHTML = html;
+}
+
+function renderTeam() {
+  document.getElementById('team').innerHTML =
+    '<label class="field"><span>Your team</span><input type="text" id="teamName" maxlength="28" value="' + esc(Store.team || '') + '" placeholder="Team name, as you will submit it"></label>' +
+    '<button type="button" class="btn pri" id="teamGo">' + (Store.team ? 'Change team' : 'Use this name') + '</button>' +
+    '<span class="hint">' + (Store.team ? 'Saved settings are kept under this name on the room\'s server.' : 'Choose a name first. The market matches teams on it, and your saved settings are kept under it.') + '</span>';
+  document.getElementById('teamGo').onclick = function () {
+    var v = document.getElementById('teamName').value;
+    if (!v.trim()) return;
+    Store.setTeam(v).then(function () { renderTeam(); renderForms(); M.nav('setup'); });
+  };
+}
+
+/* ---------------------------------------------------------------------
+   EDITING — the draft changes as you type; the saved copy does not
+   --------------------------------------------------------------------- */
+var forms = document.getElementById('forms');
+function sectionOf(el) { var c = el.closest('[data-sec]'); return c ? c.getAttribute('data-sec') : null; }
+
+forms.addEventListener('input', function (e) {
+  var t = e.target;
+  if (t.hasAttribute('data-alloc')) return setAlloc(t.getAttribute('data-alloc'), Number(t.value));
+  var path = t.getAttribute('data-path');
+  if (!path) return;
+  var kind = t.getAttribute('data-kind');
+  var v = kind === 'num' ? Number(t.value)
+    : kind === 'csv' ? t.value.split(',').map(function (x) { return x.trim(); }).filter(Boolean)
+    : t.value;
+  Store.edit(path, v);
+  var show = document.querySelector('[data-show="' + path + '"]');
+  if (show) show.textContent = pct(v);
+  if (path === 'constitution.policies') document.querySelector('[data-policycheck]').innerHTML = policyCheck(M.policiesFrom(v));
+  if (path.indexOf('case.rubric') === 0) {
+    var r = Store.draft.case.rubric, total = M.ANGLES.reduce(function (a, g) { return a + (Number(r[g[0]]) || 0); }, 0);
+    document.querySelector('[data-total]').textContent = total ? 'Total weight ' + total + (total !== 100 ? ' (shares are read relative to the total)' : '') : 'No weights yet.';
+  }
+  refreshStates();
+});
+forms.addEventListener('change', function (e) {
+  var t = e.target;
+  if (t.tagName === 'SELECT' && t.getAttribute('data-path')) {
+    var sp = t.getAttribute('data-path');
+    Store.edit(sp, t.value);
+    /* a new verb or lever changes what the other two fields may hold */
+    if (V && /^government\.rules\.\d+\.then\.\d+\.(verb|target)$/.test(sp)) {
+      var ap = sp.replace(/\.(verb|target)$/, ''), act = M.getPath(Store.draft, ap);
+      var nl = leverOf(act.target), amt = Number(act.amount);
+      var keep = /[.]target$/.test(sp) && act.verb === 'set' && nl && nl.range && act.amount !== '' && amt >= nl.range[0] && amt <= nl.range[1];
+      Store.edit(ap, keep ? { verb: act.verb, target: act.target, amount: act.amount } : defaultAction(act.verb, act.target));
+      renderBody('government');
+    } else if (/\.verb$/.test(sp)) renderBody('government');
+    refreshStates();
+  }
+});
+forms.addEventListener('click', function (e) {
+  var b = e.target.closest('button');
+  if (!b) return;
+  var sec = sectionOf(b);
+  if (b.hasAttribute('data-set')) {
+    Store.edit(b.getAttribute('data-set'), JSON.parse(b.getAttribute('data-val')));
+    renderBody(sec); refreshStates(); return;
+  }
+  if (b.hasAttribute('data-remove')) {
+    var list = M.clone(M.getPath(Store.draft, b.getAttribute('data-remove')));
+    list.splice(Number(b.getAttribute('data-i')), 1);
+    Store.edit(b.getAttribute('data-remove'), list);
+    renderBody(sec); refreshStates(); return;
+  }
+  if (b.hasAttribute('data-add')) {
+    var what = b.getAttribute('data-add');
+    if (what === 'rule') Store.edit('government.rules', Store.draft.government.rules.concat([{ when: '', then: [{ verb: 'shift', target: 'reserves->ubi', amount: '1' }] }]));
+    if (what === 'commitment') Store.edit('constitution.commitments', Store.draft.constitution.commitments.concat(['']));
+    if (what === 'crule') Store.edit('constitution.rules', Store.draft.constitution.rules.concat([{ when: 'always', assert: '' }]));
+    if (what === 'scheme') Store.edit('distribution', (Store.draft.distribution || []).concat([{
+      id: 'scheme-' + Date.now().toString(36), name: '', earns: { time: true, sector_choice: 'all', ties: false, organising: false },
+      credits_per_hour: 1, sgd_per_credit: 10, cap_credits_month: 40, funding: 'payment', note: '' }]));
+    if (what === 'institution') Store.edit('institutions', (Store.draft.institutions || []).concat([{ id: 'new-' + Date.now().toString(36), name: '', behaviour: null, sector: 'care_services', adoption: 'fund', budget_bn: 0.5, mandate: '' }]));
+    renderBody(sec); refreshStates(); return;
+  }
+  if (b.hasAttribute('data-insert')) {
+    var ip = b.getAttribute('data-insert'), box = b.closest('.builder');
+    var pick = function (n) { return box.querySelector('[data-b="' + n + '"]').value.trim(); };
+    var term = pick('term').replace('*', pick('sector')), num = pick('value');
+    if (num === '' || isNaN(Number(num))) { box.querySelector('[data-b="value"]').focus(); return; }
+    var have = String(M.getPath(Store.draft, ip) || '').trim();
+    Store.edit(ip, (have ? have + ' ' + pick('join') + ' ' : '') + term + ' ' + pick('op') + ' ' + num);
+    renderBody(sec); refreshStates(); return;
+  }
+  if (b.hasAttribute('data-add-action')) {
+    var i = Number(b.getAttribute('data-add-action'));
+    var then = (Store.draft.government.rules[i].then || []).concat([{ verb: 'nudge', target: 'corporate_tax_rate', amount: '0.01' }]);
+    Store.edit('government.rules.' + i + '.then', then);
+    renderBody('government'); refreshStates(); return;
+  }
+  if (b.hasAttribute('data-save')) return save(b.getAttribute('data-save'));
+  if (b.id === 'fromRun') { loadBehaviours(); return; }
+  if (b.hasAttribute('data-discard')) { Store.discard(b.getAttribute('data-discard')); renderBody(b.getAttribute('data-discard')); refreshStates(); }
+});
+
+function setAlloc(k, v) {
+  var a = M.clone(Store.draft.levers.allocation);
+  v = Math.round(v * 100) / 100;
+  var others = ['ubi', 'infrastructure', 'reserves'].filter(function (o) { return o !== k; });
+  var sum = others.reduce(function (s, o) { return s + a[o]; }, 0), rest = 1 - v;
+  a[k] = v;
+  if (sum <= 1e-4) others.forEach(function (o) { a[o] = Math.round(rest / 2 * 100) / 100; });
+  else others.forEach(function (o) { a[o] = Math.round(a[o] / sum * rest * 100) / 100; });
+  Store.edit('levers.allocation', a);
+  ['ubi', 'infrastructure', 'reserves'].forEach(function (o) {
+    var sh = document.querySelector('[data-show="alloc.' + o + '"]'); if (sh) sh.textContent = Math.round(a[o] * 100) + '%';
+    var bar = document.querySelector('[data-bar="' + o + '"]'); if (bar) bar.style.width = (a[o] * 100) + '%';
+    var inp = document.querySelector('[data-alloc="' + o + '"]'); if (inp && o !== k) inp.value = a[o];
+  });
+  refreshStates();
+}
+
+function save(id) {
+  var msg = id ? document.querySelector('[data-msg="' + id + '"]') : null;
+  if (!Store.team) {
+    if (msg) msg.textContent = 'Choose your team name at the top first.';
+    document.getElementById('teamName').focus();
+    return;
+  }
+  Store.save(id || null).then(function (r) {
+    refreshStates();
+    var text = r.ok ? 'Saved. Version ' + Store.saved.version + ' is now what your runs use.'
+      : 'Saved on this laptop, but the room\'s server did not confirm. It will retry on your next save.';
+    if (msg) msg.textContent = text;
+    else M.SECTIONS.forEach(function (s) { var m = document.querySelector('[data-msg="' + s.id + '"]'); if (m) m.textContent = ''; });
+  });
+}
+document.getElementById('saveAll').onclick = function () { save(null); };
+document.addEventListener('keydown', function (e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); if (Store.dirty()) save(null); }
+});
+
+Store.init().then(function () {
+  M.nav('setup');
+  renderTeam();
+  renderForms();
+  if (location.hash) { var t = document.querySelector(location.hash); if (t) t.scrollIntoView(); }
+});
+})();
+</script>
+</body>
+</html>

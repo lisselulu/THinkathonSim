@@ -1,0 +1,45 @@
+{
+  "_comment": "Run sizes. Runs advance in monthly TICKS. `every` is how many ticks pass between decisions: the kernel moves every tick, the government decides every tick, and residents and firms decide on their own cadence and hold what they chose in between. `tickMs` is how long a tick takes in live pace (150000 ms = 2.5 minutes, so a year is 30 minutes). `local` fits a single 7B on a laptop; `dgx` assumes a batching server (vLLM or SGLang). `substeps` and `rounds` apply only to the older two-year mode.",
+  "local": {
+    "population": 40,
+    "substeps": 1,
+    "concurrency": 1,
+    "rounds": 12,
+    "policyReviewEvery": 4,
+    "temperature": 0.7,
+    "every": {
+      "residents": 3,
+      "firms": 3,
+      "government": 1
+    },
+    "tickMs": 150000
+  },
+  "classroom": {
+    "population": 200,
+    "substeps": 2,
+    "concurrency": 16,
+    "rounds": 12,
+    "policyReviewEvery": 2,
+    "temperature": 0.7,
+    "every": {
+      "residents": 3,
+      "firms": 3,
+      "government": 1
+    },
+    "tickMs": 150000
+  },
+  "dgx": {
+    "population": 1000,
+    "substeps": 8,
+    "concurrency": 96,
+    "rounds": 12,
+    "policyReviewEvery": 2,
+    "temperature": 0.7,
+    "every": {
+      "residents": 1,
+      "firms": 3,
+      "government": 1
+    },
+    "tickMs": 150000
+  }
+}

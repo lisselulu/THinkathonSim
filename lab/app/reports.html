@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/app.css">
+<style>
+  .page{max-width:1040px;margin:0 auto;padding:26px 24px 80px;display:flex;flex-direction:column;gap:18px}
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 20px;flex-wrap:wrap}
+  .head h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:44px;line-height:1;margin:0}
+  .head p{margin:6px 0 0;color:var(--muted2);max-width:62ch}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .run{background:var(--panel);border:1.5px solid var(--line2);border-radius:6px;padding:14px 18px;
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 20px;align-items:center}
+  @media(max-width:760px){.run{grid-template-columns:1fr}}
+  .run .top{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap}
+  .run h2{font-size:16px;margin:0}
+  .run .when{font-family:"Space Mono",monospace;font-size:12px;color:var(--muted)}
+  .run .facts{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:12.5px;color:var(--muted2)}
+  .run .facts b{color:var(--ink);font-weight:700}
+  .run .err{font-size:12.5px;color:var(--bad);margin-top:6px}
+  .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  @media(max-width:760px){.acts{justify-content:flex-start}}
+  a.btn{text-decoration:none;display:inline-flex;align-items:center}
+  .pill.run-live{background:#DCE5EF;color:#3D5570}
+  .quiet{border:1.5px dashed var(--line2);border-radius:6px;padding:18px;color:var(--muted2);background:var(--panel2)}
+</style>
+</head>
+<body>
+<header id="nav"></header>
+
+<div class="page">
+  <div class="head">
+    <div>
+      <h1>Reports</h1>
+      <p>Every agent run, with its evidence. Open a report to read it, or download it as a PDF, as the report data, or as the full record for replaying the run.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Whose runs" id="scope"></div>
+  </div>
+  <div class="list" id="list"><div class="quiet">Loading runs…</div></div>
+</div>
+
+<script src="/js/meridian.js"></script>
+<script src="/app/common.js"></script>
+<script>
+(function(){
+'use strict';
+var M = window.Meridian, Store = M.Store, esc = M.esc;
+var S = { scope: M.lsGet('reportsScope', 'mine'), runs: [] };
+
+var STATUS = { finished: ['Finished', 'good'], stopped: ['Stopped early', 'mid'], failed: ['Failed', 'bad'],
+               running: ['Running', 'run-live'], queued: ['Waiting', 'run-live'] };
+var GOV = { rules: 'rules', llm: 'model briefing', none: 'no government' };
+var SIZE = { local: 'laptop size', classroom: 'classroom size', dgx: 'DGX size' };
+
+function paintScope() {
+  var el = document.getElementById('scope');
+  el.innerHTML = [['mine', Store.team ? esc(Store.team) : 'Your team'], ['all', 'All teams']].map(function (o) {
+    return '<button data-scope="' + o[0] + '" aria-pressed="' + (S.scope === o[0]) + '">' + o[1] + '</button>';
+  }).join('');
+  el.querySelectorAll('[data-scope]').forEach(function (b) {
+    b.onclick = function () { S.scope = b.dataset.scope; M.lsSet('reportsScope', S.scope); paintScope(); paint(); };
+  });
+}
+
+function when(ts) {
+  return ts ? new Date(ts).toLocaleString('en-SG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+}
+
+function paint() {
+  var el = document.getElementById('list');
+  var runs = S.runs.filter(function (r) { return S.scope === 'all' || (Store.team && M.slug(r.team) === M.slug(Store.team)); });
+  if (!runs.length) {
+    el.innerHTML = '<div class="quiet">' + (S.scope === 'mine' && S.runs.length
+      ? 'Your team has no runs yet. <a href="/sim">Run the society on the Simulation page</a>, or look at <b>All teams</b>.'
+      : 'No runs yet. <a href="/sim">Run the society on the Simulation page</a>; its report appears here.') + '</div>';
+    return;
+  }
+  el.innerHTML = runs.map(function (r) {
+    var st = STATUS[r.status] || [r.status, ''];
+    var set = r.settings || {}, h = r.headline;
+    var id = encodeURIComponent(r.id);
+    var facts = [];
+    if (S.scope === 'all') facts.push('<span>team <b>' + esc(r.team) + '</b></span>');
+    facts.push('<span>' + esc(SIZE[set.profile] || set.profile || '') + ', ' + (set.tick ? (set.years || 24) + ' years by the month' : (set.rounds || 12) + ' two-year rounds') +
+      (set.pace === 'live' ? ', live pace' : '') + '</span>');
+    if (r.year && r.status !== 'finished') facts.push('<span>reached <b>' + r.year + '</b></span>');
+    if (set.systemVersion != null) facts.push('<span>saved version <b>' + set.systemVersion + '</b></span>');
+    facts.push('<span>governed by <b>' + esc(GOV[r.government || set.government] || 'no government') + '</b></span>');
+    if (set.noModel) facts.push('<span><b>physics only</b></span>');
+    if (h && h.decided_by_agents_pct != null) facts.push('<span><b>' + h.decided_by_agents_pct + '%</b> decided by agents</span>');
+    if (h && h.degraded) facts.push('<span style="color:var(--bad)"><b>degraded</b></span>');
+    var acts = r.report
+      ? '<a class="btn pri" href="/runs/' + id + '">Open report</a>' +
+        '<a class="btn" href="/runs/' + id + '?print=1" target="_blank" rel="noopener">PDF</a>' +
+        '<a class="btn" href="/api/runs/' + id + '/download/report" download>Report data</a>' +
+        '<a class="btn ghost" href="/api/runs/' + id + '/download/record" download>Full record</a>'
+      : (r.status === 'running' || r.status === 'queued'
+          ? '<a class="btn" href="/runs/' + id + '">Watch it run</a>'
+          : '<span class="hint">No report: the run ended before any evidence was written.</span>');
+    return '<article class="run"><div>' +
+      '<div class="top"><h2>' + when(r.created) + '</h2><span class="pill ' + st[1] + '">' + st[0] + '</span></div>' +
+      '<div class="facts">' + facts.join('') + '</div>' +
+      (r.error ? '<div class="err">' + esc(r.error) + '</div>' : '') +
+      '</div><div class="acts">' + acts + '</div></article>';
+  }).join('');
+}
+
+var timer = null;
+function load() {
+  clearTimeout(timer);
+  fetch('/api/runs', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+    S.runs = j.runs || [];
+    paint();
+    if (S.runs.some(function (r) { return r.status === 'running' || r.status === 'queued'; })) timer = setTimeout(load, 4000);
+  }).catch(function () {
+    document.getElementById('list').innerHTML = '<div class="quiet">The runs could not be loaded. Is the server running?</div>';
+  });
+}
+
+Store.init().then(function () { M.nav('reports'); paintScope(); load(); });
+Store.on(function () { paintScope(); paint(); });
+})();
+</script>
+</body>
+</html>

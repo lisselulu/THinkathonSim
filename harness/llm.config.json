@@ -1,0 +1,15 @@
+{
+  "baseUrl": "http://localhost:1234/v1",
+  "model": "qwen2.5-7b-instruct",
+  "timeoutMs": 180000,
+  "temperature": 0.4,
+  "maxConcurrent": 1,
+  "_maxConcurrent": "One prompt at a time, across everything this machine runs, to keep the load on one GPU. Raise it (or set 0 for no limit) on a batching server such as vLLM on the DGX. LLM_MAX_CONCURRENT overrides it.",
+  "_comment": "LM Studio's local server. Start it from the Developer tab and load the model named above. Ollama instead? baseUrl http://localhost:11434/v1 and the model as Ollama names it, e.g. qwen2.5:7b-instruct. An environment variable still overrides anything here, so one run can point somewhere else without editing this file.",
+  "_models_available_here": [
+    "qwen2.5-7b-instruct",
+    "qwen2.5-14b-instruct-1m",
+    "qwen/qwen3.5-9b",
+    "deepseek/deepseek-r1-0528-qwen3-8b"
+  ]
+}

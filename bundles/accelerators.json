@@ -1,0 +1,63 @@
+{
+  "team": "Accelerators",
+  "constitution": {
+    "name": "The Abundance Declaration",
+    "commitments": [
+      "We take every point of productivity.",
+      "Proceeds return as cash, unconditionally."
+    ],
+    "rules": [
+      {
+        "id": "cash",
+        "commitment": 1,
+        "when": "always",
+        "assert": "levers.ubi_design == 'flat'"
+      },
+      {
+        "id": "majority",
+        "commitment": 1,
+        "when": "always",
+        "assert": "levers.allocation.ubi >= 0.6"
+      }
+    ]
+  },
+  "harness": {
+    "kind": "policy",
+    "policy": {
+      "opening": {
+        "corporate_tax_rate": 0.34,
+        "compute_levy": 0.1,
+        "reskilling_spend_pct": 0.04,
+        "public_ownership_pct": 0.09,
+        "ubi_design": "flat",
+        "working_week_days": 5,
+        "care_job_guarantee": false,
+        "allocation": {
+          "ubi": 0.7,
+          "infrastructure": 0.22,
+          "reserves": 0.08
+        },
+        "automation_target": {
+          "healthcare": 0.8,
+          "care_services": 0.45,
+          "education_research": 0.7,
+          "transport_logistics": 0.95,
+          "energy_utilities": 0.93,
+          "compute_telecom": 0.95,
+          "housing_construction": 0.95,
+          "food_agri": 0.92,
+          "manufacturing": 0.96,
+          "finance": 0.96,
+          "retail_commerce": 0.95,
+          "public_admin": 0.85,
+          "public_safety": 0.8
+        }
+      },
+      "rules": [],
+      "trade": {
+        "style": "extractive",
+        "never_sell": []
+      }
+    }
+  }
+}

@@ -1,0 +1,953 @@
+{
+ "meta": {
+  "built": "2026-10-06",
+  "note": "Compiled by data/singstat/build.py from the tables in data/singstat/raw. Do not edit by hand.",
+  "sources": [
+   {
+    "id": "M810011",
+    "title": "Singapore Residents By Age Group, Ethnic Group And Sex, At End June, Annual",
+    "agency": "Singapore Department Of Statistics",
+    "period": "end June 2026",
+    "updated": "25/09/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810011?limit=5000",
+    "used_for": "ethnicity by age; ages of people 65 and over"
+   },
+   {
+    "id": "M810381",
+    "title": "Singapore Residents By Age Group And Type Of Dwelling, Annual",
+    "agency": "Singapore Department Of Statistics",
+    "period": "end June 2026",
+    "updated": "25/09/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810381?limit=5000",
+    "used_for": "type of home by age"
+   },
+   {
+    "id": "M810891",
+    "title": "Residents In Resident Households By Living Arrangement, Age Group And Sex, Annual",
+    "agency": "Singapore Department Of Statistics",
+    "period": "2025",
+    "updated": "30/06/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810891?limit=5000",
+    "used_for": "who people live with, by age"
+   },
+   {
+    "id": "M810571",
+    "title": "Resident Ever-Married Females By Age Group And Number Of Children Born, Annual",
+    "agency": "Singapore Department Of Statistics",
+    "period": "2025",
+    "updated": "30/06/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M810571?limit=5000",
+    "used_for": "number of children"
+   },
+   {
+    "id": "M182131",
+    "title": "Employed Residents Aged 15 Years And Over By Industry And Age Group, (June), Annual",
+    "agency": "Ministry Of Manpower",
+    "period": "June 2025",
+    "updated": "30/01/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M182131?limit=5000",
+    "used_for": "ages of workers in each industry; which industries older workers are in"
+   },
+   {
+    "id": "MOM A4",
+    "title": "Resident population aged fifteen years and over by labour force status, age and sex, 2025",
+    "agency": "Ministry Of Manpower, Labour Force in Singapore 2025",
+    "period": "June 2025",
+    "url": "https://stats.mom.gov.sg/iMAS_Tables1/LabourForce/LabourForce_2025/LFR2025_SectionA.xlsx",
+    "used_for": "share of people 65 and over still working; unemployed and outside the labour force by age"
+   },
+   {
+    "id": "MOM L7",
+    "title": "Residents outside the labour force aged fifteen years and over by main reason for not working, age and sex, 2025",
+    "agency": "Ministry Of Manpower, Labour Force in Singapore 2025",
+    "period": "June 2025",
+    "url": "https://stats.mom.gov.sg/iMAS_Tables1/LabourForce/LabourForce_2025/LFR2025_SectionL.xlsx",
+    "used_for": "why working-age people are not working: studying, caring, retired early, other"
+   },
+   {
+    "id": "MOM C13",
+    "title": "Employed residents aged fifteen years and over by gross monthly income from employment (excluding employer CPF), industry and sex, 2025",
+    "agency": "Ministry Of Manpower, Labour Force in Singapore 2025",
+    "period": "June 2025",
+    "url": "https://stats.mom.gov.sg/iMAS_Tables1/LabourForce/LabourForce_2025/LFR2025_SectionC.xlsx",
+    "used_for": "income position by industry"
+   },
+   {
+    "id": "C020102",
+    "title": "Resident Households by Monthly Household Market Income Per Household Member and Type of Dwelling",
+    "agency": "Singapore Department Of Statistics",
+    "period": "General Household Survey 2025",
+    "updated": "30/06/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/C020102?limit=5000",
+    "used_for": "income position by type of home"
+   },
+   {
+    "id": "C020125",
+    "title": "Resident Population by Planning Area/Subzone of Residence and Type of Dwelling",
+    "agency": "Singapore Department Of Statistics",
+    "period": "General Household Survey 2025",
+    "updated": "30/06/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/C020125?limit=5000",
+    "used_for": "region by type of home"
+   },
+   {
+    "id": "C020175",
+    "title": "Resident Population Aged 5 Years and Over by Age Group, Level of Difficulty in Performing Basic Activities and Sex",
+    "agency": "Singapore Department Of Statistics",
+    "period": "General Household Survey 2025",
+    "updated": "30/06/2026",
+    "url": "https://tablebuilder.singstat.gov.sg/api/table/tabledata/C020175?limit=5000",
+    "used_for": "health by age"
+   }
+  ],
+  "typed_in": [
+   "planning area to region (URA Master Plan 2019 planning regions)",
+   "scenario industry to published industry (SSIC 2020 sections)"
+  ],
+  "industry_of": {
+   "healthcare": [
+    "Health & Social Services"
+   ],
+   "care_services": [
+    "Health & Social Services"
+   ],
+   "education_research": [
+    "Public Administration & Education"
+   ],
+   "transport_logistics": [
+    "Transportation & Storage"
+   ],
+   "energy_utilities": [
+    "Others"
+   ],
+   "compute_telecom": [
+    "Information & Communications"
+   ],
+   "housing_construction": [
+    "Construction",
+    "Real Estate Services"
+   ],
+   "food_agri": [
+    "Accommodation & Food Services"
+   ],
+   "manufacturing": [
+    "Manufacturing"
+   ],
+   "finance": [
+    "Financial & Insurance Services"
+   ],
+   "retail_commerce": [
+    "Wholesale & Retail Trade"
+   ],
+   "public_admin": [
+    "Public Administration & Education"
+   ],
+   "public_safety": [
+    "Public Administration & Education"
+   ]
+  }
+ },
+ "elder_ages": {
+  "65-69": 276973.0,
+  "70-74": 225014.0,
+  "75-79": 166239.0,
+  "80-84": 76537.0,
+  "85-89": 51999.0,
+  "90+": 28560.0
+ },
+ "elder_employment": {
+  "65-69": 0.491,
+  "70+": 0.2227
+ },
+ "elder_by_sector": {
+  "healthcare": 14.2,
+  "care_services": 14.2,
+  "education_research": 14.4,
+  "transport_logistics": 28.5,
+  "energy_utilities": 1.8,
+  "compute_telecom": 3.7,
+  "housing_construction": 24.1,
+  "food_agri": 32.3,
+  "manufacturing": 24.2,
+  "finance": 9.7,
+  "retail_commerce": 42.0,
+  "public_admin": 14.4,
+  "public_safety": 14.4
+ },
+ "ethnicity_by_age": {
+  "20-24": {
+   "malay": 35829.0,
+   "chinese": 142501.0,
+   "indian": 24950.0,
+   "other": 8522.0
+  },
+  "25-29": {
+   "malay": 43284.0,
+   "chinese": 188374.0,
+   "indian": 23367.0,
+   "other": 7962.0
+  },
+  "30-34": {
+   "malay": 48519.0,
+   "chinese": 234597.0,
+   "indian": 24529.0,
+   "other": 9561.0
+  },
+  "35-39": {
+   "malay": 46824.0,
+   "chinese": 245215.0,
+   "indian": 27147.0,
+   "other": 13215.0
+  },
+  "40-44": {
+   "malay": 39011.0,
+   "chinese": 224707.0,
+   "indian": 31451.0,
+   "other": 15599.0
+  },
+  "45-49": {
+   "malay": 30510.0,
+   "chinese": 224178.0,
+   "indian": 34543.0,
+   "other": 15769.0
+  },
+  "50-54": {
+   "malay": 30634.0,
+   "chinese": 229064.0,
+   "indian": 31884.0,
+   "other": 15074.0
+  },
+  "55-59": {
+   "malay": 33220.0,
+   "chinese": 216014.0,
+   "indian": 26873.0,
+   "other": 12024.0
+  },
+  "60-64": {
+   "malay": 40098.0,
+   "chinese": 224835.0,
+   "indian": 24138.0,
+   "other": 8156.0
+  },
+  "65-69": {
+   "malay": 33961.0,
+   "chinese": 217904.0,
+   "indian": 19920.0,
+   "other": 5188.0
+  },
+  "70-74": {
+   "malay": 23545.0,
+   "chinese": 184163.0,
+   "indian": 14075.0,
+   "other": 3231.0
+  },
+  "75-79": {
+   "malay": 14222.0,
+   "chinese": 140218.0,
+   "indian": 9637.0,
+   "other": 2162.0
+  },
+  "80-84": {
+   "malay": 5260.0,
+   "chinese": 66779.0,
+   "indian": 3678.0,
+   "other": 820.0
+  },
+  "85-89": {
+   "malay": 3213.0,
+   "chinese": 45826.0,
+   "indian": 2410.0,
+   "other": 550.0
+  },
+  "90+": {
+   "malay": 1648.0,
+   "chinese": 24851.0,
+   "indian": 1672.0,
+   "other": 389.0
+  }
+ },
+ "dwelling_by_age": {
+  "20-24": {
+   "hdb_1_2": 8835.0,
+   "hdb_3": 21788.0,
+   "hdb_4": 62449.0,
+   "hdb_5": 63635.0,
+   "condo": 39139.0,
+   "landed": 14801.0
+  },
+  "25-29": {
+   "hdb_1_2": 10773.0,
+   "hdb_3": 30484.0,
+   "hdb_4": 90445.0,
+   "hdb_5": 75577.0,
+   "condo": 39024.0,
+   "landed": 15610.0
+  },
+  "30-34": {
+   "hdb_1_2": 9837.0,
+   "hdb_3": 36283.0,
+   "hdb_4": 126680.0,
+   "hdb_5": 82314.0,
+   "condo": 46787.0,
+   "landed": 13725.0
+  },
+  "35-39": {
+   "hdb_1_2": 8849.0,
+   "hdb_3": 37817.0,
+   "hdb_4": 122235.0,
+   "hdb_5": 82802.0,
+   "condo": 65905.0,
+   "landed": 13121.0
+  },
+  "40-44": {
+   "hdb_1_2": 10245.0,
+   "hdb_3": 35191.0,
+   "hdb_4": 100885.0,
+   "hdb_5": 73420.0,
+   "condo": 75830.0,
+   "landed": 13560.0
+  },
+  "45-49": {
+   "hdb_1_2": 11428.0,
+   "hdb_3": 37162.0,
+   "hdb_4": 93187.0,
+   "hdb_5": 71969.0,
+   "condo": 73782.0,
+   "landed": 15762.0
+  },
+  "50-54": {
+   "hdb_1_2": 12304.0,
+   "hdb_3": 41100.0,
+   "hdb_4": 89665.0,
+   "hdb_5": 76110.0,
+   "condo": 67656.0,
+   "landed": 17872.0
+  },
+  "55-59": {
+   "hdb_1_2": 14065.0,
+   "hdb_3": 42346.0,
+   "hdb_4": 86601.0,
+   "hdb_5": 74715.0,
+   "condo": 51304.0,
+   "landed": 17061.0
+  },
+  "60-64": {
+   "hdb_1_2": 19075.0,
+   "hdb_3": 47987.0,
+   "hdb_4": 95309.0,
+   "hdb_5": 75902.0,
+   "condo": 38972.0,
+   "landed": 17273.0
+  },
+  "65-69": {
+   "hdb_1_2": 21782.0,
+   "hdb_3": 46803.0,
+   "hdb_4": 89409.0,
+   "hdb_5": 69349.0,
+   "condo": 28983.0,
+   "landed": 17269.0
+  },
+  "70-74": {
+   "hdb_1_2": 20114.0,
+   "hdb_3": 40435.0,
+   "hdb_4": 71721.0,
+   "hdb_5": 52725.0,
+   "condo": 20907.0,
+   "landed": 15333.0
+  },
+  "75-79": {
+   "hdb_1_2": 14900.0,
+   "hdb_3": 32231.0,
+   "hdb_4": 50266.0,
+   "hdb_5": 36361.0,
+   "condo": 15166.0,
+   "landed": 13128.0
+  },
+  "80-84": {
+   "hdb_1_2": 6361.0,
+   "hdb_3": 15928.0,
+   "hdb_4": 21975.0,
+   "hdb_5": 15629.0,
+   "condo": 6749.0,
+   "landed": 6889.0
+  },
+  "85-89": {
+   "hdb_1_2": 3916.0,
+   "hdb_3": 11453.0,
+   "hdb_4": 14070.0,
+   "hdb_5": 10069.0,
+   "condo": 4052.0,
+   "landed": 4946.0
+  },
+  "90+": {
+   "hdb_1_2": 2078.0,
+   "hdb_3": 5593.0,
+   "hdb_4": 7331.0,
+   "hdb_5": 5070.0,
+   "condo": 1978.0,
+   "landed": 3286.0
+  }
+ },
+ "household_by_age": {
+  "<25": {
+   "multigenerational": 400.0,
+   "couple_with_children": 1300.0,
+   "couple_with_parents": 100.0,
+   "couple": 400.0,
+   "single_parent": 100.0,
+   "with_parents": 955800.0,
+   "with_others": 34300.0,
+   "lives_alone": 3500.0
+  },
+  "25-34": {
+   "multigenerational": 15900.0,
+   "couple_with_children": 78900.0,
+   "couple_with_parents": 18000.0,
+   "couple": 72400.0,
+   "single_parent": 2800.0,
+   "with_parents": 339900.0,
+   "with_others": 31400.0,
+   "lives_alone": 21100.0
+  },
+  "35-49": {
+   "multigenerational": 77000.0,
+   "couple_with_children": 455600.0,
+   "couple_with_parents": 24500.0,
+   "couple": 122300.0,
+   "single_parent": 28900.0,
+   "with_parents": 115400.0,
+   "with_others": 32000.0,
+   "lives_alone": 72000.0
+  },
+  "50-64": {
+   "multigenerational": 50200.0,
+   "couple_with_children": 494500.0,
+   "couple_with_parents": 12000.0,
+   "couple": 115500.0,
+   "single_parent": 64700.0,
+   "with_parents": 42100.0,
+   "with_others": 32600.0,
+   "lives_alone": 76000.0
+  },
+  "65+": {
+   "multigenerational": 5100.0,
+   "couple_with_children": 267500.0,
+   "couple_with_parents": 4600.0,
+   "couple": 218100.0,
+   "single_parent": 119400.0,
+   "with_parents": 5400.0,
+   "with_others": 41900.0,
+   "lives_alone": 106700.0
+  }
+ },
+ "children_by_age": {
+  "15-29": {
+   "1": 8000.0,
+   "2": 3300.0,
+   "3": 1400.0
+  },
+  "30-39": {
+   "1": 70300.0,
+   "2": 66700.0,
+   "3": 18300.0,
+   "4": 7500.0
+  },
+  "40-49": {
+   "1": 71900.0,
+   "2": 114300.0,
+   "3": 36500.0,
+   "4": 14000.0
+  },
+  "50+": {
+   "1": 171200.0,
+   "2": 326800.0,
+   "3": 170800.0,
+   "4": 81700.0
+  }
+ },
+ "age_by_sector": {
+  "healthcare": {
+   "20-24": 9.5,
+   "25-29": 22.6,
+   "30-34": 26.8,
+   "35-39": 28.5,
+   "40-44": 20.3,
+   "45-49": 16.1,
+   "50-54": 16.4,
+   "55-59": 14.3,
+   "60-64": 12.7
+  },
+  "care_services": {
+   "20-24": 9.5,
+   "25-29": 22.6,
+   "30-34": 26.8,
+   "35-39": 28.5,
+   "40-44": 20.3,
+   "45-49": 16.1,
+   "50-54": 16.4,
+   "55-59": 14.3,
+   "60-64": 12.7
+  },
+  "education_research": {
+   "20-24": 35.2,
+   "25-29": 27.0,
+   "30-34": 37.0,
+   "35-39": 41.0,
+   "40-44": 39.3,
+   "45-49": 33.0,
+   "50-54": 34.2,
+   "55-59": 22.5,
+   "60-64": 15.1
+  },
+  "transport_logistics": {
+   "20-24": 3.8,
+   "25-29": 12.5,
+   "30-34": 20.8,
+   "35-39": 20.7,
+   "40-44": 23.4,
+   "45-49": 21.5,
+   "50-54": 26.9,
+   "55-59": 23.6,
+   "60-64": 26.3
+  },
+  "energy_utilities": {
+   "20-24": 0.2,
+   "25-29": 1.0,
+   "30-34": 2.8,
+   "35-39": 3.0,
+   "40-44": 2.8,
+   "45-49": 1.9,
+   "50-54": 2.0,
+   "55-59": 1.9,
+   "60-64": 2.0
+  },
+  "compute_telecom": {
+   "20-24": 4.1,
+   "25-29": 16.0,
+   "30-34": 21.8,
+   "35-39": 22.7,
+   "40-44": 19.5,
+   "45-49": 14.3,
+   "50-54": 14.5,
+   "55-59": 8.4,
+   "60-64": 3.9
+  },
+  "housing_construction": {
+   "20-24": 2.8,
+   "25-29": 7.1,
+   "30-34": 15.6,
+   "35-39": 16.6,
+   "40-44": 17.5,
+   "45-49": 19.6,
+   "50-54": 19.9,
+   "55-59": 18.3,
+   "60-64": 20.3
+  },
+  "food_agri": {
+   "20-24": 9.7,
+   "25-29": 8.0,
+   "30-34": 8.7,
+   "35-39": 11.8,
+   "40-44": 12.3,
+   "45-49": 11.5,
+   "50-54": 15.3,
+   "55-59": 14.6,
+   "60-64": 17.2
+  },
+  "manufacturing": {
+   "20-24": 3.5,
+   "25-29": 11.2,
+   "30-34": 20.9,
+   "35-39": 21.5,
+   "40-44": 22.6,
+   "45-49": 28.7,
+   "50-54": 28.7,
+   "55-59": 27.1,
+   "60-64": 21.5
+  },
+  "finance": {
+   "20-24": 5.8,
+   "25-29": 24.1,
+   "30-34": 37.9,
+   "35-39": 36.8,
+   "40-44": 35.4,
+   "45-49": 31.2,
+   "50-54": 24.8,
+   "55-59": 18.6,
+   "60-64": 10.5
+  },
+  "retail_commerce": {
+   "20-24": 10.8,
+   "25-29": 19.7,
+   "30-34": 33.3,
+   "35-39": 36.7,
+   "40-44": 39.0,
+   "45-49": 45.4,
+   "50-54": 39.7,
+   "55-59": 36.2,
+   "60-64": 31.3
+  },
+  "public_admin": {
+   "20-24": 35.2,
+   "25-29": 27.0,
+   "30-34": 37.0,
+   "35-39": 41.0,
+   "40-44": 39.3,
+   "45-49": 33.0,
+   "50-54": 34.2,
+   "55-59": 22.5,
+   "60-64": 15.1
+  },
+  "public_safety": {
+   "20-24": 35.2,
+   "25-29": 27.0,
+   "30-34": 37.0,
+   "35-39": 41.0,
+   "40-44": 39.3,
+   "45-49": 33.0,
+   "50-54": 34.2,
+   "55-59": 22.5,
+   "60-64": 15.1
+  }
+ },
+ "not_employed": {
+  "student": {
+   "20-24": 90.0,
+   "25-29": 13.49,
+   "30-39": 3.62,
+   "40-49": 1.36,
+   "50-59": 0.66,
+   "60-64": 0.12
+  },
+  "carer": {
+   "20-24": 0.49,
+   "25-29": 2.68,
+   "30-39": 26.16,
+   "40-49": 47.1,
+   "50-59": 62.33,
+   "60-64": 26.87
+  },
+  "not_working": {
+   "20-24": 2.78,
+   "25-29": 5.64,
+   "30-39": 11.0,
+   "40-49": 14.21,
+   "50-59": 32.71,
+   "60-64": 25.11
+  },
+  "retired": {
+   "20-24": 0.03,
+   "25-29": 0.29,
+   "30-39": 0.62,
+   "40-49": 1.84,
+   "50-59": 16.4,
+   "60-64": 43.69
+  },
+  "unemployed": {
+   "20-24": 8.3,
+   "25-29": 10.5,
+   "30-39": 16.2,
+   "40-49": 14.8,
+   "50-59": 15.9,
+   "60-64": 6.3
+  }
+ },
+ "decile_by_sector": {
+  "healthcare": [
+   0.0655,
+   0.0657,
+   0.121,
+   0.1403,
+   0.1389,
+   0.1274,
+   0.1122,
+   0.088,
+   0.0709,
+   0.0701
+  ],
+  "care_services": [
+   0.0655,
+   0.0657,
+   0.121,
+   0.1403,
+   0.1389,
+   0.1274,
+   0.1122,
+   0.088,
+   0.0709,
+   0.0701
+  ],
+  "education_research": [
+   0.0559,
+   0.0404,
+   0.0592,
+   0.0814,
+   0.0982,
+   0.1135,
+   0.1394,
+   0.1579,
+   0.1501,
+   0.104
+  ],
+  "transport_logistics": [
+   0.1285,
+   0.134,
+   0.1491,
+   0.1388,
+   0.1204,
+   0.0963,
+   0.0745,
+   0.0601,
+   0.0481,
+   0.05
+  ],
+  "energy_utilities": [
+   0.035,
+   0.0521,
+   0.0855,
+   0.1093,
+   0.1179,
+   0.1247,
+   0.1391,
+   0.1353,
+   0.1074,
+   0.0938
+  ],
+  "compute_telecom": [
+   0.0542,
+   0.0336,
+   0.0506,
+   0.069,
+   0.0868,
+   0.106,
+   0.1134,
+   0.1422,
+   0.162,
+   0.1822
+  ],
+  "housing_construction": [
+   0.1073,
+   0.133,
+   0.0993,
+   0.1028,
+   0.1106,
+   0.1113,
+   0.0984,
+   0.093,
+   0.0814,
+   0.0627
+  ],
+  "food_agri": [
+   0.2704,
+   0.2567,
+   0.1692,
+   0.1061,
+   0.0718,
+   0.0454,
+   0.0312,
+   0.0212,
+   0.0166,
+   0.0113
+  ],
+  "manufacturing": [
+   0.0651,
+   0.0873,
+   0.0952,
+   0.0957,
+   0.1032,
+   0.1128,
+   0.12,
+   0.1128,
+   0.1184,
+   0.0894
+  ],
+  "finance": [
+   0.033,
+   0.0272,
+   0.0359,
+   0.0564,
+   0.072,
+   0.1017,
+   0.1147,
+   0.1386,
+   0.1739,
+   0.2465
+  ],
+  "retail_commerce": [
+   0.1126,
+   0.1104,
+   0.1178,
+   0.1048,
+   0.0997,
+   0.0908,
+   0.093,
+   0.0904,
+   0.0859,
+   0.0947
+  ],
+  "public_admin": [
+   0.0559,
+   0.0404,
+   0.0592,
+   0.0814,
+   0.0982,
+   0.1135,
+   0.1394,
+   0.1579,
+   0.1501,
+   0.104
+  ],
+  "public_safety": [
+   0.0559,
+   0.0404,
+   0.0592,
+   0.0814,
+   0.0982,
+   0.1135,
+   0.1394,
+   0.1579,
+   0.1501,
+   0.104
+  ]
+ },
+ "decile_by_dwelling": {
+  "hdb_1_2": [
+   0.3447,
+   0.2006,
+   0.1335,
+   0.0954,
+   0.0705,
+   0.0457,
+   0.0436,
+   0.0304,
+   0.0199,
+   0.0156
+  ],
+  "hdb_3": [
+   0.1678,
+   0.1537,
+   0.1448,
+   0.1223,
+   0.1021,
+   0.0861,
+   0.074,
+   0.0567,
+   0.0532,
+   0.0395
+  ],
+  "hdb_4": [
+   0.0866,
+   0.1086,
+   0.1164,
+   0.1238,
+   0.124,
+   0.1178,
+   0.1069,
+   0.0973,
+   0.0734,
+   0.0452
+  ],
+  "hdb_5": [
+   0.0593,
+   0.0832,
+   0.0955,
+   0.1055,
+   0.1158,
+   0.1263,
+   0.1271,
+   0.1184,
+   0.1059,
+   0.063
+  ],
+  "condo": [
+   0.0269,
+   0.0292,
+   0.0371,
+   0.0443,
+   0.0581,
+   0.0773,
+   0.1039,
+   0.1408,
+   0.1926,
+   0.2897
+  ],
+  "landed": [
+   0.0416,
+   0.05,
+   0.0469,
+   0.0588,
+   0.0665,
+   0.0716,
+   0.0883,
+   0.1361,
+   0.1788,
+   0.2615
+  ]
+ },
+ "region_by_dwelling": {
+  "hdb_1_2": {
+   "central": 64350,
+   "east": 19880,
+   "north": 34350,
+   "north_east": 46860,
+   "west": 35290
+  },
+  "hdb_3": {
+   "central": 172310,
+   "east": 85420,
+   "north": 62620,
+   "north_east": 113330,
+   "west": 116360
+  },
+  "hdb_4": {
+   "central": 230830,
+   "east": 209870,
+   "north": 242520,
+   "north_east": 333630,
+   "west": 341720
+  },
+  "hdb_5": {
+   "central": 136460,
+   "east": 196470,
+   "north": 190070,
+   "north_east": 256630,
+   "west": 300040
+  },
+  "condo": {
+   "central": 273260,
+   "east": 138350,
+   "north": 54580,
+   "north_east": 140690,
+   "west": 124040
+  },
+  "landed": {
+   "central": 83560,
+   "east": 54150,
+   "north": 12010,
+   "north_east": 75810,
+   "west": 20650
+  }
+ },
+ "health_by_age": {
+  "<25": {
+   "good": 794600.0,
+   "fair": 18100.0,
+   "poor": 4300.0
+  },
+  "25-44": {
+   "good": 1100200.0,
+   "fair": 48400.0,
+   "poor": 8700.0
+  },
+  "45-64": {
+   "good": 1117500.0,
+   "fair": 101700.0,
+   "poor": 16600.0
+  },
+  "65+": {
+   "good": 596700.0,
+   "fair": 165000.0,
+   "poor": 64000.0
+  }
+ }
+}

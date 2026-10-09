@@ -1,0 +1,20 @@
+# Output of test runs: transcripts, evidence and views, rebuilt by running the simulation
+runs/
+*.log
+.demo-trace.jsonl
+
+# Caches written while testing: what each test team's society invented, and one machine's calibration result.
+# The shared starter dictionary is kept.
+agents/interpretations/*
+!agents/interpretations/_starter.json
+agents/interpretations.json
+agents/calibration.json
+
+# Scratch output of the JS/Python parity check
+engine/.parity/
+__pycache__/
+*.pyc
+
+# Local tool settings
+.claude/
+node_modules/
