@@ -1,0 +1,14 @@
+{
+  "name": "meridian",
+  "version": "1.0.0",
+  "description": "Meridian: an agent society simulation of a post-capitalist city-state, built for the THINKathon",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node lab/serve-console.js --port 7823",
+    "test": "node tests/test_kernel_channels.js && node tests/test_llm_client.js && node tests/test_one_at_a_time.js && node tests/test_simulation_loop.js && node tests/test_agents.js",
+    "test:parity": "python engine/test_parity.py",
+    "data": "python data/singstat/build.py"
+  }
+}

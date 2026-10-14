@@ -175,6 +175,15 @@ steward        74        61      56  |  yes
 
 ## Running it
 
+Needs Node 18 or later and nothing else: there are no packages to install. Python 3 with `openpyxl` is only needed
+for the parity check and for rebuilding the population data. An OpenAI-compatible model server (LM Studio, Ollama,
+vLLM) is needed for agent runs; set its address in `harness/llm.config.json`.
+
+```bash
+npm start        # the studio, at http://localhost:7823
+npm test         # all five suites
+```
+
 ### The agent society
 
 ```bash
